@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
 import { useFocusEffect, useIsFocused, useRoute, RouteProp } from '@react-navigation/native';
-import { Alert, findNodeHandle, Image, InteractionManager, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Alert, findNodeHandle, Image, InteractionManager, StyleSheet, Text, useWindowDimensions, View, TouchableOpacity } from 'react-native';
 import A from '../../blue_modules/analytics';
 import { getClipboardContent } from '../../blue_modules/clipboard';
 import { isDesktop } from '../../blue_modules/environment';
@@ -25,6 +25,7 @@ import { useSettings } from '../../hooks/context/useSettings';
 import useMenuElements from '../../hooks/useMenuElements';
 import SafeAreaSectionList from '../../components/SafeAreaSectionList';
 import { scanQrHelper } from '../../helpers/scan-qr.ts';
+import { HDSegwitBech32Wallet } from '../../class/index';import { render } from '@testing-library/react-native';
 
 const WalletsListSections = { CAROUSEL: 'CAROUSEL', TRANSACTIONS: 'TRANSACTIONS' };
 
@@ -111,6 +112,7 @@ const WalletsList: React.FC = () => {
   const dataSource = getTransactions(undefined, 10);
   const walletsCount = useRef<number>(wallets.length);
   const walletActionButtonsRef = useRef<any>();
+  const { addWallet, saveToDisk } = useStorage();
 
   const stylesHook = StyleSheet.create({
     walletsListWrapper: {
@@ -509,24 +511,114 @@ const WalletsList: React.FC = () => {
     [sizeClass, getSectionHeaderHeight],
   );
 
+    const createWallet = async () => {
+    try {
+      // Create a new HDSegwitBech32Wallet (native segwit) directly
+      const w = new HDSegwitBech32Wallet();
+      w.setLabel(loc.wallets.details_title);
+      
+      // Generate the wallet (this creates the seed phrase)
+      await w.generate();
+      
+      // Add to storage immediately so it can be found by ID
+      addWallet(w);
+      await saveToDisk();
+      
+      // Analytics and haptic feedback
+      A(A.ENUM.CREATED_WALLET);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+      
+      // Navigate to AddWalletRoot's PleaseBackup screen to show seed phrase
+      // @ts-ignore - nested navigation typing issue, but this pattern works in the codebase
+      navigation.navigate('AddWalletRoot', {
+        screen: 'PleaseBackup',
+        params: {
+          walletID: w.getID(),
+        },
+      });
+    } catch (error) {
+      console.error('Error creating wallet:', error);
+      // Fallback to normal flow
+      navigation.navigate('AddWalletRoot');
+    }
+  };
+
+  const renderWelcomeScreen = useCallback(() => {
+      return (
+        <View style={[styles.welcomeContainer, { backgroundColor: colors.background }]}>
+          <View style={styles.welcomeContent}>
+            <View style={styles.logoContainer}>
+              <Image source={require('../../img/bitcoin.png')} style={styles.bitcoinLogo} />
+            </View>
+            
+            <Text style={[styles.welcomeTitle, { color: colors.foregroundColor }]}>
+              Bitcoin wallet
+            </Text>
+            
+            <Text style={[styles.welcomeSubtitle, { color: colors.alternativeTextColor }]}>
+              A simple bitcoin wallet for{'\n'}your enjoyment.
+            </Text>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.createButton, { backgroundColor: colors.bitcoinOrange }]}
+                onPress={createWallet}
+                testID="CreateWalletButton"
+              >
+                <Text style={[styles.createButtonText, { color: colors.brandingColor }]}>
+                  Create a new wallet
+                </Text>
+              </TouchableOpacity>
+              
+  
+              {/* uncomment to add restore wallet button */}
+              {/* <TouchableOpacity
+                style={styles.restoreButton}
+                onPress={() => navigation.navigate('AddWalletRoot')}
+                testID="RestoreWalletButton"
+              >
+                <Text style={[styles.restoreButtonText, { color: colors.shadowColor }]}>
+                  Restore existing wallet
+                </Text>
+              </TouchableOpacity> */}
+            </View>
+            
+            <View style={styles.footerContainer}>
+              <Text style={[styles.footerText, { color: colors.alternativeTextColor }]}>
+                Your wallet, your coins{'\n'}100% open-source & open-design
+              </Text>
+            </View>
+          </View>
+        </View>
+      );
+  }, [colors, navigation]);
+
+  
   return (
     <>
-      <SafeAreaSectionList<any | string, SectionData>
-        renderItem={renderSectionItem}
-        keyExtractor={sectionListKeyExtractor}
-        renderSectionHeader={renderSectionHeader}
-        initialNumToRender={10}
-        renderSectionFooter={renderSectionFooter}
-        sections={sections}
-        floatingButtonHeight={70}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        getItemLayout={getItemLayout}
-        ignoreTopInset={true} // Ignore top inset as the screen header already handles it
-        {...refreshProps}
-      />
-      {renderScanButton()}
+      {wallets.length === 0 ? (
+        renderWelcomeScreen()
+      ) : (
+        <>
+          <SafeAreaSectionList<any | string, SectionData>
+            renderItem={renderSectionItem}
+            keyExtractor={sectionListKeyExtractor}
+            renderSectionHeader={renderSectionHeader}
+            initialNumToRender={10}
+            renderSectionFooter={renderSectionFooter}
+            sections={sections}
+            floatingButtonHeight={70}
+            maxToRenderPerBatch={10}
+            updateCellsBatchingPeriod={50}
+            getItemLayout={getItemLayout}
+            ignoreTopInset={true} // Ignore top inset as the screen header already handles it
+            {...refreshProps}
+          />
+          {renderScanButton()}
+        </>
+      )}
     </>
+
   );
 };
 
@@ -561,5 +653,71 @@ const styles = StyleSheet.create({
     color: '#9aa0aa',
     textAlign: 'center',
     fontWeight: '600',
+  },
+  welcomeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  welcomeContent: {
+    alignItems: 'center',
+    maxWidth: 320,
+    width: '100%',
+  },
+  logoContainer: {
+    marginBottom: 40,
+  },
+  bitcoinLogo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  welcomeTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 60,
+    lineHeight: 22,
+  },
+  buttonContainer: {
+    width: '100%',
+    marginBottom: 40,
+  },
+  createButton: {
+    backgroundColor: '#ff9500',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  createButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  restoreButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+  },
+  restoreButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  footerContainer: {
+    marginTop: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

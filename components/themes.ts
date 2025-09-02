@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, useTheme as useThemeBase } from '@react-navigation/native';
+import { bitcoin } from 'bitcoinjs-lib/src/networks';
 import { Appearance } from 'react-native';
 
 export const BlueDefaultTheme = {
@@ -71,6 +72,7 @@ export const BlueDefaultTheme = {
     receiveText: '#37C0A1',
     navigationBarColor: '#FFFFFF',
     androidRippleColor: '#CCCCCC',
+    bitcoinOrange: '#f7931a',
   },
 };
 
