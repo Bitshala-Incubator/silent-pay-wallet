@@ -5,4 +5,5 @@ export type DrawerParamList = {
     screen?: keyof DetailViewStackParamList;
     params?: object;
   };
+  OnboardingStack: undefined;
 };

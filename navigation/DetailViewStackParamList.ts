@@ -115,4 +115,5 @@ export type DetailViewStackParamList = {
     walletID: string;
   };
   ManageWallets: undefined;
+  Onboarding: undefined;
 };
