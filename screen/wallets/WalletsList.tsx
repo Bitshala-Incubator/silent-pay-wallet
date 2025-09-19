@@ -26,6 +26,7 @@ import { useSettings } from '../../hooks/context/useSettings';
 import useMenuElements from '../../hooks/useMenuElements';
 import SafeAreaSectionList from '../../components/SafeAreaSectionList';
 import { scanQrHelper } from '../../helpers/scan-qr.ts';
+import ScanIcon from '../../components/ScanIcon';
 
 const WalletsListSections = { WALLET: 'WALLET', TRANSACTIONS: 'TRANSACTIONS' };
 
@@ -102,7 +103,7 @@ const WalletsList: React.FC = () => {
   const { registerTransactionsHandler, unregisterTransactionsHandler } = useMenuElements();
   const { wallets, getTransactions, getBalance, refreshAllWalletTransactions, saveToDisk } = useStorage();
   const { isTotalBalanceEnabled, isElectrumDisabled } = useSettings();
-  const { colors, scanImage } = useTheme();
+  const { colors } = useTheme();
   const navigation = useExtendedNavigation<NavigationProps>();
   const route = useRoute<RouteProps>();
   const dataSource = getTransactions(undefined, Infinity);
@@ -402,7 +403,11 @@ const WalletsList: React.FC = () => {
           />
           <FButton
             onPress={onScanButtonPressed}
-            icon={<Image resizeMode="stretch" source={scanImage} />}
+            icon={
+              <View style={{ width: 40, height: 40, justifyContent: 'center', alignItems: 'center' }}>
+                <ScanIcon />
+              </View>
+            }
             text=""
             widthRatio={0.01}
             testID="HomeScreenScanButton"
@@ -421,7 +426,7 @@ const WalletsList: React.FC = () => {
       return null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scanImage, wallets.length]);
+  }, [wallets.length]);
 
   const sectionListKeyExtractor = useCallback((item: any, index: any) => {
     return `${item}${index}}`;

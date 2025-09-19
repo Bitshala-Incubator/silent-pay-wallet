@@ -5,7 +5,6 @@ export const BlueDefaultTheme = {
   ...DefaultTheme,
   closeImage: require('../img/close.png'),
   barStyle: 'dark-content',
-  scanImage: require('../img/scan.png'),
   colors: {
     ...DefaultTheme.colors,
     borderWidth: 0.5,
@@ -79,7 +78,6 @@ export type Theme = typeof BlueDefaultTheme;
 export const BlueDarkTheme: Theme = {
   ...DarkTheme,
   closeImage: require('../img/close-white.png'),
-  scanImage: require('../img/scan-white.png'),
   barStyle: 'light-content',
   colors: {
     ...BlueDefaultTheme.colors,
@@ -138,13 +136,11 @@ export const useTheme = (): Theme => useThemeBase() as Theme;
 export class BlueCurrentTheme {
   static colors: Theme['colors'];
   static closeImage: Theme['closeImage'];
-  static scanImage: Theme['scanImage'];
 
   static updateColorScheme(): void {
     const isColorSchemeDark = Appearance.getColorScheme() === 'dark';
     BlueCurrentTheme.colors = isColorSchemeDark ? BlueDarkTheme.colors : BlueDefaultTheme.colors;
     BlueCurrentTheme.closeImage = isColorSchemeDark ? BlueDarkTheme.closeImage : BlueDefaultTheme.closeImage;
-    BlueCurrentTheme.scanImage = isColorSchemeDark ? BlueDarkTheme.scanImage : BlueDefaultTheme.scanImage;
   }
 }
 
