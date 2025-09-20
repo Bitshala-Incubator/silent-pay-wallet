@@ -9,7 +9,6 @@ import {
   ImportCustomDerivationPathComponent,
   ImportSpeedComponent,
   ImportWalletComponent,
-  ImportWalletDiscoveryComponent,
   PleaseBackupComponent,
   PleaseBackupLNDHubComponent,
   ProvideEntropyComponent,
@@ -30,11 +29,6 @@ export type AddWalletStackParamList = {
     label?: string;
     triggerImport?: boolean;
     onBarScanned?: string;
-  };
-  ImportWalletDiscovery: {
-    importText: string;
-    askPassphrase: boolean;
-    searchAccounts: boolean;
   };
   ImportSpeed: undefined;
   ImportCustomDerivationPath: {
@@ -99,13 +93,6 @@ const AddWalletStack = () => {
         name="ImportSpeed"
         component={ImportSpeedComponent}
         options={navigationStyle({ statusBarStyle: 'light', title: loc.wallets.import_title })(theme)}
-      />
-      <Stack.Screen
-        name="ImportWalletDiscovery"
-        component={ImportWalletDiscoveryComponent}
-        options={navigationStyle({
-          title: loc.wallets.import_discovery_title,
-        })(theme)}
       />
       <Stack.Screen
         name="PleaseBackup"

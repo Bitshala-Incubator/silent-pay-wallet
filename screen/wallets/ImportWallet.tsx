@@ -21,6 +21,9 @@ import { AddressInputScanButton } from '../../components/AddressInputScanButton'
 import { useScreenProtect } from '../../hooks/useScreenProtect';
 import SafeAreaScrollView from '../../components/SafeAreaScrollView';
 import { BlueSpacing20 } from '../../components/BlueSpacing';
+import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet.ts';
+import { useStorage } from '../../hooks/context/useStorage';
+import presentAlert from '../../components/Alert';
 
 type RouteProps = RouteProp<AddWalletStackParamList, 'ImportWallet'>;
 type NavigationProps = NativeStackNavigationProp<AddWalletStackParamList, 'ImportWallet'>;
@@ -39,6 +42,7 @@ const ImportWallet = () => {
   const [clearClipboardMenuState, setClearClipboardMenuState] = useState<boolean>(true);
   const { isPrivacyBlurEnabled } = useSettings();
   const { enableScreenProtect, disableScreenProtect } = useScreenProtect();
+  const { addAndSaveWallet } = useStorage();
   const styles = StyleSheet.create({
     root: {
       paddingTop: 10,
@@ -84,14 +88,35 @@ const ImportWallet = () => {
 
       Keyboard.dismiss();
 
-      navigation.navigate('ImportWalletDiscovery', {
-        importText: text,
-        askPassphrase: askPassphraseMenuState,
-        searchAccounts: searchAccountsMenuState,
-      });
-    },
+      try {
+        if (!text.trim()) {
+          presentAlert({ title: 'Error', message: 'Please enter a valid mnemonic phrase or private key.' });
+          return;
+        }
 
-    [askPassphraseMenuState, clearClipboardMenuState, navigation, searchAccountsMenuState],
+        // create HDSilentPaymentsWallet with hardcoded m/84'/0'/0' derivation path
+        const wallet = new HDSilentPaymentsWallet();
+        wallet.setSecret(text.trim());
+        
+        wallet.setDerivationPath("m/84'/0'/0'");
+        
+        if (!wallet.validateMnemonic() && !wallet.getSecret()) {
+          presentAlert({ title: 'Error', message: 'Invalid mnemonic phrase or private key.' });
+          return;
+        }
+
+        addAndSaveWallet(wallet);
+        navigation.getParent()?.goBack();
+        
+      } catch (error: any) {
+        console.error('Import error:', error);
+        presentAlert({ 
+          title: 'Import Error', 
+          message: error.message || 'Failed to import wallet. Please check your input and try again.' 
+        });
+      }
+    },
+    [askPassphraseMenuState, clearClipboardMenuState, addAndSaveWallet, navigation],
   );
 
   const handleImport = useCallback(() => {

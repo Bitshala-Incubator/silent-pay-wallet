@@ -33,6 +33,7 @@ import { AddWalletStackParamList } from '../../navigation/AddWalletStack';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import SafeAreaScrollView from '../../components/SafeAreaScrollView';
 import { BlueSpacing20, BlueSpacing40 } from '../../components/BlueSpacing';
+import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet.ts';
 
 enum ButtonSelected {
   // @ts-ignore: Return later to update
@@ -301,45 +302,28 @@ const WalletsAdd: React.FC = () => {
     if (selectedWalletType === ButtonSelected.OFFCHAIN) {
       createLightningWallet();
     } else if (selectedWalletType === ButtonSelected.ONCHAIN) {
-      let w: HDSegwitBech32Wallet | SegwitP2SHWallet | HDSegwitP2SHWallet;
-      if (selectedIndex === 2) {
-        // zero index radio - HD segwit
-        w = new HDSegwitP2SHWallet();
-        w.setLabel(label || loc.wallets.details_title);
-      } else if (selectedIndex === 1) {
-        // btc was selected
-        // index 1 radio - segwit single address
-        w = new SegwitP2SHWallet();
-        w.setLabel(label || loc.wallets.details_title);
+      const w = new HDSilentPaymentsWallet();
+      w.setLabel(label || loc.wallets.details_title);
+      if (entropy) {
+        try {
+          await w.generateFromEntropy(entropy);
+        } catch (e: any) {
+          console.log(e.toString());
+          presentAlert({ message: e.toString() });
+          return;
+        }
       } else {
-        // btc was selected
-        // index 2 radio - hd bip84
-        w = new HDSegwitBech32Wallet();
-        w.setLabel(label || loc.wallets.details_title);
+        await w.generate();
       }
-      if (selectedWalletType === ButtonSelected.ONCHAIN) {
-        if (entropy) {
-          try {
-            await w.generateFromEntropy(entropy);
-          } catch (e: any) {
-            console.log(e.toString());
-            presentAlert({ message: e.toString() });
-            return;
-          }
-        } else {
-          await w.generate();
-        }
-        addWallet(w);
-        await saveToDisk();
-        A(A.ENUM.CREATED_WALLET);
-        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-        if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
-          navigate('PleaseBackup', {
-            walletID: w.getID(),
-          });
-        } else {
-          goBack();
-        }
+      addWallet(w);
+      await saveToDisk();
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+      if (w.type === HDSegwitBech32Wallet.type) {
+        navigate('PleaseBackup', {
+          walletID: w.getID(),
+        });
+      } else {
+        goBack();
       }
     } else if (selectedWalletType === ButtonSelected.VAULT) {
       setIsLoading(false);

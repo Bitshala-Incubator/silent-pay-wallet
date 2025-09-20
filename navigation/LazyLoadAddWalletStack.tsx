@@ -5,7 +5,6 @@ import { LazyLoadingIndicator } from './LazyLoadingIndicator';
 // Define lazy imports with more reliable loading patterns
 const WalletsAdd = lazy(() => import('../screen/wallets/Add'));
 const ImportCustomDerivationPath = lazy(() => import('../screen/wallets/ImportCustomDerivationPath'));
-const ImportWalletDiscovery = lazy(() => import('../screen/wallets/ImportWalletDiscovery'));
 const ImportSpeed = lazy(() => import('../screen/wallets/ImportSpeed'));
 const ImportWallet = lazy(() => import('../screen/wallets/ImportWallet'));
 const PleaseBackup = lazy(() => import('../screen/wallets/PleaseBackup'));
@@ -19,12 +18,6 @@ const WalletsAddMultisigHelp = lazy(() => import('../screen/wallets/addMultisigH
 export const AddComponent: React.FC = () => (
   <Suspense fallback={<LazyLoadingIndicator />}>
     <WalletsAdd />
-  </Suspense>
-);
-
-export const ImportWalletDiscoveryComponent = () => (
-  <Suspense fallback={<LazyLoadingIndicator />}>
-    <ImportWalletDiscovery />
   </Suspense>
 );
 

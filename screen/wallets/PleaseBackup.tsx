@@ -15,7 +15,7 @@ type RouteProps = RouteProp<AddWalletStackParamList, 'PleaseBackup'>;
 type NavigationProp = NativeStackNavigationProp<AddWalletStackParamList, 'PleaseBackup'>;
 
 const PleaseBackup: React.FC = () => {
-  const { wallets } = useStorage();
+  const { wallets, saveToDisk } = useStorage();
   const { walletID } = useRoute<RouteProps>().params;
   const wallet = wallets.find(w => w.getID() === walletID)!;
   const navigation = useNavigation<NavigationProp>();
@@ -35,9 +35,12 @@ const PleaseBackup: React.FC = () => {
   });
 
   const handleBackButton = useCallback(() => {
+    // Mark that the user has saved the backup
+    wallet.setUserHasSavedExport(true);
+    saveToDisk();
     navigation.getParent()?.goBack();
     return true;
-  }, [navigation]);
+  }, [navigation, wallet, saveToDisk]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
