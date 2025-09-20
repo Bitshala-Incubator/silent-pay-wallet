@@ -103,21 +103,12 @@ const DetailViewStackScreensStack = () => {
   const initialRoute = wallets.length === 0 ? 'Onboarding' : 'WalletsList';
 
   return (
-      <DetailViewStack.Navigator
-    initialRouteName={initialRoute}
-    screenOptions={{ headerShadowVisible: false, animationTypeForReplace: 'push' }}
-  >
-    <DetailViewStack.Screen
-      name="Onboarding"
-      component={OnboardingStack}
-      options={{ headerShown: false }}
-    />
-
-    <DetailViewStack.Screen
-      name="WalletsList"
-      component={WalletsList}
-      options={navigationStyle(walletListScreenOptions)(theme)}
-    />
+    <DetailViewStack.Navigator
+      initialRouteName={initialRoute}
+      screenOptions={{ headerShadowVisible: false, animationTypeForReplace: 'push' }}
+    >
+      <DetailViewStack.Screen name="Onboarding" component={OnboardingStack} options={{ headerShown: false }} />
+      <DetailViewStack.Screen name="WalletsList" component={WalletsList} options={navigationStyle(walletListScreenOptions)(theme)} />
       <DetailViewStack.Screen name="WalletTransactions" component={WalletTransactions} options={getWalletTransactionsOptions} />
       <DetailViewStack.Screen
         name="WalletDetails"
