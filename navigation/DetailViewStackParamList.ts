@@ -55,7 +55,10 @@ export type DetailViewStackParamList = {
   LnurlAuth: undefined;
   Success: undefined;
   WalletAddresses: { walletID: string };
-  AddWalletRoot: undefined;
+  AddWalletRoot?: {
+  screen?: keyof AddWalletRootParamList;
+  params?: AddWalletRootParamList[keyof AddWalletRootParamList];
+  };
   SendDetailsRoot: SendDetailsParams;
   LNDCreateInvoiceRoot: undefined;
   ScanLNDInvoiceRoot: {
@@ -115,4 +118,9 @@ export type DetailViewStackParamList = {
     walletID: string;
   };
   ManageWallets: undefined;
+  Onboarding: undefined;
+};
+
+export type AddWalletRootParamList = {
+  PleaseBackup: {walletID: string};
 };

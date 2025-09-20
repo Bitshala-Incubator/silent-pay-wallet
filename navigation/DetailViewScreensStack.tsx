@@ -55,6 +55,7 @@ import getWalletTransactionsOptions from './helpers/getWalletTransactionsOptions
 import { isDesktop } from '../blue_modules/environment';
 import ManageWallets from '../screen/wallets/ManageWallets';
 import ReceiveDetails from '../screen/receive/ReceiveDetails';
+import OnboardingStack from './OnboardingStack';
 
 const DetailViewStackScreensStack = () => {
   const theme = useTheme();
@@ -99,12 +100,14 @@ const DetailViewStackScreensStack = () => {
   }, [RightBarButtons, sizeClass, isTotalBalanceEnabled, theme.colors.customHeader, theme.colors.navigationBarColor, wallets]);
 
   const walletListScreenOptions = useWalletListScreenOptions;
+  const initialRoute = wallets.length === 0 ? 'Onboarding' : 'WalletsList';
 
   return (
     <DetailViewStack.Navigator
-      initialRouteName="WalletsList"
+      initialRouteName={initialRoute}
       screenOptions={{ headerShadowVisible: false, animationTypeForReplace: 'push' }}
     >
+      <DetailViewStack.Screen name="Onboarding" component={OnboardingStack} options={{ headerShown: false }} />
       <DetailViewStack.Screen name="WalletsList" component={WalletsList} options={navigationStyle(walletListScreenOptions)(theme)} />
       <DetailViewStack.Screen name="WalletTransactions" component={WalletTransactions} options={getWalletTransactionsOptions} />
       <DetailViewStack.Screen

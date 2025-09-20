@@ -1,7 +1,7 @@
 import { RouteProp, useFocusEffect, useLocale, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect } from 'react';
-import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, ScrollView, StyleSheet, Text, View, InteractionManager } from 'react-native';
 import Button from '../../components/Button';
 import { useTheme } from '../../components/themes';
 import { useSettings } from '../../hooks/context/useSettings';
@@ -35,7 +35,18 @@ const PleaseBackup: React.FC = () => {
   });
 
   const handleBackButton = useCallback(() => {
-    navigation.getParent()?.goBack();
+    // Get the parent navigator (MainRoot) and navigate to WalletsList
+    const parent = navigation.getParent();
+    if (parent) {
+      InteractionManager.runAfterInteractions(() => {
+        parent.navigate('DrawerRoot', {
+          screen: 'DetailViewStackScreensStack',
+          params: {
+            screen: 'WalletsList',
+          },
+        });
+      });
+    }
     return true;
   }, [navigation]);
 
