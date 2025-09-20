@@ -177,7 +177,7 @@ const WalletExport: React.FC = () => {
       <BlueText style={styles.scanText}>{loc.wallets.scan_import}</BlueText>
 
       <View style={styles.qrCodeContainer}>
-        <QRCodeComponent isMenuAvailable={false} value={secret} size={qrCodeSize} logoSize={70} />
+        <QRCodeComponent isMenuAvailable={false} value={secret} size={qrCodeSize} />
       </View>
 
       {/* Do not allow to copy mnemonic */}

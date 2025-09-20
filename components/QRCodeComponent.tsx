@@ -12,9 +12,7 @@ import { Action } from './types';
 
 interface QRCodeComponentProps {
   value: string;
-  isLogoRendered?: boolean;
   isMenuAvailable?: boolean;
-  logoSize?: number;
   size?: number;
   ecl?: 'H' | 'Q' | 'M' | 'L';
   onError?: () => void;
@@ -56,9 +54,7 @@ const menuActions: Action[] =
 
 const QRCodeComponent: React.FC<QRCodeComponentProps> = ({
   value = '',
-  isLogoRendered = true,
   isMenuAvailable = true,
-  logoSize = 90,
   size = 300,
   ecl = 'H',
   onError = () => {},
@@ -93,11 +89,8 @@ const QRCodeComponent: React.FC<QRCodeComponentProps> = ({
   const renderQRCode = (
     <QRCode
       value={value}
-      {...(isLogoRendered ? { logo: require('../img/qr-code.png') } : {})}
       size={newSize}
-      logoSize={logoSize}
       color="#000000"
-      logoBackgroundColor={colors.brandingColor}
       backgroundColor="#FFFFFF"
       ecl={ecl}
       getRef={(c: any) => (qrCode.current = c)}

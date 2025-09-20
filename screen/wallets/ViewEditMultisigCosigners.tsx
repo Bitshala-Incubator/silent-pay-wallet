@@ -606,7 +606,7 @@ const ViewEditMultisigCosigners: React.FC = () => {
               {loc.multisig.this_is_cosigners_xpub} {Platform.OS === 'ios' ? loc.multisig.this_is_cosigners_xpub_airdrop : ''}
             </Text>
             <BlueSpacing20 />
-            <QRCodeComponent value={exportStringURv2} size={260} isLogoRendered={false} />
+            <QRCodeComponent value={exportStringURv2} size={260} />
           </View>
         </SafeArea>
       </BottomModal>

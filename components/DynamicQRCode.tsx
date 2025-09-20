@@ -130,7 +130,6 @@ export class DynamicQRCode extends Component<DynamicQRCodeProps, DynamicQRCodeSt
           {this.state.displayQRCode && (
             <View style={animatedQRCodeStyle.qrcodeContainer}>
               <QRCodeComponent
-                isLogoRendered={false}
                 value={currentFragment.toUpperCase()}
                 size={this.state.qrCodeHeight}
                 isMenuAvailable={false}
