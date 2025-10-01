@@ -30,6 +30,22 @@ const OnboardingScreen: React.FC = () => {
     );
   };
 
+  const navigateToImportWallet = () => {
+    dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Onboarding',
+            state: {
+              routes: [{ name: 'ImportWallet' }],
+            },
+          },
+        ],
+      }),
+    );
+  };
+
   const renderCoverScreen = useCallback(() => {
     return (
       <View style={[styles.welcomeContainer, { backgroundColor: colors.background }]}>
@@ -57,16 +73,15 @@ const OnboardingScreen: React.FC = () => {
             </TouchableOpacity>
 
 
-            {/* uncomment to add restore wallet button */}
-            {/* <TouchableOpacity
-                    style={styles.restoreButton}
-                    onPress={() => navigation.navigate('AddWalletRoot')}
-                    testID="RestoreWalletButton"
-                  >
-                    <Text style={[styles.restoreButtonText, { color: colors.shadowColor }]}>
-                      Restore existing wallet
-                    </Text>
-                  </TouchableOpacity> */}
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={navigateToImportWallet}
+              testID="ImportWallet"
+            >
+              <Text style={[styles.restoreButtonText]}>
+                Restore existing wallet
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.footerContainer}>
@@ -100,4 +115,6 @@ const styles = StyleSheet.create({
   createButtonText: { color: 'white', fontSize: 16, fontWeight: '600', textAlign: 'center' },
   footerContainer: { marginTop: 20 },
   footerText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  restoreButton: { paddingVertical: 16, paddingHorizontal: 32, borderRadius: 8, marginBottom: 16 },
+  restoreButtonText: { color: '#ff9500', fontSize: 16, fontWeight: '600', textAlign: 'center' },
 });

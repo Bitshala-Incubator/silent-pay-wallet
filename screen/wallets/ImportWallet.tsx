@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Keyboard, Platform, StyleSheet, TouchableWithoutFeedback, View, TouchableOpacity, Image } from 'react-native';
+import { Keyboard, Platform, StyleSheet, TouchableWithoutFeedback, View, TouchableOpacity, Image, InteractionManager } from 'react-native';
 import { BlueFormLabel, BlueFormMultiInput } from '../../BlueComponents';
 import Button from '../../components/Button';
 import {
@@ -24,6 +24,7 @@ import { BlueSpacing20 } from '../../components/BlueSpacing';
 import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet.ts';
 import { useStorage } from '../../hooks/context/useStorage';
 import presentAlert from '../../components/Alert';
+import { CommonActions } from '@react-navigation/native';
 
 type RouteProps = RouteProp<AddWalletStackParamList, 'ImportWallet'>;
 type NavigationProps = NativeStackNavigationProp<AddWalletStackParamList, 'ImportWallet'>;
@@ -37,8 +38,6 @@ const ImportWallet = () => {
   const [importText, setImportText] = useState<string>(label);
   const [isToolbarVisibleForAndroid, setIsToolbarVisibleForAndroid] = useState<boolean>(false);
   const [, setSpeedBackdoor] = useState<number>(0);
-  const [searchAccountsMenuState, setSearchAccountsMenuState] = useState<boolean>(false);
-  const [askPassphraseMenuState, setAskPassphraseMenuState] = useState<boolean>(false);
   const [clearClipboardMenuState, setClearClipboardMenuState] = useState<boolean>(true);
   const { isPrivacyBlurEnabled } = useSettings();
   const { enableScreenProtect, disableScreenProtect } = useScreenProtect();
@@ -97,26 +96,29 @@ const ImportWallet = () => {
         // create HDSilentPaymentsWallet with hardcoded m/84'/0'/0' derivation path
         const wallet = new HDSilentPaymentsWallet();
         wallet.setSecret(text.trim());
-        
+
         wallet.setDerivationPath("m/84'/0'/0'");
-        
+
         if (!wallet.validateMnemonic() && !wallet.getSecret()) {
           presentAlert({ title: 'Error', message: 'Invalid mnemonic phrase or private key.' });
           return;
         }
 
         addAndSaveWallet(wallet);
-        navigation.getParent()?.goBack();
-        
+        // Reset stack and go directly to WalletsList
+        InteractionManager.runAfterInteractions(() => {
+          navigation.navigateToWalletsList();
+        });
+
       } catch (error: any) {
         console.error('Import error:', error);
-        presentAlert({ 
-          title: 'Import Error', 
-          message: error.message || 'Failed to import wallet. Please check your input and try again.' 
+        presentAlert({
+          title: 'Import Error',
+          message: error.message || 'Failed to import wallet. Please check your input and try again.'
         });
       }
     },
-    [askPassphraseMenuState, clearClipboardMenuState, addAndSaveWallet, navigation],
+    [clearClipboardMenuState, addAndSaveWallet, navigation],
   );
 
   const handleImport = useCallback(() => {
@@ -157,30 +159,44 @@ const ImportWallet = () => {
   const toolTipOnPressMenuItem = useCallback(
     (menuItem: string) => {
       Keyboard.dismiss();
-      if (menuItem === CommonToolTipActions.Passphrase.id) {
-        setAskPassphraseMenuState(!askPassphraseMenuState);
-      } else if (menuItem === CommonToolTipActions.SearchAccount.id) {
-        setSearchAccountsMenuState(!searchAccountsMenuState);
-      } else if (menuItem === CommonToolTipActions.ClearClipboard.id) {
+      if (menuItem === CommonToolTipActions.ClearClipboard.id) {
         setClearClipboardMenuState(!clearClipboardMenuState);
       }
     },
-    [askPassphraseMenuState, clearClipboardMenuState, searchAccountsMenuState],
+    [clearClipboardMenuState],
   );
 
   // ToolTipMenu actions for advanced options
   const toolTipActions = useMemo(() => {
     return [
-      { ...CommonToolTipActions.Passphrase, menuState: askPassphraseMenuState },
-      { ...CommonToolTipActions.SearchAccount, menuState: searchAccountsMenuState },
       { ...CommonToolTipActions.ClearClipboard, menuState: clearClipboardMenuState },
     ];
-  }, [askPassphraseMenuState, clearClipboardMenuState, searchAccountsMenuState]);
+  }, [clearClipboardMenuState]);
 
   const HeaderRight = useMemo(
     () => <HeaderMenuButton onPressMenuItem={toolTipOnPressMenuItem} actions={toolTipActions} />,
     [toolTipOnPressMenuItem, toolTipActions],
   );
+
+  const handleBackButton = useCallback(() => {
+    // Mark that the user has saved the backup
+    // Navigate to Onboarding screen
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Onboarding',
+            state: {
+              routes: [{ name: 'OnboardingMain' }],
+            },
+          },
+        ],
+      }),
+    );
+
+    return true;
+  }, [navigation]);
 
   useEffect(() => {
     if (isPrivacyBlurEnabled) {
@@ -198,21 +214,19 @@ const ImportWallet = () => {
   // Adding the ToolTipMenu to the header
   useEffect(() => {
     navigation.setOptions({
+      headerShown: true,
       headerRight: () => HeaderRight,
-      headerLeft:
-        navigation.getState().index === 0
-          ? () => (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel={loc._.close}
-                style={styles.button}
-                onPress={() => navigation.goBack()}
-                testID="NavigationCloseButton"
-              >
-                <Image source={closeImage} />
-              </TouchableOpacity>
-            )
-          : undefined,
+      headerLeft: () => (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={loc._.close}
+          style={styles.button}
+          onPress={handleBackButton}
+          testID="NavigationCloseButton"
+        >
+          <Image source={closeImage} />
+        </TouchableOpacity>
+      )
     });
   }, [colors, navigation, toolTipActions, HeaderRight, styles.button, closeImage]);
 
