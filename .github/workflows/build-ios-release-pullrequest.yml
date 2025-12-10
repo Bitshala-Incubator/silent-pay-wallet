@@ -1,13 +1,6 @@
 name: Build Release and Upload to TestFlight (iOS)
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    types: [opened, reopened, synchronize, labeled]
-    branches:
-      - master
   workflow_dispatch:
 
 jobs:

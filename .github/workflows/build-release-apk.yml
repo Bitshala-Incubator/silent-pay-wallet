@@ -1,13 +1,7 @@
 name: BuildReleaseApk
 
 on:
-  pull_request:
-    branches:
-      - master
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
   buildReleaseApk:

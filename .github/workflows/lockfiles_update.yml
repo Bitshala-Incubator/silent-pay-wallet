@@ -2,9 +2,6 @@ name: Lock Files Update
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
   pod-update:
