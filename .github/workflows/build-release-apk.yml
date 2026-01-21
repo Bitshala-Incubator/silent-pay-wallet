@@ -32,16 +32,8 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci
+      - name: Install node_modules
+        run: npm ci --omit=dev
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1

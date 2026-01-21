@@ -82,7 +82,7 @@ def cached_app_store_connect_login
 end
 
 before_all do |lane, options|
-  skip_auth_lanes = ['register_devices_from_txt']
+  skip_auth_lanes = [:register_devices_from_txt, :prepare_keystore, :update_version_build_and_sign_apk]
   
   # Check if we need App Store Connect for this lane
   unless skip_auth_lanes.include?(lane)
@@ -110,14 +110,14 @@ platform :android do
       UI.user_error!("KEYSTORE_FILE_HEX environment variable is missing") if keystore_file_hex.nil?
 
       UI.message("Creating keystore from HEX...")
-      File.write("bluewallet-release-key.keystore.hex", keystore_file_hex)
+      File.write("shroud-release-key.keystore.hex", keystore_file_hex)
 
-      sh("xxd -plain -revert bluewallet-release-key.keystore.hex > bluewallet-release-key.keystore") do |status|
+      sh("xxd -plain -revert shroud-release-key.keystore.hex > shroud-release-key.keystore") do |status|
         UI.user_error!("Error reverting hex to keystore") unless status.success?
       end
       UI.message("Keystore created successfully.")
 
-      File.delete("bluewallet-release-key.keystore.hex")
+      File.delete("shroud-release-key.keystore.hex")
     end
   end
 
@@ -145,8 +145,8 @@ platform :android do
  
       # Define APK name based on branch
       signed_apk_name = branch_name != 'master' ? 
-        "BlueWallet-#{version_name}-#{build_number}-#{branch_name}.apk" : 
-        "BlueWallet-#{version_name}-#{build_number}.apk"
+        "Shroud-#{version_name}-#{build_number}-#{branch_name}.apk" :
+        "Shroud-#{version_name}-#{build_number}.apk"
  
       # Define paths
       unsigned_apk_path = "android/app/build/outputs/apk/release/app-release-unsigned.apk"
@@ -171,7 +171,7 @@ platform :android do
       UI.message("Signing APK with apksigner...")
       apksigner_path = Dir.glob("#{ENV['ANDROID_HOME']}/build-tools/*/apksigner").sort.last
       UI.user_error!("apksigner not found in Android build-tools") if apksigner_path.nil? || apksigner_path.empty?
-      sh("#{apksigner_path} sign --ks #{project_root}/bluewallet-release-key.keystore --ks-pass=pass:#{ENV['KEYSTORE_PASSWORD']} #{signed_apk_path}")
+      sh("#{apksigner_path} sign --ks #{project_root}/shroud-release-key.keystore --ks-pass=pass:#{ENV['KEYSTORE_PASSWORD']} #{signed_apk_path}")
       UI.message("APK signed successfully: #{signed_apk_path}")
     end
   end
