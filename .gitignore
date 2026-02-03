@@ -93,3 +93,4 @@ android/.project
 android/.settings/org.eclipse.buildship.core.prefs
 android/app/.classpath
 android/app/.project
+android/app/src/main/assets/index.android.bundle
