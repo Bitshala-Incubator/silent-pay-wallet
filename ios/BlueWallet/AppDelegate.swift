@@ -44,7 +44,7 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
       #endif
         }
 
-        self.moduleName = "BlueWallet"
+        self.moduleName = "Shroud"
         self.dependencyProvider = RCTAppDependencyProvider()
         self.initialProps = [:]
 
