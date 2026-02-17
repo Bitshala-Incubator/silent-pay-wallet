@@ -171,7 +171,7 @@ platform :android do
       UI.message("Signing APK with apksigner...")
       apksigner_path = Dir.glob("#{ENV['ANDROID_HOME']}/build-tools/*/apksigner").sort.last
       UI.user_error!("apksigner not found in Android build-tools") if apksigner_path.nil? || apksigner_path.empty?
-      sh("#{apksigner_path} sign --ks #{project_root}/shroud-release-key.keystore --ks-pass=pass:#{ENV['KEYSTORE_PASSWORD']} #{signed_apk_path}")
+      sh("#{apksigner_path} sign --ks #{project_root}/shroud-release-key.keystore --ks-pass env:KEYSTORE_PASSWORD #{signed_apk_path}")
       UI.message("APK signed successfully: #{signed_apk_path}")
     end
   end
