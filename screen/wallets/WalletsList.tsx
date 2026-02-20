@@ -317,7 +317,7 @@ const WalletsList: React.FC = () => {
     const balanceText = formatBalance(wallet.getBalance(), wallet.getPreferredBalanceUnit(), true);
 
     return (
-      <View style={[styles.balanceHeader, stylesHook.walletContainer]}>
+      <View style={[styles.balanceHeader, stylesHook.walletContainer]} testID={wallet.getLabel()}>
         <TouchableOpacity onPress={changeWalletBalanceUnit}>
           <Text style={[styles.balanceAmount, stylesHook.balanceAmountText]}>{balanceText}</Text>
         </TouchableOpacity>
@@ -552,6 +552,7 @@ const WalletsList: React.FC = () => {
   return (
     <>
       <SafeAreaSectionList<any | string, SectionData>
+        testID="WalletsList"
         renderItem={renderSectionItem}
         keyExtractor={sectionListKeyExtractor}
         renderSectionHeader={renderSectionHeader}

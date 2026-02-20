@@ -3,11 +3,13 @@ import { Image, Linking, StyleSheet, Text, View } from 'react-native';
 import { BlueCard } from '../../BlueComponents';
 import ListItem from '../../components/ListItem';
 import { useTheme } from '../../components/themes';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import loc, { formatStringAddTwoWhiteSpaces } from '../../loc';
 import SafeAreaScrollView from '../../components/SafeAreaScrollView';
 
 const About: React.FC = () => {
   const { colors } = useTheme();
+  const { navigate } = useExtendedNavigation();
 
   const stylesHook = StyleSheet.create({
     textBackup: {
@@ -49,6 +51,7 @@ const About: React.FC = () => {
           onPress={handleOnGithubPress}
           title={loc.settings.about_sm_github}
         />
+        <ListItem title={loc.settings.selfTest} onPress={() => navigate('SelfTest')} testID="RunSelfTestButton" chevron />
       </BlueCard>
     </SafeAreaScrollView>
   );

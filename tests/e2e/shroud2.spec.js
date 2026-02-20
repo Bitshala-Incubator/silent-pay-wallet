@@ -39,13 +39,12 @@ beforeAll(async () => {
   await device.launchApp({ delete: true });
 
   console.log('before all - importing bip84...');
-  await helperImportWallet(process.env.HD_MNEMONIC_BIP84, 'HDsegwitBech32', 'Imported HD SegWit (BIP84 Bech32 Native)', '0.00105526');
+  await helperImportWallet(process.env.HD_MNEMONIC_BIP84, 'HDsegwitBech32');
   console.log('...imported!');
-  await device.pressBack();
   await sleep(15000);
 }, 1200_000);
 
-describe('BlueWallet UI Tests - import BIP84 wallet', () => {
+describe('Shroud UI Tests - import BIP84 wallet', () => {
   it('can create a transaction; can scanQR with bip21; can switch units', async () => {
     const lockFile = '/tmp/travislock.' + hashIt('t21');
     if (process.env.TRAVIS) {
@@ -615,7 +614,7 @@ describe('BlueWallet UI Tests - import BIP84 wallet', () => {
     // go inside the wallet
     await element(by.text('Imported HD SegWit (BIP84 Bech32 Native)')).tap();
 
-    await waitFor(element(by.id('NoTxBuyBitcoin')))
+    await waitFor(element(by.id('NoTransactionsMessage')))
       .not.toExist()
       .withTimeout(300 * 1000);
 

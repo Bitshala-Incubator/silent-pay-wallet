@@ -27,8 +27,6 @@ const OnboardingScreen: React.FC = () => {
     const w = new HDSilentPaymentsWallet();
     w.setLabel(loc.wallets.details_title);
     await w.generate();
-    addWallet(w);
-    await saveToDisk();
 
     try {
       const indexer = getDefaultIndexer();
@@ -36,8 +34,11 @@ const OnboardingScreen: React.FC = () => {
       w.setBirthHeight(latestHeightResponse.height);
       console.log(`Wallet birth height set to: ${latestHeightResponse.height}`);
     } catch (error) {
-      console.warn('Could not set birth height, will default to 0:', error);
+      console.warn('Could not set birth height, will use default:', error);
     }
+
+    addWallet(w);
+    await saveToDisk();
 
     triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
 
@@ -69,7 +70,7 @@ const OnboardingScreen: React.FC = () => {
           <Text style={[styles.welcomeSubtitle, { color: colors.labelText }]}>{loc.onboarding.subtitle}</Text>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.createButton} onPress={handleContinue}>
+            <TouchableOpacity style={styles.createButton} onPress={handleContinue} testID="CreateWallet">
               <Text style={styles.createButtonText}>{loc.onboarding.create_wallet}</Text>
             </TouchableOpacity>
 

@@ -1,4 +1,4 @@
-name: Tests
+name: E2E Tests
 
 # https://dev.to/edvinasbartkus/running-react-native-detox-tests-for-ios-and-android-on-github-actions-2ekn
 # https://medium.com/@reime005/the-best-ci-cd-for-react-native-with-e2e-support-4860b4aaab29
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
 
@@ -90,10 +90,10 @@ jobs:
       with:
         api-level: 31
         avd-name: Pixel_API_29_AOSP
-        force-avd-creation: false
+        force-avd-creation: true
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -partition-size 2047
         arch: x86_64
-        script: npm run e2e:release-test --  --record-videos all --record-logs all --take-screenshots all --headless -d 200000 -R 5 --artifacts-location /mnt/artifacts
+        script: npm run e2e:release-test --  --record-videos all --record-logs all --take-screenshots all --headless --retries 3 --reuse --artifacts-location /mnt/artifacts
 
     - uses: actions/upload-artifact@v4
       if: failure()

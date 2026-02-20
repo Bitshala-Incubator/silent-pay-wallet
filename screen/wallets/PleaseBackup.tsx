@@ -1,6 +1,15 @@
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View, InteractionManager } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  BackHandler,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+  InteractionManager,
+} from 'react-native';
 import { useSettings } from '../../hooks/context/useSettings';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useScreenProtect } from '../../hooks/useScreenProtect';
@@ -27,6 +36,7 @@ const PleaseBackup: React.FC = () => {
   const { isPrivacyBlurEnabled } = useSettings();
   const { enableScreenProtect, disableScreenProtect } = useScreenProtect();
   const [currentStep, setCurrentStep] = useState<BackupStep>(BackupStep.SHOW_SEED);
+  const skipBackdoorCount = useRef(0);
   const handleVerifyComplete = useCallback(() => {
     InteractionManager.runAfterInteractions(() => {
       navigation.navigateToWalletsList();
@@ -40,6 +50,15 @@ const PleaseBackup: React.FC = () => {
 
   const handleBackToSeed = () => {
     setCurrentStep(BackupStep.SHOW_SEED);
+  };
+
+  const skipBackdoorTap = () => {
+    if (!__DEV__) return;
+    skipBackdoorCount.current += 1;
+    if (skipBackdoorCount.current >= 5) {
+      skipBackdoorCount.current = 0;
+      handleVerifyComplete();
+    }
   };
 
   useEffect(() => {
@@ -65,7 +84,13 @@ const PleaseBackup: React.FC = () => {
         {currentStep === BackupStep.SHOW_SEED && (
           <ScrollView style={styles.root} contentContainerStyle={[styles.flex]} testID="PleaseBackupScrollView">
             <View>
-              <Text style={styles.title}>{loc.pleasebackup.title}</Text>
+              {__DEV__ ? (
+                <TouchableWithoutFeedback onPress={skipBackdoorTap} testID="SkipVerifyBackdoor">
+                  <Text style={styles.title}>{loc.pleasebackup.title}</Text>
+                </TouchableWithoutFeedback>
+              ) : (
+                <Text style={styles.title}>{loc.pleasebackup.title}</Text>
+              )}
               <Text style={styles.subtitle}>{loc.pleasebackup.text}</Text>
               <View style={styles.seedGrid}>
                 {seedPhrase.split(' ').map((word: string, idx: number) => (

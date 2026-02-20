@@ -90,6 +90,7 @@ android {
         versionName "7.2.1"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        missingDimensionStrategy 'detox', 'full'
     }
 
     lintOptions {
@@ -123,7 +124,7 @@ task copyFiatUnits(type: Copy) {
 preBuild.dependsOn(copyFiatUnits)
 
 dependencies {
-		androidTestImplementation('com.wix:detox:+')
+    androidTestImplementation(project(':detox'))
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation 'androidx.core:core-ktx:1.16.0'
@@ -137,7 +138,6 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    androidTestImplementation('com.wix:detox:0.1.1')
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
