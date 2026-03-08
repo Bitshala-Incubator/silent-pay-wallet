@@ -14,7 +14,8 @@ export class SilentPaymentIndexer {
 
   constructor(config: SilentPaymentIndexerConfig) {
     const baseUrl = config.baseUrl.replace(/\/$/, '');
-    this.httpClient = new IndexerHttpClient(baseUrl, config.timeout);
+    const onionUrl = config.onionUrl?.replace(/\/$/, '');
+    this.httpClient = new IndexerHttpClient(baseUrl, config.timeout, onionUrl);
   }
 
   getBaseUrl(): string {

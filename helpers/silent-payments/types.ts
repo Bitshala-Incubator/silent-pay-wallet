@@ -45,6 +45,7 @@ export interface SilentPaymentUTXOSerializable extends Omit<SilentPaymentUTXO, '
 
 export interface SilentPaymentIndexerConfig {
   baseUrl: string;
+  onionUrl?: string;
   timeout?: number;
   retry?: {
     count: number;

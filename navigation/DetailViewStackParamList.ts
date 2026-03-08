@@ -48,6 +48,7 @@ export type DetailViewStackParamList = {
   PlausibleDeniability: undefined;
   Licensing: undefined;
   NetworkSettings: undefined;
+  TorSettings: undefined;
   About: undefined;
   DefaultView: undefined;
   ElectrumSettings: { server?: ElectrumServerItem; onBarScanned?: string };

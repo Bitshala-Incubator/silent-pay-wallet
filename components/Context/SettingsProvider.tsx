@@ -15,6 +15,7 @@ import {
 } from '../../hooks/useDeviceQuickActions';
 import { useStorage } from '../../hooks/context/useStorage';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
+import TorManager, { type TorStatus } from '../../blue_modules/torManager';
 
 const TotalWalletsBalanceKey = 'TotalWalletsBalance';
 const TotalWalletsBalancePreferredUnit = 'TotalWalletsBalancePreferredUnit';
@@ -95,6 +96,13 @@ interface SettingsContextType {
   setBlockExplorerStorage: (explorer: BlockExplorer) => Promise<boolean>;
   isElectrumDisabled: boolean;
   setIsElectrumDisabled: (value: boolean) => void;
+  isTorEnabled: boolean;
+  setIsTorEnabled: (value: boolean) => Promise<void>;
+  isTorOnly: boolean;
+  setIsTorOnly: (value: boolean) => Promise<void>;
+  torSocksPort: number;
+  setTorSocksPort: (port: number) => Promise<void>;
+  torStatus: TorStatus;
 }
 
 const defaultSettingsContext: SettingsContextType = {
@@ -120,6 +128,13 @@ const defaultSettingsContext: SettingsContextType = {
   setBlockExplorerStorage: async () => false,
   isElectrumDisabled: false,
   setIsElectrumDisabled: () => {},
+  isTorEnabled: false,
+  setIsTorEnabled: async () => {},
+  isTorOnly: false,
+  setIsTorOnly: async () => {},
+  torSocksPort: 9050,
+  setTorSocksPort: async () => {},
+  torStatus: 'disabled' as TorStatus,
 };
 
 export const SettingsContext = createContext<SettingsContextType>(defaultSettingsContext);
@@ -136,6 +151,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
   const [totalBalancePreferredUnit, setTotalBalancePreferredUnit] = useState<BitcoinUnit>(BitcoinUnit.BTC);
   const [selectedBlockExplorer, setSelectedBlockExplorer] = useState<BlockExplorer>(BLOCK_EXPLORERS.default);
   const [isElectrumDisabled, setIsElectrumDisabled] = useState<boolean>(true);
+  const [isTorEnabled, setIsTorEnabledState] = useState<boolean>(false);
+  const [isTorOnly, setIsTorOnlyState] = useState<boolean>(false);
+  const [torSocksPort, setTorSocksPortState] = useState<number>(9050);
+  const [torStatus, setTorStatus] = useState<TorStatus>('disabled');
 
   const { walletsInitialized } = useStorage();
 
@@ -175,6 +194,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
         getBlockExplorerUrl().then(url => {
           const predefinedExplorer = Object.values(BLOCK_EXPLORERS).find(explorer => normalizeUrl(explorer.url) === normalizeUrl(url));
           setSelectedBlockExplorer(predefinedExplorer ?? ({ key: 'custom', name: 'Custom', url } as BlockExplorer));
+        }),
+        TorManager.getInstance().loadSettings().then(settings => {
+          setIsTorEnabledState(settings.enabled);
+          setIsTorOnlyState(settings.torOnly);
+          setTorSocksPortState(settings.socksPort);
+          setTorStatus(TorManager.getInstance().status);
         }),
       ];
 
@@ -301,6 +326,46 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
     }
   }, []);
 
+  const setIsTorEnabled = useCallback(async (value: boolean): Promise<void> => {
+    try {
+      const torManager = TorManager.getInstance();
+      await torManager.setEnabled(value);
+      setIsTorEnabledState(value);
+      setTorStatus(torManager.status);
+    } catch (e) {
+      console.error('Error setting Tor enabled:', e);
+    }
+  }, []);
+
+  const setIsTorOnly = useCallback(async (value: boolean): Promise<void> => {
+    try {
+      const torManager = TorManager.getInstance();
+      await torManager.setTorOnly(value);
+      setIsTorOnlyState(value);
+    } catch (e) {
+      console.error('Error setting Tor-only mode:', e);
+    }
+  }, []);
+
+  const setTorSocksPort = useCallback(async (port: number): Promise<void> => {
+    try {
+      const torManager = TorManager.getInstance();
+      await torManager.setSocksPort(port);
+      setTorSocksPortState(port);
+      setTorStatus(torManager.status);
+    } catch (e) {
+      console.error('Error setting Tor SOCKS port:', e);
+    }
+  }, []);
+
+  // Listen for Tor status changes
+  useEffect(() => {
+    const unsubscribe = TorManager.getInstance().addStatusListener(status => {
+      setTorStatus(status);
+    });
+    return unsubscribe;
+  }, []);
+
   const value = useMemo(
     () => ({
       preferredFiatCurrency,
@@ -325,6 +390,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       setBlockExplorerStorage,
       isElectrumDisabled,
       setIsElectrumDisabled,
+      isTorEnabled,
+      setIsTorEnabled,
+      isTorOnly,
+      setIsTorOnly,
+      torSocksPort,
+      setTorSocksPort,
+      torStatus,
     }),
     [
       preferredFiatCurrency,
@@ -348,6 +420,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       selectedBlockExplorer,
       setBlockExplorerStorage,
       isElectrumDisabled,
+      isTorEnabled,
+      setIsTorEnabled,
+      isTorOnly,
+      setIsTorOnly,
+      torSocksPort,
+      setTorSocksPort,
+      torStatus,
     ],
   );
 

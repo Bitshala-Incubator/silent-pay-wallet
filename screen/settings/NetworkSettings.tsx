@@ -16,8 +16,13 @@ const NetworkSettings: React.FC = () => {
     navigation.navigate('SettingsBlockExplorer');
   };
 
+  const navigateToTorSettings = () => {
+    navigation.navigate('TorSettings');
+  };
+
   return (
     <SafeAreaScrollView contentInsetAdjustmentBehavior="automatic" automaticallyAdjustContentInsets>
+      <ListItem title="Tor (Orbot)" onPress={navigateToTorSettings} testID="TorSettings" chevron />
       <ListItem title={loc.settings.block_explorer} onPress={navigateToBlockExplorerSettings} testID="BlockExplorerSettings" chevron />
       <ListItem title={loc.settings.network_electrum} onPress={navigateToElectrumSettings} testID="ElectrumSettings" chevron />
       {isNotificationsCapable && (
