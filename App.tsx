@@ -1,26 +1,37 @@
 import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
+import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SizeClassProvider } from './components/Context/SizeClassProvider';
 import { SettingsProvider } from './components/Context/SettingsProvider';
-import { BlueDefaultTheme } from './components/themes';
+import { BlueDarkTheme, BlueDefaultTheme } from './components/themes';
 import MasterView from './navigation/MasterView';
 import { navigationRef } from './NavigationService';
 import { useLogger } from '@react-navigation/devtools';
 import { StorageProvider } from './components/Context/StorageProvider';
 import { initializeIndexer } from './blue_modules/SilentPaymentIndexer';
+import CustomAlert, { CustomAlertHandle } from './components/CustomAlert';
+import { setCustomAlertRef } from './components/Alert';
 
 const App = () => {
+  const customAlertRef = React.useRef<CustomAlertHandle>(null);
+
+  React.useEffect(() => {
+    setCustomAlertRef(customAlertRef.current);
+    return () => setCustomAlertRef(null);
+  }, []);
   initializeIndexer({
     baseUrl: 'https://cushionlike-isabel-retrievable.ngrok-free.dev/',
     timeout: 100000, // 100 seconds for blockchain scanning operations (increased for slower connections)
   });
 
+  const colorScheme = useColorScheme();
+
   useLogger(navigationRef);
 
   return (
     <SizeClassProvider>
-      <NavigationContainer ref={navigationRef} theme={BlueDefaultTheme}>
+      <NavigationContainer ref={navigationRef} theme={colorScheme === 'dark' ? BlueDarkTheme : BlueDefaultTheme}>
         <SafeAreaProvider>
           <StorageProvider>
             <SettingsProvider>
@@ -29,6 +40,7 @@ const App = () => {
           </StorageProvider>
         </SafeAreaProvider>
       </NavigationContainer>
+      <CustomAlert ref={customAlertRef} />
     </SizeClassProvider>
   );
 };

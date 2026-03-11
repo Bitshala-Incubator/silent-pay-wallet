@@ -90,7 +90,7 @@ export const BlueDarkTheme: Theme = {
     background: '#000000',
     foregroundColor: '#ffffff',
     buttonDisabledBackgroundColor: '#3A3A3C',
-    buttonBackgroundColor: '#FF9500',
+    buttonBackgroundColor: '#754CE8',
     buttonTextColor: '#ffffff',
     lightButton: 'rgba(255,255,255,.1)',
     buttonAlternativeTextColor: '#ffffff',
@@ -129,6 +129,8 @@ export const BlueDarkTheme: Theme = {
     receiveText: '#37C0A1',
     navigationBarColor: '#3A3A3C',
     androidRippleColor: '#444444',
+    primary: '#754CE8',
+    secondary: '#472EBF',
   },
 };
 

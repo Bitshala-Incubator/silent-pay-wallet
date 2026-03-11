@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export const LazyLoadingIndicator = () => (
   <View style={styles.root}>
-    <ActivityIndicator size="large" />
+    <ActivityIndicator size="large" color="#754CE8" />
   </View>
 );
 

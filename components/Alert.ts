@@ -2,10 +2,17 @@ import { Alert as RNAlert, Platform, ToastAndroid, AlertButton, AlertOptions } f
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../blue_modules/hapticFeedback';
 import loc from '../loc';
 import { navigationRef } from '../NavigationService';
+import type { CustomAlertHandle } from './CustomAlert';
 
 export enum AlertType {
   Alert,
   Toast,
+}
+
+let customAlertRef: CustomAlertHandle | null = null;
+
+export function setCustomAlertRef(ref: CustomAlertHandle | null): void {
+  customAlertRef = ref;
 }
 
 const presentAlert = (() => {
@@ -25,7 +32,9 @@ const presentAlert = (() => {
   const showAlert = (title: string | undefined, message: string, buttons: AlertButton[], options: AlertOptions) => {
     if (Platform.OS === 'ios' && navigationRef.isReady()) {
       RNAlert.alert(title ?? message, title && message ? message : undefined, buttons, options);
-    } else {
+    } else if (Platform.OS === 'android' && customAlertRef) {
+      customAlertRef.show(title, message, buttons, options);
+    } else  {
       RNAlert.alert(title ?? '', message, buttons, options);
     }
   };

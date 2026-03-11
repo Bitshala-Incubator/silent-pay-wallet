@@ -130,7 +130,7 @@ const UnlockWith: React.FC = () => {
 
   const renderUnlockOptions = () => {
     if (state.isAuthenticating) {
-      return <ActivityIndicator />;
+      return <ActivityIndicator color="#754CE8" />;
     } else {
       switch (state.auth.type) {
         case AuthType.Biometrics:

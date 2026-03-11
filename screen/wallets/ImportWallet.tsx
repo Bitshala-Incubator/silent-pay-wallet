@@ -308,6 +308,7 @@ const ImportWallet = () => {
 const styles = StyleSheet.create({
   root: {
     paddingTop: 10,
+    flexGrow: 1,
   },
   center: {
     flex: 1,
