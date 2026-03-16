@@ -3,7 +3,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet, AlertButton, AlertOpti
 import { BlueDefaultTheme, BlueDarkTheme } from './themes';
 
 export interface CustomAlertHandle {
-  show: (title: string | undefined, message: string, buttons: AlertButton[], options: AlertOptions) => void;
+  show: (title: string | undefined, message: string | undefined, buttons: AlertButton[], options: AlertOptions) => void;
 }
 
 const CustomAlert = forwardRef<CustomAlertHandle>((_, ref) => {
@@ -21,7 +21,7 @@ const CustomAlert = forwardRef<CustomAlertHandle>((_, ref) => {
   useImperativeHandle(ref, () => ({
     show: (t, m, b, o) => {
       setTitle(t);
-      setMessage(m);
+      setMessage(m ?? '');
       setButtons(b);
       setOptions(o);
       setVisible(true);
@@ -43,7 +43,7 @@ const CustomAlert = forwardRef<CustomAlertHandle>((_, ref) => {
       case 'cancel':
         return { color: colors.foregroundColor, fontWeight: '600' as const };
       default:
-        return { color: colors.mainColor };
+        return { color: colors.primary };
     }
   };
 
@@ -57,6 +57,8 @@ const CustomAlert = forwardRef<CustomAlertHandle>((_, ref) => {
             {buttons.map((button, index) => (
               <TouchableOpacity
                 key={index}
+                accessibilityRole="button"
+                accessibilityLabel={button.text}
                 style={[
                   styles.button,
                   index > 0 && { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: colors.lightBorder },

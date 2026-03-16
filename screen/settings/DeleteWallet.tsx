@@ -18,13 +18,13 @@ const DeleteWallet: React.FC = () => {
   const handleDeleteWallet = useCallback(async () => {
     const wallet = wallets.length > 0 ? wallets[0] : null;
     if (!wallet) {
-      presentAlert({ title: loc.wallets.list_empty_txs1, message: 'No wallet available to delete' });
+      presentAlert({ title: loc.wallets.list_empty_txs1, message: loc.wallets.no_wallet_to_delete });
       return;
     }
 
     presentAlert({
       title: loc.wallets.details_delete_wallet,
-      message: loc.wallets.details_are_you_sure,
+      message: loc.wallets.delete_wallet_warning,
       buttons: [
         {
           text: loc._.cancel,

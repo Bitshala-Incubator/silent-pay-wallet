@@ -129,7 +129,7 @@ const WalletDetails: React.FC = () => {
     triggerHapticFeedback(HapticFeedbackTypes.NotificationWarning);
     presentAlert({
       title: loc.wallets.details_delete_wallet,
-      message: loc.wallets.details_are_you_sure,
+      message: loc.wallets.delete_wallet_warning,
       buttons: [
         {
           text: loc.wallets.details_yes_delete,

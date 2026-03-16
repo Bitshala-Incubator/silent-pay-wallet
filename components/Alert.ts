@@ -33,8 +33,8 @@ const presentAlert = (() => {
     if (Platform.OS === 'ios' && navigationRef.isReady()) {
       RNAlert.alert(title ?? message, title && message ? message : undefined, buttons, options);
     } else if (Platform.OS === 'android' && customAlertRef) {
-      customAlertRef.show(title, message, buttons, options);
-    } else  {
+      customAlertRef.show(title ?? message, title && message ? message : undefined, buttons, options);
+    } else {
       RNAlert.alert(title ?? '', message, buttons, options);
     }
   };
