@@ -3,7 +3,7 @@ import TcpSocket from 'react-native-tcp-socket';
 import { Linking, NativeModules, Platform } from 'react-native';
 
 const TOR_SETTINGS_KEY = '@tor_settings';
-const DEFAULT_SOCKS_HOST = '127.0.0.1';
+export const DEFAULT_SOCKS_HOST = '127.0.0.1';
 const DEFAULT_SOCKS_PORT = 9050;
 const ORBOT_PACKAGE = 'org.torproject.android';
 
@@ -14,14 +14,12 @@ export interface TorSettings {
   socksPort: number;
   /** When true, requests fail if Tor is unavailable instead of falling back to clearnet */
   torOnly: boolean;
-  retryAttempts: number;
 }
 
 const DEFAULT_SETTINGS: TorSettings = {
   enabled: false,
   socksPort: DEFAULT_SOCKS_PORT,
   torOnly: false,
-  retryAttempts: 3,
 };
 
 class TorManager {
@@ -45,10 +43,6 @@ class TorManager {
     return { ...this._settings };
   }
 
-  get socksHost(): string {
-    return DEFAULT_SOCKS_HOST;
-  }
-
   get socksPort(): number {
     return this._settings.socksPort;
   }
@@ -60,10 +54,6 @@ class TorManager {
   /** When true, clearnet fallback is blocked — requests must go through Tor or fail */
   get isTorOnly(): boolean {
     return this._settings.enabled && this._settings.torOnly;
-  }
-
-  get retryAttempts(): number {
-    return this._settings.retryAttempts;
   }
 
   async loadSettings(): Promise<TorSettings> {
@@ -86,29 +76,23 @@ class TorManager {
   }
 
   async saveSettings(settings: Partial<TorSettings>): Promise<void> {
-    this._settings = { ...this._settings, ...settings };
-    try {
-      await AsyncStorage.setItem(TOR_SETTINGS_KEY, JSON.stringify(this._settings));
-    } catch (e) {
-      console.error('[TorManager] Failed to save settings:', e);
-    }
+    const next = { ...this._settings, ...settings };
+    await AsyncStorage.setItem(TOR_SETTINGS_KEY, JSON.stringify(next));
+    this._settings = next;
   }
 
   async setEnabled(enabled: boolean): Promise<void> {
-    await this.saveSettings({ enabled });
     if (enabled) {
+      await this.saveSettings({ enabled });
       await this.checkConnection();
     } else {
+      await this.saveSettings({ enabled, torOnly: false });
       this._setStatus('disabled');
     }
   }
 
   async setTorOnly(torOnly: boolean): Promise<void> {
     await this.saveSettings({ torOnly });
-  }
-
-  async setRetryAttempts(retryAttempts: number): Promise<void> {
-    await this.saveSettings({ retryAttempts: Math.max(1, Math.min(retryAttempts, 10)) });
   }
 
   async setSocksPort(port: number): Promise<void> {
@@ -136,39 +120,21 @@ class TorManager {
     }
   }
 
-  /**
-   * Check if Orbot is installed on the device (Android only).
-   * On iOS, returns false — users must configure manually.
-   */
+  /** Android only. On iOS, returns false — users must configure manually. */
   static async isOrbotInstalled(): Promise<boolean> {
     if (Platform.OS !== 'android') return false;
     try {
-      const { PackageManager } = NativeModules;
-      if (!PackageManager?.isPackageInstalled) return false;
-      return await PackageManager.isPackageInstalled(ORBOT_PACKAGE);
+      const { RNShare } = NativeModules;
+      if (!RNShare?.isPackageInstalled) return false;
+      return await RNShare.isPackageInstalled(ORBOT_PACKAGE);
     } catch {
       return false;
     }
   }
 
-  /** Try to launch Orbot app (Android only) */
-  static async launchOrbot(): Promise<boolean> {
-    if (Platform.OS !== 'android') return false;
-    try {
-      const { PackageManager } = NativeModules;
-      if (!PackageManager?.launchPackage) return false;
-      return await PackageManager.launchPackage(ORBOT_PACKAGE);
-    } catch {
-      return false;
-    }
-  }
-
-  /** Open Orbot's store listing for installation */
   static openOrbotInstallPage(): void {
     if (Platform.OS === 'android') {
-      Linking.openURL('market://details?id=org.torproject.android').catch(() => {
-        Linking.openURL('https://play.google.com/store/apps/details?id=org.torproject.android');
-      });
+      Linking.openURL('https://guardianproject.info/releases/orbot-latest.apk');
     } else {
       Linking.openURL('https://apps.apple.com/app/orbot/id1609461599');
     }
@@ -183,14 +149,11 @@ class TorManager {
         resolve(false);
       }, 5000);
 
-      const client = TcpSocket.createConnection(
-        { host: DEFAULT_SOCKS_HOST, port: this._settings.socksPort },
-        () => {
-          // Send SOCKS5 greeting: version 5, 1 method, no-auth
-          const greeting = Buffer.from([0x05, 0x01, 0x00]);
-          client.write(greeting);
-        },
-      );
+      const client = TcpSocket.createConnection({ host: DEFAULT_SOCKS_HOST, port: this._settings.socksPort }, () => {
+        // Send SOCKS5 greeting: version 5, 1 method, no-auth
+        const greeting = Buffer.from([0x05, 0x01, 0x00]);
+        client.write(greeting);
+      });
 
       client.on('data', (data: string | Buffer) => {
         clearTimeout(timeout);
