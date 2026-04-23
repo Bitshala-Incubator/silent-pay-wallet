@@ -194,7 +194,7 @@ const DetailViewStackScreensStack = () => {
       <DetailViewStack.Screen
         name="TorSettings"
         component={TorSettings}
-        options={navigationStyle({ title: 'Tor (Orbot)' })(theme)}
+        options={navigationStyle({ title: loc.settings.tor_title })(theme)}
       />
       <DetailViewStack.Screen
         name="SettingsBlockExplorer"
