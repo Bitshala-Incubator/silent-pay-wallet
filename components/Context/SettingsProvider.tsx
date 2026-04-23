@@ -101,8 +101,9 @@ interface SettingsContextType {
   isTorOnly: boolean;
   setIsTorOnly: (value: boolean) => Promise<void>;
   torSocksPort: number;
-  setTorSocksPort: (port: number) => Promise<void>;
+  setTorSocksPort: (port: number) => Promise<boolean>;
   torStatus: TorStatus;
+  settingsInitialized: boolean;
 }
 
 const defaultSettingsContext: SettingsContextType = {
@@ -133,8 +134,9 @@ const defaultSettingsContext: SettingsContextType = {
   isTorOnly: false,
   setIsTorOnly: async () => {},
   torSocksPort: 9050,
-  setTorSocksPort: async () => {},
+  setTorSocksPort: async () => false,
   torStatus: 'disabled' as TorStatus,
+  settingsInitialized: false,
 };
 
 export const SettingsContext = createContext<SettingsContextType>(defaultSettingsContext);
@@ -155,6 +157,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
   const [isTorOnly, setIsTorOnlyState] = useState<boolean>(false);
   const [torSocksPort, setTorSocksPortState] = useState<number>(9050);
   const [torStatus, setTorStatus] = useState<TorStatus>('disabled');
+  const [settingsInitialized, setSettingsInitialized] = useState<boolean>(false);
 
   const { walletsInitialized } = useStorage();
 
@@ -195,12 +198,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
           const predefinedExplorer = Object.values(BLOCK_EXPLORERS).find(explorer => normalizeUrl(explorer.url) === normalizeUrl(url));
           setSelectedBlockExplorer(predefinedExplorer ?? ({ key: 'custom', name: 'Custom', url } as BlockExplorer));
         }),
-        TorManager.getInstance().loadSettings().then(settings => {
-          setIsTorEnabledState(settings.enabled);
-          setIsTorOnlyState(settings.torOnly);
-          setTorSocksPortState(settings.socksPort);
-          setTorStatus(TorManager.getInstance().status);
-        }),
+        TorManager.getInstance()
+          .loadSettings()
+          .then(settings => {
+            setIsTorEnabledState(settings.enabled);
+            setIsTorOnlyState(settings.torOnly);
+            setTorSocksPortState(settings.socksPort);
+            setTorStatus(TorManager.getInstance().status);
+          }),
       ];
 
       const results = await Promise.allSettled(promises);
@@ -210,6 +215,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
           console.error(`Error loading setting ${index}:`, result.reason);
         }
       });
+
+      setSettingsInitialized(true);
     };
 
     loadSettings();
@@ -331,6 +338,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       const torManager = TorManager.getInstance();
       await torManager.setEnabled(value);
       setIsTorEnabledState(value);
+      if (!value) setIsTorOnlyState(false);
       setTorStatus(torManager.status);
     } catch (e) {
       console.error('Error setting Tor enabled:', e);
@@ -347,14 +355,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
     }
   }, []);
 
-  const setTorSocksPort = useCallback(async (port: number): Promise<void> => {
+  const setTorSocksPort = useCallback(async (port: number): Promise<boolean> => {
     try {
       const torManager = TorManager.getInstance();
       await torManager.setSocksPort(port);
       setTorSocksPortState(port);
       setTorStatus(torManager.status);
+      return true;
     } catch (e) {
       console.error('Error setting Tor SOCKS port:', e);
+      return false;
     }
   }, []);
 
@@ -397,6 +407,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       torSocksPort,
       setTorSocksPort,
       torStatus,
+      settingsInitialized,
     }),
     [
       preferredFiatCurrency,
@@ -427,6 +438,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       torSocksPort,
       setTorSocksPort,
       torStatus,
+      settingsInitialized,
     ],
   );
 
