@@ -1,6 +1,8 @@
 import { fetchWithRetries } from '../../util/fetch';
 import { socks5Fetch } from '../../blue_modules/socks5Fetch';
-import TorManager from '../../blue_modules/torManager';
+import TorManager, { DEFAULT_SOCKS_HOST } from '../../blue_modules/torManager';
+
+const RETRY_ATTEMPTS = 3;
 
 export class IndexerHttpClient {
   private onionUrl?: string;
@@ -18,16 +20,14 @@ export class IndexerHttpClient {
 
     // Try Tor/onion route first when available
     if (torManager.settings.enabled && this.onionUrl) {
-      const retryAttempts = torManager.retryAttempts;
-
-      for (let attempt = 1; attempt <= retryAttempts; attempt++) {
-        if (torManager.isReady) {
+      if (torManager.isReady) {
+        for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
           try {
             const response = await socks5Fetch(`${this.onionUrl}${endpoint}`, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
               timeout: this.timeout,
-              socksHost: torManager.socksHost,
+              socksHost: DEFAULT_SOCKS_HOST,
               socksPort: torManager.socksPort,
             });
 
@@ -38,37 +38,25 @@ export class IndexerHttpClient {
             return await response.json();
           } catch (torError) {
             const message = torError instanceof Error ? torError.message : String(torError);
-            console.warn(
-              `[IndexerHttpClient] Tor attempt ${attempt}/${retryAttempts} failed: ${message}`,
-            );
+            console.warn(`[IndexerHttpClient] Tor attempt ${attempt}/${RETRY_ATTEMPTS} failed: ${message}`);
 
-            // Exponential backoff between retries
-            if (attempt < retryAttempts) {
+            if (attempt < RETRY_ATTEMPTS) {
               const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
               await new Promise(resolve => setTimeout(resolve, delay));
-              // Re-check connection before next attempt
-              await torManager.checkConnection();
             }
           }
-        } else if (attempt < retryAttempts) {
-          // Tor not ready yet — wait and re-check
-          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          await torManager.checkConnection();
         }
       }
 
-      // All Tor attempts exhausted
       if (torManager.isTorOnly) {
         throw new Error(
-          `${errorContext}: Tor-only mode is enabled but all ${retryAttempts} Tor attempts failed. ` +
+          `${errorContext}: Tor-only mode is enabled but Tor is unavailable. ` +
           'Clearnet fallback is blocked. Ensure Orbot is running.',
         );
       }
 
-      console.warn('[IndexerHttpClient] Tor exhausted, falling back to clearnet');
+      console.warn('[IndexerHttpClient] Tor unavailable, falling back to clearnet');
     } else if (torManager.isTorOnly) {
-      // Tor enabled in tor-only mode but no onion URL configured
       throw new Error(
         `${errorContext}: Tor-only mode is enabled but no .onion URL is configured. ` +
         'Set an onion URL or disable Tor-only mode.',
