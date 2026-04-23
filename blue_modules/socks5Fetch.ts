@@ -29,7 +29,7 @@ function parseUrl(url: string): { host: string; port: number; path: string } {
     throw new Error(`Invalid URL: ${url}`);
   }
   const host = match[1];
-  const port = match[2] ? parseInt(match[2], 10) : (url.startsWith('https') ? 443 : 80);
+  const port = match[2] ? parseInt(match[2], 10) : url.startsWith('https:') ? 443 : 80;
   const path = match[3] || '/';
   return { host, port, path };
 }
@@ -74,14 +74,14 @@ export function socks5Fetch(url: string, options: Socks5FetchOptions = {}): Prom
   const { host, port, path } = parseUrl(url);
 
   return new Promise((resolve, reject) => {
-    let timer: ReturnType<typeof setTimeout>;
     let resolved = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const chunks: Buffer[] = [];
 
     const finish = (fn: () => void) => {
       if (resolved) return;
       resolved = true;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       fn();
     };
 
