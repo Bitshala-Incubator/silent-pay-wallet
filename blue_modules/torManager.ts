@@ -142,12 +142,20 @@ class TorManager {
 
   private _testSocksProxy(): Promise<boolean> {
     return new Promise(resolve => {
-      const timeout = setTimeout(() => {
+      let resolved = false;
+      let pending = Buffer.alloc(0);
+
+      const finalize = (result: boolean) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeout);
         try {
           client.destroy();
         } catch {}
-        resolve(false);
-      }, 5000);
+        resolve(result);
+      };
+
+      const timeout = setTimeout(() => finalize(false), 5000);
 
       const client = TcpSocket.createConnection({ host: DEFAULT_SOCKS_HOST, port: this._settings.socksPort }, () => {
         // Send SOCKS5 greeting: version 5, 1 method, no-auth
@@ -156,19 +164,15 @@ class TorManager {
       });
 
       client.on('data', (data: string | Buffer) => {
-        clearTimeout(timeout);
-        try {
-          client.destroy();
-        } catch {}
         const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
+        pending = pending.length ? Buffer.concat([pending, buf]) : buf;
         // Valid SOCKS5 response: version 5, no auth method selected
-        resolve(buf.length >= 2 && buf[0] === 0x05 && buf[1] === 0x00);
+        if (pending.length >= 2) {
+          finalize(pending[0] === 0x05 && pending[1] === 0x00);
+        }
       });
 
-      client.on('error', () => {
-        clearTimeout(timeout);
-        resolve(false);
-      });
+      client.on('error', () => finalize(false));
     });
   }
 
