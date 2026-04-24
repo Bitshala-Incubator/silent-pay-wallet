@@ -162,7 +162,7 @@ const TorSettings: React.FC = () => {
           </>
         )}
 
-        {orbotInstalled === false && (
+        {Platform.OS === 'android' && orbotInstalled === false && (
           <>
             <BlueSpacing20 />
             <BlueText style={styles.sectionLabel}>{loc.settings.tor_orbot}</BlueText>
@@ -213,7 +213,7 @@ const TorSettings: React.FC = () => {
 
         <BlueSpacing20 />
 
-        <BlueText style={styles.hint}>{loc.settings.tor_hint_install_running}</BlueText>
+        {Platform.OS === 'android' && <BlueText style={styles.hint}>{loc.settings.tor_hint_install_running}</BlueText>}
         {isTorEnabled && orbotInstalled === true && torStatus === 'unavailable' && (
           <BlueText style={styles.hint}>{loc.settings.tor_hint_not_running}</BlueText>
         )}

@@ -15,7 +15,7 @@ const App = () => {
   initializeRustJsiBridge();
   initializeIndexer({
     baseUrl: 'https://superparamount-kendal-halting.ngrok-free.dev/',
-    onionUrl: 'https://azzaasniov2hjxrkhpvjyse3a4jaww74n76umntatcerp4drzwotk5yd.onion',
+    onionUrl: 'http://azzaasniov2hjxrkhpvjyse3a4jaww74n76umntatcerp4drzwotk5yd.onion',
     timeout: 100000, // 100 seconds for blockchain scanning operations (increased for slower connections)
   });
 
