@@ -18,49 +18,48 @@ export class IndexerHttpClient {
   private async executeGet<T>(endpoint: string, errorContext: string): Promise<T> {
     const torManager = TorManager.getInstance();
 
-    // Try Tor/onion route first when available
-    if (torManager.settings.enabled && this.onionUrl) {
-      if (torManager.isReady) {
-        for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
-          try {
-            const response = await socks5Fetch(`${this.onionUrl}${endpoint}`, {
-              method: 'GET',
-              headers: { 'Content-Type': 'application/json' },
-              timeout: this.timeout,
-              socksHost: DEFAULT_SOCKS_HOST,
-              socksPort: torManager.socksPort,
-            });
+    if (torManager.settings.enabled && this.onionUrl && torManager.isReady) {
+      for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
+        try {
+          const response = await socks5Fetch(`${this.onionUrl}${endpoint}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            timeout: this.timeout,
+            socksHost: DEFAULT_SOCKS_HOST,
+            socksPort: torManager.socksPort,
+          });
 
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-            return await response.json();
-          } catch (torError) {
-            const message = torError instanceof Error ? torError.message : String(torError);
-            console.warn(`[IndexerHttpClient] Tor attempt ${attempt}/${RETRY_ATTEMPTS} failed: ${message}`);
+          return await response.json();
+        } catch (torError) {
+          const message = torError instanceof Error ? torError.message : String(torError);
+          console.warn(`[IndexerHttpClient] Tor attempt ${attempt}/${RETRY_ATTEMPTS} failed: ${message}`);
 
-            if (attempt < RETRY_ATTEMPTS) {
-              const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
-              await new Promise(resolve => setTimeout(resolve, delay));
-            }
+          if (attempt < RETRY_ATTEMPTS) {
+            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+            await new Promise(resolve => setTimeout(resolve, delay));
           }
         }
       }
 
-      if (torManager.isTorOnly) {
-        throw new Error(
-          `${errorContext}: Tor-only mode is enabled but Tor is unavailable. ` +
-          'Clearnet fallback is blocked. Ensure Orbot is running.',
-        );
-      }
+      torManager.markUnavailable();
+    }
 
-      console.warn('[IndexerHttpClient] Tor unavailable, falling back to clearnet');
-    } else if (torManager.isTorOnly) {
+    if (torManager.isTorOnly) {
       throw new Error(
-        `${errorContext}: Tor-only mode is enabled but no .onion URL is configured. ` +
-        'Set an onion URL or disable Tor-only mode.',
+        this.onionUrl
+          ? `${errorContext}: Tor-only mode is enabled but Tor is unavailable. ` +
+            'Clearnet fallback is blocked. Ensure Orbot is running.'
+          : `${errorContext}: Tor-only mode is enabled but no .onion URL is configured. ` +
+            'Set an onion URL or disable Tor-only mode.',
       );
+    }
+
+    if (torManager.settings.enabled && this.onionUrl) {
+      console.warn('[IndexerHttpClient] Tor unavailable, falling back to clearnet');
     }
 
     // Clearnet fallback

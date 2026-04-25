@@ -32,6 +32,7 @@ const torState = (overrides: Partial<{ enabled: boolean; isReady: boolean; isTor
   isReady: overrides.isReady ?? true,
   isTorOnly: overrides.isTorOnly ?? false,
   socksPort: overrides.socksPort ?? 9050,
+  markUnavailable: jest.fn(),
 });
 
 describe('IndexerHttpClient routing', () => {
@@ -130,5 +131,19 @@ describe('IndexerHttpClient routing', () => {
     expect(result).toEqual({ height: 900003 });
     expect(mockedSocks5Fetch).not.toHaveBeenCalled();
     expect(mockedFetchWithRetries).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks Tor unavailable after exhausting retries so subsequent calls skip the loop', async () => {
+    const state = torState();
+    torManagerGetInstance.mockReturnValue(state);
+    mockedSocks5Fetch.mockRejectedValue(new Error('SOCKS5 timeout'));
+    mockedFetchWithRetries.mockResolvedValue(okResponse({ height: 900004 }));
+
+    const client = new IndexerHttpClient(baseUrl, 30000, onionUrl);
+    const promise = client.get<{ height: number }>(endpoint, errCtx);
+    await jest.advanceTimersByTimeAsync(3000);
+    await promise;
+
+    expect(state.markUnavailable).toHaveBeenCalledTimes(1);
   });
 });

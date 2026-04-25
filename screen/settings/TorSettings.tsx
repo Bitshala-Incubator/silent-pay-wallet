@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View, Switch, TextInput, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Switch, TextInput, ActivityIndicator, Platform, TouchableOpacity, AppState } from 'react-native';
 import { BlueCard, BlueText } from '../../BlueComponents';
 import { useSettings } from '../../hooks/context/useSettings';
 import { useTheme } from '../../components/themes';
@@ -9,17 +9,16 @@ import { BlueSpacing20 } from '../../components/BlueSpacing';
 import TorManager, { type TorStatus } from '../../blue_modules/torManager';
 import loc from '../../loc';
 
-const STATUS_LABELS: Record<TorStatus, string> = {
-  disabled: loc.settings.tor_status_disabled,
-  checking: loc.settings.tor_status_checking,
-  connected: loc.settings.tor_status_connected,
-  unavailable: loc.settings.tor_status_unavailable,
-};
-
 const TorSettings: React.FC = () => {
   const { colors } = useTheme();
   const { isTorEnabled, setIsTorEnabled, isTorOnly, setIsTorOnly, torSocksPort, setTorSocksPort, torStatus, settingsInitialized } =
     useSettings();
+  const statusLabels: Record<TorStatus, string> = {
+    disabled: loc.settings.tor_status_disabled,
+    checking: loc.settings.tor_status_checking,
+    connected: loc.settings.tor_status_connected,
+    unavailable: loc.settings.tor_status_unavailable,
+  };
   const [portInput, setPortInput] = useState(String(torSocksPort));
   const [orbotInstalled, setOrbotInstalled] = useState<boolean | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -41,9 +40,16 @@ const TorSettings: React.FC = () => {
   );
 
   useEffect(() => {
-    TorManager.isOrbotInstalled()
-      .then(setOrbotInstalled)
-      .catch(() => setOrbotInstalled(null));
+    const check = () => {
+      TorManager.isOrbotInstalled()
+        .then(setOrbotInstalled)
+        .catch(() => setOrbotInstalled(null));
+    };
+    check();
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') check();
+    });
+    return () => sub.remove();
   }, []);
 
   useEffect(() => {
@@ -146,7 +152,7 @@ const TorSettings: React.FC = () => {
 
             <View style={styles.statusRow}>
               <BlueText>{loc.settings.tor_status_label}</BlueText>
-              <BlueText style={[styles.statusValue, { color: statusColors[torStatus] }]}>{STATUS_LABELS[torStatus]}</BlueText>
+              <BlueText style={[styles.statusValue, { color: statusColors[torStatus] }]}>{statusLabels[torStatus]}</BlueText>
               {torStatus === 'checking' && <ActivityIndicator size="small" style={styles.spinner} />}
             </View>
 

@@ -60,7 +60,13 @@ class TorManager {
     try {
       const stored = await AsyncStorage.getItem(TOR_SETTINGS_KEY);
       if (stored) {
-        this._settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+        const parsed = JSON.parse(stored) as Partial<TorSettings>;
+        const port = parsed.socksPort;
+        this._settings = {
+          enabled: typeof parsed.enabled === 'boolean' ? parsed.enabled : DEFAULT_SETTINGS.enabled,
+          torOnly: typeof parsed.torOnly === 'boolean' ? parsed.torOnly : DEFAULT_SETTINGS.torOnly,
+          socksPort: typeof port === 'number' && Number.isInteger(port) && port >= 1 && port <= 65535 ? port : DEFAULT_SETTINGS.socksPort,
+        };
       }
     } catch (e) {
       console.warn('[TorManager] Failed to load settings:', e);
@@ -117,6 +123,12 @@ class TorManager {
     } catch {
       this._setStatus('unavailable');
       return false;
+    }
+  }
+
+  markUnavailable(): void {
+    if (this._status === 'connected') {
+      this._setStatus('unavailable');
     }
   }
 
