@@ -133,6 +133,19 @@ describe('IndexerHttpClient routing', () => {
     expect(mockedFetchWithRetries).toHaveBeenCalledTimes(1);
   });
 
+  it('propagates HTTP status errors from onion without retry, markUnavailable, or clearnet fallback', async () => {
+    const state = torState();
+    torManagerGetInstance.mockReturnValue(state);
+    mockedSocks5Fetch.mockResolvedValue({ ok: false, status: 500, json: async () => ({}) });
+
+    const client = new IndexerHttpClient(baseUrl, 30000, onionUrl);
+    await expect(client.get(endpoint, errCtx)).rejects.toThrow(/HTTP error! status: 500/);
+
+    expect(mockedSocks5Fetch).toHaveBeenCalledTimes(1);
+    expect(state.markUnavailable).not.toHaveBeenCalled();
+    expect(mockedFetchWithRetries).not.toHaveBeenCalled();
+  });
+
   it('marks Tor unavailable after exhausting retries so subsequent calls skip the loop', async () => {
     const state = torState();
     torManagerGetInstance.mockReturnValue(state);

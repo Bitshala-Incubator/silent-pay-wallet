@@ -20,20 +20,15 @@ export class IndexerHttpClient {
 
     if (torManager.settings.enabled && this.onionUrl && torManager.isReady) {
       for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
+        let response;
         try {
-          const response = await socks5Fetch(`${this.onionUrl}${endpoint}`, {
+          response = await socks5Fetch(`${this.onionUrl}${endpoint}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             timeout: this.timeout,
             socksHost: DEFAULT_SOCKS_HOST,
             socksPort: torManager.socksPort,
           });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          return await response.json();
         } catch (torError) {
           const message = torError instanceof Error ? torError.message : String(torError);
           console.warn(`[IndexerHttpClient] Tor attempt ${attempt}/${RETRY_ATTEMPTS} failed: ${message}`);
@@ -42,7 +37,13 @@ export class IndexerHttpClient {
             const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
             await new Promise(resolve => setTimeout(resolve, delay));
           }
+          continue;
         }
+
+        if (!response.ok) {
+          throw new Error(`${errorContext}: HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
       }
 
       torManager.markUnavailable();

@@ -62,9 +62,11 @@ class TorManager {
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<TorSettings>;
         const port = parsed.socksPort;
+        const enabled = typeof parsed.enabled === 'boolean' ? parsed.enabled : DEFAULT_SETTINGS.enabled;
+        const torOnly = enabled && (typeof parsed.torOnly === 'boolean' ? parsed.torOnly : DEFAULT_SETTINGS.torOnly);
         this._settings = {
-          enabled: typeof parsed.enabled === 'boolean' ? parsed.enabled : DEFAULT_SETTINGS.enabled,
-          torOnly: typeof parsed.torOnly === 'boolean' ? parsed.torOnly : DEFAULT_SETTINGS.torOnly,
+          enabled,
+          torOnly,
           socksPort: typeof port === 'number' && Number.isInteger(port) && port >= 1 && port <= 65535 ? port : DEFAULT_SETTINGS.socksPort,
         };
       }
@@ -185,6 +187,7 @@ class TorManager {
       });
 
       client.on('error', () => finalize(false));
+      client.on('close', () => finalize(false));
     });
   }
 
