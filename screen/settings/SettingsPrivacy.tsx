@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
-import { openSettings } from 'react-native-permissions';
+import { Linking } from 'react-native';
 import A from '../../modules/analytics';
 import { Header } from '../../components/Header';
 import ListItem, { PressableWrapper } from '../../components/ListItem';
@@ -94,7 +94,7 @@ const SettingsPrivacy: React.FC = () => {
   };
 
   const openApplicationSettings = () => {
-    openSettings();
+    Linking.openSettings();
   };
 
   return (

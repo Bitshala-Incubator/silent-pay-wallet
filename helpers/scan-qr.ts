@@ -1,14 +1,14 @@
-import { Platform } from 'react-native';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { navigationRef } from '../NavigationService.ts';
+import { Camera } from 'expo-camera';
+import { navigationRef } from '../NavigationService';
 
 const isCameraAuthorizationStatusGranted = async () => {
-  const status = await check(Platform.OS === 'android' ? PERMISSIONS.ANDROID.CAMERA : PERMISSIONS.IOS.CAMERA);
-  return status === RESULTS.GRANTED;
+  const { status } = await Camera.getCameraPermissionsAsync();
+  return status === 'granted';
 };
 
-const requestCameraAuthorization = () => {
-  return request(Platform.OS === 'android' ? PERMISSIONS.ANDROID.CAMERA : PERMISSIONS.IOS.CAMERA);
+const requestCameraAuthorization = async () => {
+  const { status } = await Camera.requestCameraPermissionsAsync();
+  return status === 'granted';
 };
 
 const scanQrHelper = async (): Promise<string> => {

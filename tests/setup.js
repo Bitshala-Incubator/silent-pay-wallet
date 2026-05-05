@@ -51,11 +51,17 @@ jest.mock('react-native-secure-key-store', () => {
   return {};
 });
 
-jest.mock('@react-native-community/push-notification-ios', () => {
-  return {};
-});
-
-jest.mock('react-native-permissions', () => require('react-native-permissions/mock'));
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  getDevicePushTokenAsync: jest.fn().mockResolvedValue({ data: 'mock-push-token' }),
+  setNotificationHandler: jest.fn(),
+  addNotificationReceivedListener: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn(),
+  dismissAllNotificationsAsync: jest.fn(),
+  setBadgeCountAsync: jest.fn(),
+  getPresentedNotificationsAsync: jest.fn().mockResolvedValue([]),
+}));
 
 jest.mock('expo-device', () => {
   return {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Linking, StyleSheet, TextInput, View, Pressable, AppState } from 'react-native';
+import { StyleSheet, TextInput, View, Pressable, AppState } from 'react-native';
 import { Button as ButtonRNElements } from '@rneui/themed';
 import {
   getDefaultUri,
@@ -24,7 +24,7 @@ import ListItem, { PressableWrapper } from '../../components/ListItem';
 import { useTheme } from '../../components/themes';
 import loc from '../../loc';
 import { Divider } from '@rneui/base';
-import { openSettings } from 'react-native-permissions';
+import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SafeAreaScrollView from '../../components/SafeAreaScrollView';
 import { Spacing20, Spacing40 } from '../../components/Spacing';
@@ -75,7 +75,7 @@ const NotificationSettings: React.FC = () => {
   const onNotificationsSwitch = async (value: boolean) => {
     if (value) {
       const currentStatus = await checkNotificationPermissionStatus();
-      if (currentStatus === 'blocked') {
+      if (currentStatus === 'denied') {
         // If permissions are denied/blocked, show alert and reset the toggle
         showNotificationPermissionAlert();
         setNotificationsEnabledState(false);
@@ -191,7 +191,7 @@ const NotificationSettings: React.FC = () => {
   }, [URI]);
 
   const onSystemSettings = () => {
-    openSettings('notifications');
+    Linking.openSettings();
   };
 
   return (

@@ -154,7 +154,8 @@ const OutputModal: React.FC<TOutputModalProps> = ({
     tranText: { fontWeight: 'normal', fontSize: 13, color: colors.alternativeTextColor },
     memo: { fontSize: 13, marginTop: 3, color: colors.alternativeTextColor },
   });
-  const confirmationsFormatted = new Intl.NumberFormat(Localization.getLocales()[0].languageCode, { maximumSignificantDigits: 3 }).format(
+  const languageCode = Localization.getLocales()[0]?.languageCode ?? 'en';
+  const confirmationsFormatted = new Intl.NumberFormat(languageCode, { maximumSignificantDigits: 3 }).format(
     confirmations,
   );
 

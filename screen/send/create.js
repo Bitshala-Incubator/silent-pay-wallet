@@ -7,7 +7,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Alert, FlatList, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as FileSystem from 'expo-file-system';
-import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+
 import Share from 'react-native-share';
 import { satoshiToBTC } from '../../modules/currency';
 import { isDesktop } from '../../modules/environment';
@@ -75,29 +75,13 @@ const SendCreate = () => {
           FileSystem.deleteAsync(filePath).catch(() => {});
         });
     } else if (Platform.OS === 'android') {
-      const granted = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
-      if (granted === RESULTS.GRANTED) {
-        console.log('Storage Permission: Granted');
-        const filePath = FileSystem.documentDirectory + fileName;
-        try {
-          await FileSystem.writeAsStringAsync(filePath, tx);
-          presentAlert({ message: loc.formatString(loc.send.txSaved, { filePath }) });
-        } catch (e) {
-          console.log(e);
-          presentAlert({ message: e.message });
-        }
-      } else {
-        console.log('Storage Permission: Denied');
-        Alert.alert(loc.send.permission_storage_title, loc.send.permission_storage_denied_message, [
-          {
-            text: loc.send.open_settings,
-            onPress: () => {
-              Linking.openSettings();
-            },
-            style: 'default',
-          },
-          { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
-        ]);
+      const filePath = FileSystem.documentDirectory + fileName;
+      try {
+        await FileSystem.writeAsStringAsync(filePath, tx);
+        presentAlert({ message: loc.formatString(loc.send.txSaved, { filePath }) });
+      } catch (e) {
+        console.log(e);
+        presentAlert({ message: e.message });
       }
     }
   }, [tx]);
