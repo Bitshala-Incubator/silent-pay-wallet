@@ -1,5 +1,6 @@
 import Bugsnag from '@bugsnag/react-native';
-import { getUniqueId } from 'react-native-device-info';
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
 
 import { ShroudApp } from '../class';
 
@@ -15,7 +16,13 @@ let userHasOptedOut: boolean = false;
 (async () => {
   // Don't try to start Bugsnag again as it's already initialized in native code
   // Just configure the existing instance if tracking is allowed
-  const uniqueID = await getUniqueId();
+  let uniqueID: string | null = null;
+  if (Platform.OS === 'ios') {
+    uniqueID = await Application.getIosIdForVendorAsync();
+  } else if (Platform.OS === 'android') {
+    uniqueID = Application.getAndroidId();
+  }
+
   const doNotTrack = await shroudApp.isDoNotTrackEnabled();
 
   if (doNotTrack) {
@@ -24,7 +31,9 @@ let userHasOptedOut: boolean = false;
   }
 
   // Configure the existing Bugsnag instance instead of starting a new one
-  Bugsnag.setUser(uniqueID);
+  if (uniqueID) {
+    Bugsnag.setUser(uniqueID);
+  }
 
   // Add additional configuration if needed
   Bugsnag.addOnError(function (event) {

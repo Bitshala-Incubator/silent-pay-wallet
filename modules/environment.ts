@@ -1,7 +1,7 @@
-import { getDeviceType, isTablet as checkIsTablet } from 'react-native-device-info';
+import * as Device from 'expo-device';
 
-const isTablet: boolean = checkIsTablet();
-const isDesktop: boolean = getDeviceType() === 'Desktop';
-const isHandset: boolean = getDeviceType() === 'Handset';
+const isTablet: boolean = Device.deviceType === Device.DeviceType.TABLET;
+const isDesktop: boolean = Device.deviceType === Device.DeviceType.DESKTOP;
+const isHandset: boolean = Device.deviceType === Device.DeviceType.PHONE;
 
 export { isDesktop, isHandset, isTablet };

@@ -53,14 +53,22 @@ jest.mock('@react-native-community/push-notification-ios', () => {
 
 jest.mock('react-native-permissions', () => require('react-native-permissions/mock'));
 
-jest.mock('react-native-device-info', () => {
+jest.mock('expo-device', () => {
   return {
-    getUniqueId: jest.fn().mockReturnValue('uniqueId'),
-    getSystemName: jest.fn(),
-    getDeviceType: jest.fn().mockReturnValue(false),
-    hasGmsSync: jest.fn().mockReturnValue(true),
-    hasHmsSync: jest.fn().mockReturnValue(false),
-    isTablet: jest.fn().mockReturnValue(false),
+    DeviceType: { PHONE: 1, TABLET: 2, DESKTOP: 3, TV: 4 },
+    deviceType: 1,
+    modelName: 'mock-model',
+    osVersion: '16.0',
+  };
+});
+
+jest.mock('expo-application', () => {
+  return {
+    getIosIdForVendorAsync: jest.fn().mockResolvedValue('mock-unique-id'),
+    getAndroidId: jest.fn().mockReturnValue('mock-unique-id'),
+    applicationName: 'Shroud',
+    nativeApplicationVersion: '0.0.1',
+    nativeBuildVersion: '1',
   };
 });
 
@@ -199,7 +207,13 @@ jest.mock('react-native-fs', () => {
 
 jest.mock('@react-native-documents/picker', () => ({}));
 
-jest.mock('react-native-haptic-feedback', () => ({}));
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  selectionAsync: jest.fn(),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
+  NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
+}));
 
 const realmInstanceMock = {
   create: function () {},
@@ -239,11 +253,7 @@ jest.mock('rn-qr-generator', () => ({
   }),
 }));
 
-jest.mock('react-native-haptic-feedback', () => {
-  return {
-    trigger: jest.fn(),
-  };
-});
+
 
 jest.mock('../modules/analytics', () => {
   const ret = jest.fn();
