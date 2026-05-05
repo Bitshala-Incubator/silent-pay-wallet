@@ -11,7 +11,7 @@ import {
   ViewStyle,
   UIManager,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import WalletGradient from '../class/wallet-gradient';
 import { useSizeClass, SizeClass } from '../modules/sizeClass';
 import loc, { formatBalance, transactionTimeToReadable } from '../loc';

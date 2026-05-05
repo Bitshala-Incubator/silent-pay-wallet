@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import WalletGradient from '../class/wallet-gradient';
 import { TWallet } from '../class/wallets/types';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../loc';
