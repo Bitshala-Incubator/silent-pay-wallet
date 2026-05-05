@@ -163,53 +163,30 @@ jest.mock('react-native-default-preference', () => {
   };
 });
 
-jest.mock('react-native-fs', () => {
+jest.mock('expo-file-system', () => {
   return {
-    mkdir: jest.fn(),
-    moveFile: jest.fn(),
-    copyFile: jest.fn(),
-    pathForBundle: jest.fn(),
-    pathForGroup: jest.fn(),
-    getFSInfo: jest.fn(),
-    getAllExternalFilesDirs: jest.fn(),
-    unlink: jest.fn(),
-    exists: jest.fn(),
-    stopDownload: jest.fn(),
-    resumeDownload: jest.fn(),
-    isResumable: jest.fn(),
-    stopUpload: jest.fn(),
-    completeHandlerIOS: jest.fn(),
-    readDir: jest.fn(),
-    readDirAssets: jest.fn(),
-    existsAssets: jest.fn(),
-    readdir: jest.fn(),
-    setReadable: jest.fn(),
-    stat: jest.fn(),
-    readFile: jest.fn(),
-    read: jest.fn(),
-    readFileAssets: jest.fn(),
-    hash: jest.fn(),
-    copyFileAssets: jest.fn(),
-    copyFileAssetsIOS: jest.fn(),
-    copyAssetsVideoIOS: jest.fn(),
-    writeFile: jest.fn(),
-    appendFile: jest.fn(),
-    write: jest.fn(),
-    downloadFile: jest.fn(),
-    uploadFiles: jest.fn(),
-    touch: jest.fn(),
-    MainBundlePath: jest.fn(),
-    CachesDirectoryPath: jest.fn(),
-    DocumentDirectoryPath: jest.fn(),
-    ExternalDirectoryPath: jest.fn(),
-    ExternalStorageDirectoryPath: jest.fn(),
-    TemporaryDirectoryPath: jest.fn(),
-    LibraryDirectoryPath: jest.fn(),
-    PicturesDirectoryPath: jest.fn(),
+    documentDirectory: 'file:///mock/document/directory/',
+    cacheDirectory: 'file:///mock/cache/directory/',
+    readAsStringAsync: jest.fn(),
+    writeAsStringAsync: jest.fn(),
+    deleteAsync: jest.fn(),
+    getInfoAsync: jest.fn().mockResolvedValue({ exists: true }),
+    readDirectoryAsync: jest.fn().mockResolvedValue([]),
+    moveAsync: jest.fn(),
+    EncodingType: {
+      UTF8: 'utf8',
+      Base64: 'base64',
+    },
   };
 });
 
-jest.mock('@react-native-documents/picker', () => ({}));
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn().mockResolvedValue({ canceled: true }),
+}));
+
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: jest.fn().mockResolvedValue({ canceled: true }),
+}));
 
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),

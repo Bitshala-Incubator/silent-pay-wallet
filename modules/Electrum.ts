@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import { bech32, bech32m } from 'bech32';
 import DefaultPreference from 'react-native-default-preference';
-import RNFS from 'react-native-fs';
+import * as FileSystem from 'expo-file-system';
 import Realm from 'realm';
 import { sha256 as _sha256 } from '@noble/hashes/sha256';
 
@@ -139,7 +139,7 @@ function bitcoinjs_crypto_sha256(buffer: Uint8Array): Buffer {
 async function _getRealm() {
   if (_realm) return _realm;
 
-  const cacheFolderPath = RNFS.CachesDirectoryPath; // Path to cache folder
+  const cacheFolderPath = FileSystem.cacheDirectory; // Path to cache folder
   const password = uint8ArrayToHex(bitcoinjs_crypto_sha256(Buffer.from('fyegjitkyf[eqjnc.lf')));
   const buf = Buffer.from(password + password, 'hex');
   const encryptionKey = Int8Array.from(buf);

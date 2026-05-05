@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sha256 } from '@noble/hashes/sha256';
 import DefaultPreference from 'react-native-default-preference';
-import RNFS from 'react-native-fs';
+import * as FileSystem from 'expo-file-system';
 import Keychain from 'react-native-keychain';
 import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
 import Realm from 'realm';
@@ -224,7 +224,7 @@ export class ShroudApp {
    * Database file is deterministically derived from encryption key.
    */
   async getRealmForTransactions() {
-    const cacheFolderPath = RNFS.CachesDirectoryPath; // Path to cache folder
+    const cacheFolderPath = FileSystem.cacheDirectory; // Path to cache folder
     const password = this.hashIt(this.cachedPassword || 'fyegjitkyf[eqjnc.lf');
     const buf = Buffer.from(this.hashIt(password) + this.hashIt(password), 'hex');
     const encryptionKey = Int8Array.from(buf);
@@ -259,7 +259,7 @@ export class ShroudApp {
    * @returns {Promise<Realm>}
    */
   async openRealmKeyValue(): Promise<Realm> {
-    const cacheFolderPath = RNFS.CachesDirectoryPath; // Path to cache folder
+    const cacheFolderPath = FileSystem.cacheDirectory; // Path to cache folder
     const service = 'realm_encryption_key';
     let password;
     const credentials = await Keychain.getGenericPassword({ service });
@@ -767,28 +767,30 @@ export class ShroudApp {
   }
 
   async moveRealmFilesToCacheDirectory() {
-    const documentPath = RNFS.DocumentDirectoryPath; // Path to documentPath folder
-    const cachePath = RNFS.CachesDirectoryPath; // Path to cachePath folder
+    const documentPath = FileSystem.documentDirectory; // Path to documentPath folder
+    const cachePath = FileSystem.cacheDirectory; // Path to cachePath folder
     try {
-      if (!(await RNFS.exists(documentPath))) return; // If the documentPath directory does not exist, return (nothing to move)
-      const files = await RNFS.readDir(documentPath); // Read all files in documentPath directory
+      if (!documentPath) return;
+      const dirInfo = await FileSystem.getInfoAsync(documentPath);
+      if (!dirInfo.exists) return; // If the documentPath directory does not exist, return (nothing to move)
+      const files = await FileSystem.readDirectoryAsync(documentPath); // Read all files in documentPath directory
       if (Array.isArray(files) && files.length === 0) return; // If there are no files, return (nothing to move)
       const appRealmFiles = files.filter(
-        file => file.name.endsWith('.realm') || file.name.endsWith('.realm.lock') || file.name.includes('.realm.management'),
+        file => file.endsWith('.realm') || file.endsWith('.realm.lock') || file.includes('.realm.management'),
       );
 
       for (const file of appRealmFiles) {
-        const filePath = `${documentPath}/${file.name}`;
-        const newFilePath = `${cachePath}/${file.name}`;
-        const fileExists = await RNFS.exists(filePath); // Check if the file exists
-        const cacheFileExists = await RNFS.exists(newFilePath); // Check if the file already exists in the cache directory
+        const filePath = `${documentPath}${file}`;
+        const newFilePath = `${cachePath}${file}`;
+        const fileInfo = await FileSystem.getInfoAsync(filePath); // Check if the file exists
+        const cacheFileInfo = await FileSystem.getInfoAsync(newFilePath); // Check if the file already exists in the cache directory
 
-        if (fileExists) {
-          if (cacheFileExists) {
-            await RNFS.unlink(newFilePath); // Delete the file in the cache directory if it exists
+        if (fileInfo.exists) {
+          if (cacheFileInfo.exists) {
+            await FileSystem.deleteAsync(newFilePath); // Delete the file in the cache directory if it exists
             console.log(`Existing file removed from cache: ${newFilePath}`);
           }
-          await RNFS.moveFile(filePath, newFilePath); // Move the file
+          await FileSystem.moveAsync({ from: filePath, to: newFilePath }); // Move the file
           console.log(`Moved Realm file: ${filePath} to ${newFilePath}`);
         } else {
           console.log(`File does not exist: ${filePath}`);

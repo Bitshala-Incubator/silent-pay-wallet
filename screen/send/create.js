@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import React, { useCallback, useEffect } from 'react';
 import { Alert, FlatList, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Icon } from '@rneui/themed';
-import RNFS from 'react-native-fs';
+import * as FileSystem from 'expo-file-system';
 import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import Share from 'react-native-share';
 import { satoshiToBTC } from '../../modules/currency';
@@ -62,8 +62,8 @@ const SendCreate = () => {
   const exportTXN = useCallback(async () => {
     const fileName = `${Date.now()}.txn`;
     if (Platform.OS === 'ios') {
-      const filePath = RNFS.TemporaryDirectoryPath + `/${fileName}`;
-      await RNFS.writeFile(filePath, tx);
+      const filePath = FileSystem.cacheDirectory + fileName;
+      await FileSystem.writeAsStringAsync(filePath, tx);
       Share.open({
         url: 'file://' + filePath,
         saveToFiles: isDesktop,
@@ -72,15 +72,15 @@ const SendCreate = () => {
           console.log(error);
         })
         .finally(() => {
-          RNFS.unlink(filePath);
+          FileSystem.deleteAsync(filePath).catch(() => {});
         });
     } else if (Platform.OS === 'android') {
       const granted = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
       if (granted === RESULTS.GRANTED) {
         console.log('Storage Permission: Granted');
-        const filePath = RNFS.DownloadDirectoryPath + `/${fileName}`;
+        const filePath = FileSystem.documentDirectory + fileName;
         try {
-          await RNFS.writeFile(filePath, tx);
+          await FileSystem.writeAsStringAsync(filePath, tx);
           presentAlert({ message: loc.formatString(loc.send.txSaved, { filePath }) });
         } catch (e) {
           console.log(e);

@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
-import { pick, types, keepLocalCopy, errorCodes } from '@react-native-documents/picker';
-import RNFS from 'react-native-fs';
-import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import Share from 'react-native-share';
 import presentAlert from '../components/Alert';
 import loc from '../loc';
@@ -15,7 +15,7 @@ const _sanitizeFileName = (fileName: string) => {
 };
 
 export const isCancel = (err: any): boolean => {
-  return err.code && err.code === errorCodes.OPERATION_CANCELED;
+  return err.code === 'OPERATION_CANCELED' || err.message === 'OPERATION_CANCELED';
 };
 
 const _shareOpen = async (filePath: string, showShareDialog: boolean = false) => {
@@ -34,7 +34,9 @@ const _shareOpen = async (filePath: string, showShareDialog: boolean = false) =>
       presentAlert({ message: error.message });
     }
   } finally {
-    await RNFS.unlink(filePath);
+    try {
+      await FileSystem.deleteAsync(filePath, { idempotent: true });
+    } catch (e) {}
   }
 };
 
@@ -47,13 +49,13 @@ export const writeFileAndExport = async function (fileName: string, contents: st
   const sanitizedFileName = _sanitizeFileName(fileName);
   try {
     if (Platform.OS === 'ios') {
-      const filePath = `${RNFS.TemporaryDirectoryPath}/${sanitizedFileName}`;
-      await RNFS.writeFile(filePath, contents);
+      const filePath = `${FileSystem.cacheDirectory}${sanitizedFileName}`;
+      await FileSystem.writeAsStringAsync(filePath, contents);
       await _shareOpen(filePath, showShareDialog);
     } else if (Platform.OS === 'android') {
-      const filePath = `${RNFS.DownloadDirectoryPath}/${sanitizedFileName}`;
+      const filePath = `${FileSystem.documentDirectory}${sanitizedFileName}`;
       try {
-        await RNFS.writeFile(filePath, contents);
+        await FileSystem.writeAsStringAsync(filePath, contents);
         if (showShareDialog) {
           await _shareOpen(filePath);
         } else {
@@ -75,12 +77,17 @@ export const writeFileAndExport = async function (fileName: string, contents: st
  */
 export const openSignedTransaction = async function (): Promise<string | false> {
   try {
-    const [res] = await pick({
-      type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn', types.json] : [types.allFiles],
+    const result = await DocumentPicker.getDocumentAsync({
+      type: Platform.OS === 'ios' ? ['application/json', '*/*'] : '*/*',
+      copyToCacheDirectory: true,
     });
 
-    return await _readPsbtFileIntoBase64(res.uri);
-  } catch (err) {
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      throw { code: 'OPERATION_CANCELED' };
+    }
+
+    return await _readPsbtFileIntoBase64(result.assets[0].uri);
+  } catch (err: any) {
     if (!isCancel(err)) {
       presentAlert({ message: loc.send.details_no_signed_tx });
     }
@@ -90,7 +97,7 @@ export const openSignedTransaction = async function (): Promise<string | false> 
 };
 
 const _readPsbtFileIntoBase64 = async function (uri: string): Promise<string> {
-  const base64 = await RNFS.readFile(uri, 'base64');
+  const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
   const stringData = Buffer.from(base64, 'base64').toString(); // decode from base64
   if (stringData.startsWith('psbt')) {
     // file was binary, but outer code expects base64 psbt, so we return base64 we got from rn-fs;
@@ -106,24 +113,20 @@ const _readPsbtFileIntoBase64 = async function (uri: string): Promise<string> {
 
 export const showImagePickerAndReadImage = async (): Promise<string | undefined> => {
   try {
-    const response: ImagePickerResponse = await launchImageLibrary({
-      mediaType: 'photo',
-      maxHeight: 800,
-      maxWidth: 600,
-      selectionLimit: 1,
+    const response = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: false,
     });
 
-    if (response.didCancel) {
+    if (response.canceled) {
       return undefined;
-    } else if (response.errorCode) {
-      throw new Error(response.errorMessage);
-    } else if (response.assets) {
+    } else if (response.assets && response.assets.length > 0) {
       try {
         const uri = response.assets[0].uri;
         if (uri) {
-          const result = await RNQRGenerator.detect({ uri: decodeURI(uri.toString()) });
-          if (result?.values.length > 0) {
-            return result?.values[0];
+          const result = await RNQRGenerator.detect({ uri: decodeURI(uri) });
+          if (result?.values && result.values.length > 0) {
+            return result.values[0];
           }
         }
         throw new Error(loc.send.qr_error_no_qrcode);
@@ -142,42 +145,30 @@ export const showImagePickerAndReadImage = async (): Promise<string | undefined>
 
 export const showFilePickerAndReadFile = async function (): Promise<{ data: string | false; uri: string | false }> {
   try {
-    const [pickedFile] = await pick({
-      type:
-        Platform.OS === 'ios'
-          ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn', 'io.bluewallet.backup', types.plainText, types.json, types.images]
-          : [types.allFiles],
+    const result = await DocumentPicker.getDocumentAsync({
+      type: '*/*',
+      copyToCacheDirectory: true,
     });
 
-    const [localCopy] = await keepLocalCopy({
-      files: [
-        {
-          uri: pickedFile.uri,
-          fileName: pickedFile.name ?? 'unnamed',
-        },
-      ],
-      destination: 'cachesDirectory',
-    });
-
-    if (localCopy.status !== 'success') {
-      // to make ts happy, should not need this check here
-      presentAlert({ message: 'Picking and caching a file failed: ' + localCopy.copyError });
-      return { data: false, uri: false };
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      throw { code: 'OPERATION_CANCELED' };
     }
 
-    const fileCopyUri = decodeURI(localCopy.localUri);
+    const pickedFile = result.assets[0];
+    const fileCopyUri = pickedFile.uri;
+    const lowerName = (pickedFile.name || fileCopyUri).toLowerCase();
 
-    if (localCopy.localUri.toLowerCase().endsWith('.psbt')) {
+    if (lowerName.endsWith('.psbt')) {
       // this is either binary file from ElectrumDesktop OR string file with base64 string in there
       const file = await _readPsbtFileIntoBase64(fileCopyUri);
       return { data: file, uri: fileCopyUri };
     }
 
-    if (localCopy.localUri.endsWith('.png') || localCopy.localUri.endsWith('.jpg') || localCopy.localUri.endsWith('.jpeg')) {
+    if (lowerName.endsWith('.png') || lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) {
       return await handleImageFile(fileCopyUri);
     }
 
-    const file = await RNFS.readFile(fileCopyUri);
+    const file = await FileSystem.readAsStringAsync(fileCopyUri, { encoding: FileSystem.EncodingType.UTF8 });
     return { data: file, uri: fileCopyUri };
   } catch (err: any) {
     if (!isCancel(err)) {
@@ -189,8 +180,8 @@ export const showFilePickerAndReadFile = async function (): Promise<{ data: stri
 
 const handleImageFile = async (fileCopyUri: string): Promise<{ data: string | false; uri: string | false }> => {
   try {
-    const exists = await RNFS.exists(fileCopyUri);
-    if (!exists) {
+    const info = await FileSystem.getInfoAsync(fileCopyUri);
+    if (!info.exists) {
       presentAlert({ message: 'File does not exist' });
       return { data: false, uri: false };
     }
@@ -218,7 +209,7 @@ export const readFileOutsideSandbox = (filePath: string) => {
   if (Platform.OS === 'ios') {
     return readFile(filePath);
   } else if (Platform.OS === 'android') {
-    return RNFS.readFile(filePath);
+    return FileSystem.readAsStringAsync(filePath, { encoding: FileSystem.EncodingType.UTF8 });
   } else {
     presentAlert({ message: 'Not implemented for this platform' });
     throw new Error('Not implemented for this platform');
@@ -227,16 +218,22 @@ export const readFileOutsideSandbox = (filePath: string) => {
 
 export const openSignedTransactionRaw: () => Promise<string> = async () => {
   try {
-    const [res] = await pick({
-      type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn', types.json] : [types.allFiles],
+    const result = await DocumentPicker.getDocumentAsync({
+      type: '*/*',
+      copyToCacheDirectory: true,
     });
-    const file = await RNFS.readFile(res.uri);
+
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      throw { code: 'OPERATION_CANCELED' };
+    }
+
+    const file = await FileSystem.readAsStringAsync(result.assets[0].uri, { encoding: FileSystem.EncodingType.UTF8 });
     if (file) {
       return file;
     } else {
       throw new Error('Could not read file');
     }
-  } catch (err) {
+  } catch (err: any) {
     if (!isCancel(err)) {
       presentAlert({ message: loc.send.details_no_signed_tx });
     }
@@ -246,9 +243,14 @@ export const openSignedTransactionRaw: () => Promise<string> = async () => {
 };
 
 export const pickTransaction = async () => {
-  const [res] = await pick({
-    type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn', types.plainText, types.json] : [types.allFiles],
+  const result = await DocumentPicker.getDocumentAsync({
+    type: '*/*',
+    copyToCacheDirectory: true,
   });
 
-  return res;
+  if (result.canceled || !result.assets || result.assets.length === 0) {
+    return null;
+  }
+  
+  return result.assets[0];
 };
