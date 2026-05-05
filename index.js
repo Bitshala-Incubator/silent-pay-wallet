@@ -1,3 +1,4 @@
+import 'expo-dev-client';
 import './gesture-handler';
 import 'react-native-get-random-values';
 import './shim.js';

@@ -1,4 +1,4 @@
 module.exports = {
-  presets: ['module:@react-native/babel-preset'],
+  presets: ['babel-preset-expo'],
   plugins: ['react-native-reanimated/plugin'], // required by react-native-reanimated v2 https://docs.swmansion.com/react-native-reanimated/docs/installation/
 };
