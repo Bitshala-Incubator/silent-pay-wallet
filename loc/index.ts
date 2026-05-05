@@ -5,7 +5,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Localization, { LocalizedStrings } from 'react-localization';
 import { I18nManager } from 'react-native';
-import * as RNLocalize from 'react-native-localize';
+import * as ExpoLocalization from 'expo-localization';
 
 import { satoshiToLocalCurrency } from '../modules/currency';
 import { BitcoinUnit } from '../models/bitcoinUnits';
@@ -193,7 +193,7 @@ const init = async () => {
     }
     await setDateTimeLocale();
   } else {
-    const locales = RNLocalize.getLocales();
+    const locales = ExpoLocalization.getLocales();
     if (Object.values(AvailableLanguages).some(language => language.value === locales[0].languageCode)) {
       await saveLanguage(locales[0].languageCode);
       await loc.setLanguage(locales[0].languageCode);

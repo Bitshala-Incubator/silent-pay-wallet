@@ -15,7 +15,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import * as RNLocalize from 'react-native-localize';
+import * as Localization from 'expo-localization';
 import debounce from '../../modules/debounce';
 import { TWallet, Utxo } from '../../class/wallets/types';
 import BottomModal, { BottomModalHandle } from '../../components/BottomModal';
@@ -154,7 +154,7 @@ const OutputModal: React.FC<TOutputModalProps> = ({
     tranText: { fontWeight: 'normal', fontSize: 13, color: colors.alternativeTextColor },
     memo: { fontSize: 13, marginTop: 3, color: colors.alternativeTextColor },
   });
-  const confirmationsFormatted = new Intl.NumberFormat(RNLocalize.getLocales()[0].languageCode, { maximumSignificantDigits: 3 }).format(
+  const confirmationsFormatted = new Intl.NumberFormat(Localization.getLocales()[0].languageCode, { maximumSignificantDigits: 3 }).format(
     confirmations,
   );
 

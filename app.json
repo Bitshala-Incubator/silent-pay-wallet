@@ -35,7 +35,8 @@
       ]
     },
     "plugins": [
-      "expo-dev-client"
+      "expo-dev-client",
+      "expo-localization"
     ],
     "extra": {
       "eas": {
