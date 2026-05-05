@@ -1,6 +1,6 @@
 /* global jest */
 
-import mockClipboard from '@react-native-clipboard/clipboard/jest/clipboard-mock.js';
+
 
 const consoleWarnOrig = console.warn;
 console.warn = (...args) => {
@@ -33,7 +33,11 @@ global.net = require('net'); // needed by Electrum client. For RN it is proviced
 global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
 global.fetch = require('node-fetch');
 
-jest.mock('@react-native-clipboard/clipboard', () => mockClipboard);
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: jest.fn(),
+  getStringAsync: jest.fn().mockResolvedValue(''),
+  hasStringAsync: jest.fn().mockResolvedValue(false),
+}));
 
 jest.mock('react-native-watch-connectivity', () => {
   return {

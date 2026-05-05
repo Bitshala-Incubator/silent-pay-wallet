@@ -1,4 +1,4 @@
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import React, { forwardRef, useEffect, useState } from 'react';
 import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -31,7 +31,7 @@ const CopyTextToClipboard = forwardRef<React.ElementRef<typeof TouchableOpacity>
 
   const copyToClipboard = () => {
     setHasTappedText(true);
-    Clipboard.setString(text);
+    Clipboard.setStringAsync(text);
     triggerHapticFeedback(HapticFeedbackTypes.Selection);
     setAddress(loc.wallets.xpub_copiedToClipboard); // Adjust according to your localization logic
     setTimeout(() => {

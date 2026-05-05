@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 
 const STORAGE_KEY: string = 'ClipboardReadAllowed';
 
@@ -31,8 +31,8 @@ export const getClipboardContent = async (): Promise<string | undefined> => {
     const isAllowed = await isReadClipboardAllowed();
     if (!isAllowed) return undefined;
 
-    const hasString = await Clipboard.hasString();
-    return hasString ? await Clipboard.getString() : undefined;
+    const hasString = await Clipboard.hasStringAsync();
+    return hasString ? await Clipboard.getStringAsync() : undefined;
   } catch (error) {
     console.error('Error accessing clipboard:', error);
     return undefined;

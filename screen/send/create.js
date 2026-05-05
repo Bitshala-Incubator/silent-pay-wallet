@@ -1,4 +1,4 @@
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import BigNumber from 'bignumber.js';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -154,7 +154,7 @@ const SendCreate = () => {
       <ShroudText style={[styles.cardText, styleHooks.cardText]}>{loc.send.create_this_is_hex}</ShroudText>
       <TextInput testID="TxhexInput" style={styles.cardTx} height={72} multiline editable={false} value={tx} />
 
-      <TouchableOpacity accessibilityRole="button" style={styles.actionTouch} onPress={() => Clipboard.setString(tx)}>
+      <TouchableOpacity accessibilityRole="button" style={styles.actionTouch} onPress={() => Clipboard.setStringAsync(tx)}>
         <Text style={styles.actionText}>{loc.send.create_copy}</Text>
       </TouchableOpacity>
       <TouchableOpacity

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { RouteProp, useFocusEffect, usePreventRemove, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import assert from 'assert';
@@ -161,7 +161,7 @@ const TransactionDetails = () => {
   };
 
   const handleCopyPress = (stringToCopy: string) => {
-    Clipboard.setString(stringToCopy !== actionKeys.CopyToClipboard ? stringToCopy : `${selectedBlockExplorer.url}/tx/${tx?.hash}`);
+    Clipboard.setStringAsync(stringToCopy !== actionKeys.CopyToClipboard ? stringToCopy : `${selectedBlockExplorer.url}/tx/${tx?.hash}`);
   };
 
   if (isLoading || !tx) {

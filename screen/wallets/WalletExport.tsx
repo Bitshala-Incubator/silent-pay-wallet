@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Icon } from '@rneui/themed';
 import { LayoutChangeEvent, ScrollView, StyleSheet, Pressable, View } from 'react-native';
@@ -114,7 +114,7 @@ const WalletExport: React.FC = () => {
   }, []);
 
   const handleCopy = useCallback(() => {
-    Clipboard.setString(wallet.getSecret());
+    Clipboard.setStringAsync(wallet.getSecret());
     triggerHapticFeedback(HapticFeedbackTypes.Selection);
   }, [wallet]);
 

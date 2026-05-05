@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { StyleSheet, Text, View } from 'react-native';
 import { ListItem } from '@rneui/themed';
 import Share from 'react-native-share';
@@ -106,7 +106,7 @@ const AddressItem = ({
   const balance = formatBalance(item.balance, balanceUnit, true);
 
   const handleCopyPress = useCallback(() => {
-    Clipboard.setString(item.address);
+    Clipboard.setStringAsync(item.address);
   }, [item.address]);
 
   const handleSharePress = useCallback(() => {
@@ -127,7 +127,7 @@ const AddressItem = ({
         return;
       }
       triggerHapticFeedback(HapticFeedbackTypes.Selection);
-      Clipboard.setString(wif);
+      Clipboard.setStringAsync(wif);
     } catch (error: any) {
       presentAlert({ message: error.message });
     }

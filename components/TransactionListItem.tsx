@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { Linking, View, ViewStyle, StyleSheet, Text } from 'react-native';
 import { Transaction } from '../class/wallets/types';
 import loc, { formatBalanceWithoutSuffix, transactionTimeToReadable } from '../loc';
@@ -182,9 +182,9 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
       }
     }, [item, navigate, walletID]);
 
-    const handleOnCopyAmountTap = useCallback(() => Clipboard.setString(rowTitle.replace(/[\s\\-]/g, '')), [rowTitle]);
-    const handleOnCopyTransactionID = useCallback(() => Clipboard.setString(item.hash), [item.hash]);
-    const handleOnCopyNote = useCallback(() => Clipboard.setString(subtitle ?? ''), [subtitle]);
+    const handleOnCopyAmountTap = useCallback(() => Clipboard.setStringAsync(rowTitle.replace(/[\s\\-]/g, '')), [rowTitle]);
+    const handleOnCopyTransactionID = useCallback(() => Clipboard.setStringAsync(item.hash), [item.hash]);
+    const handleOnCopyNote = useCallback(() => Clipboard.setStringAsync(subtitle ?? ''), [subtitle]);
     const handleOnViewOnBlockExplorer = useCallback(() => {
       const url = `${selectedBlockExplorer.url}/tx/${item.hash}`;
       Linking.canOpenURL(url).then(supported => {
@@ -194,7 +194,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
       });
     }, [item.hash, selectedBlockExplorer]);
     const handleCopyOpenInBlockExplorerPress = useCallback(() => {
-      Clipboard.setString(`${selectedBlockExplorer.url}/tx/${item.hash}`);
+      Clipboard.setStringAsync(`${selectedBlockExplorer.url}/tx/${item.hash}`);
     }, [item.hash, selectedBlockExplorer]);
 
     const onToolTipPress = useCallback(

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { DevSettings, Alert, Platform, AlertButton } from 'react-native';
 import { useStorage } from '../hooks/context/useStorage';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { TWallet } from '../class/wallets/types';
 import { HDSilentPaymentsWallet } from '../class/wallets/hd-bip352-wallet';
 
@@ -88,7 +88,7 @@ const DevMenu: React.FC = () => {
           return;
         }
 
-        Clipboard.setString(wallet.getSecret());
+        Clipboard.setStringAsync(wallet.getSecret());
         Alert.alert('New Wallet created!', `Wallet secret copied to clipboard.\nLabel: ${label}`);
       });
 
@@ -99,7 +99,7 @@ const DevMenu: React.FC = () => {
         }
 
         showAlertWithWalletOptions(wallets, 'Copy Wallet Secret', 'Select the wallet to copy the secret', wallet => {
-          Clipboard.setString(wallet.getSecret());
+          Clipboard.setStringAsync(wallet.getSecret());
           Alert.alert('Wallet Secret copied to clipboard!');
         });
       });
@@ -111,7 +111,7 @@ const DevMenu: React.FC = () => {
         }
 
         showAlertWithWalletOptions(wallets, 'Copy Wallet ID', 'Select the wallet to copy the ID', wallet => {
-          Clipboard.setString(wallet.getID());
+          Clipboard.setStringAsync(wallet.getID());
           Alert.alert('Wallet ID copied to clipboard!');
         });
       });
@@ -129,7 +129,7 @@ const DevMenu: React.FC = () => {
           wallet => {
             const xpub = wallet.getXpub();
             if (xpub) {
-              Clipboard.setString(xpub);
+              Clipboard.setStringAsync(xpub);
               Alert.alert('Wallet Xpub copied to clipboard!');
             } else {
               Alert.alert('This wallet does not have an Xpub.');

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { ActivityIndicator, Keyboard, Platform, StyleSheet, TouchableWithoutFeedback, View, TouchableOpacity, Image } from 'react-native';
 import { ShroudFormLabel, ShroudFormMultiInput } from '../../ShroudComponents';
 import Button from '../../components/Button';
@@ -108,8 +108,8 @@ const ImportWallet = () => {
       }
 
       try {
-        if (await Clipboard.hasString()) {
-          Clipboard.setString('');
+        if (await Clipboard.hasStringAsync()) {
+          Clipboard.setStringAsync('');
         }
       } catch (error) {
         console.error('Failed to clear clipboard:', error);

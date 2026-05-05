@@ -1,4 +1,4 @@
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import React, { useCallback, useRef } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';

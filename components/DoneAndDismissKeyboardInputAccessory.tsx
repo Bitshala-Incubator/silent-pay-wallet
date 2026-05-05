@@ -3,7 +3,7 @@ import { InputAccessoryView, Keyboard, Platform, StyleSheet, View } from 'react-
 import { ShroudButtonLink } from '../ShroudComponents';
 import loc from '../loc';
 import { useTheme } from './themes';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 
 interface DoneAndDismissKeyboardInputAccessoryProps {
   onPasteTapped: (clipboard: string) => void;
@@ -20,7 +20,7 @@ export const DoneAndDismissKeyboardInputAccessory: React.FC<DoneAndDismissKeyboa
   });
 
   const onPasteTapped = async () => {
-    const clipboard = await Clipboard.getString();
+    const clipboard = await Clipboard.getStringAsync();
     props.onPasteTapped(clipboard);
   };
 

@@ -1,4 +1,4 @@
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { StackActions, useIsFocused, useRoute } from '@react-navigation/native';
 import * as bitcoin from 'bitcoinjs-lib';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -166,7 +166,7 @@ const PsbtWithHardwareWallet = () => {
   };
 
   const copyHexToClipboard = () => {
-    Clipboard.setString(txHex);
+    Clipboard.setStringAsync(txHex);
   };
 
   const _renderBroadcastHex = () => {

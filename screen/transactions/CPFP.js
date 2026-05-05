@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, Linking, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import PropTypes from 'prop-types';
 import { Text } from '@rneui/themed';
 import * as Electrum from '../../modules/Electrum';
@@ -175,7 +175,7 @@ export default class CPFP extends Component {
           <ShroudText style={styles.hex}>{loc.send.create_this_is_hex}</ShroudText>
           <TextInput style={styles.hexInput} height={112} multiline editable value={this.state.txhex} />
 
-          <TouchableOpacity accessibilityRole="button" style={styles.action} onPress={() => Clipboard.setString(this.state.txhex)}>
+          <TouchableOpacity accessibilityRole="button" style={styles.action} onPress={() => Clipboard.setStringAsync(this.state.txhex)}>
             <Text style={styles.actionText}>{loc.send.create_copy}</Text>
           </TouchableOpacity>
           <TouchableOpacity

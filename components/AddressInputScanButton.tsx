@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Image, Keyboard, Platform, StyleSheet, Text } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import ToolTipMenu from './TooltipMenu';
 import loc from '../loc';
 import { showFilePickerAndReadFile, showImagePickerAndReadImage } from '../modules/fs';
@@ -92,7 +92,7 @@ export const AddressInputScanButton = ({
                 presentAlert({ message: (error as Error).message });
               }
             } else {
-              const clipboardText = await Clipboard.getString();
+              const clipboardText = await Clipboard.getStringAsync();
               onChangeText(clipboardText);
             }
           } catch (error) {
