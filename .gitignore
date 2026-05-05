@@ -99,3 +99,9 @@ android/app/src/main/jniLibs
 
 # rust
 rust_jsi_bridge/target/
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+eas-build-on-simulator.log
