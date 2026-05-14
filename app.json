@@ -37,23 +37,7 @@
     "plugins": [
       "expo-dev-client",
       "expo-localization",
-      "expo-font",
-      [
-        "expo-notifications",
-        {
-          "icon": "./img/icon.png",
-          "color": "#000000",
-          "sounds": []
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Shroud Wallet uses the camera to scan QR codes"
-        }
-      ],
-      "expo-image-picker",
-      "expo-document-picker"
+      "expo-font"
     ],
     "extra": {
       "eas": {
