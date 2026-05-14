@@ -13,6 +13,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "org.bitshala.shroud",
+      "deploymentTarget": "16.0",
       "infoPlist": {
         "NSCameraUsageDescription": "Shroud Wallet uses the camera to scan QR codes",
         "NSFaceIDUsageDescription": "Shroud Wallet uses Face ID to unlock your wallet",
@@ -36,7 +37,23 @@
     "plugins": [
       "expo-dev-client",
       "expo-localization",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./img/icon.png",
+          "color": "#000000",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Shroud Wallet uses the camera to scan QR codes"
+        }
+      ],
+      "expo-image-picker",
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {
