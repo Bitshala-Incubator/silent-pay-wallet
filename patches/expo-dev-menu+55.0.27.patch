@@ -1,0 +1,20 @@
+diff --git a/node_modules/expo-dev-menu/ios/DevMenuPackagerConnectionHandler.swift b/node_modules/expo-dev-menu/ios/DevMenuPackagerConnectionHandler.swift
+index aaeb550..345ddee 100644
+--- a/node_modules/expo-dev-menu/ios/DevMenuPackagerConnectionHandler.swift
++++ b/node_modules/expo-dev-menu/ios/DevMenuPackagerConnectionHandler.swift
+@@ -17,6 +17,7 @@ class DevMenuPackagerConnectionHandler {
+ #if DEBUG
+     self.swizzleRCTDevMenuShow()
+ 
++/*
+     RCTPackagerConnection
+       .shared()
+       .addNotificationHandler(
+@@ -32,6 +33,7 @@ class DevMenuPackagerConnectionHandler {
+         queue: DispatchQueue.main,
+         forMethod: "devMenu"
+       )
++*/
+ #endif
+   }
+ 
