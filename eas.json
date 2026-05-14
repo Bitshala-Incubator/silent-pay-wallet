@@ -12,7 +12,7 @@
       },
       "ios": {
         "simulator": true,
-        "scheme": "BlueWallet"
+        "scheme": "Shroud"
       }
     },
     "preview": {
