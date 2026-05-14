@@ -1,9 +1,9 @@
 //
 //  XMLParserDelegate.swift
-//  BlueWallet
+//  Shroud
 //
 //  Created by Marcos Rodriguez on 11/13/23.
-//  Copyright © 2023 BlueWallet. All rights reserved.
+//  Copyright © 2026 Shroud contributors. All rights reserved.
 //
 
 import Foundation

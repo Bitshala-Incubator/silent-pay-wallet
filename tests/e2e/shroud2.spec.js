@@ -111,7 +111,7 @@ describe('Shroud UI Tests - import BIP84 wallet', () => {
     await element(by.id('changeAmountUnitButton')).tap(); // switched to SATS
     await element(by.id('BlueAddressInputScanQrButton')).tap();
 
-    await scanText('bitcoin:bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.00015&pj=https://btc.donate.kukks.org/BTC/pj');
+    await scanText('bitcoin:bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.00015');
 
     if (process.env.TRAVIS) await sleep(5000);
     try {
@@ -119,7 +119,6 @@ describe('Shroud UI Tests - import BIP84 wallet', () => {
     } catch (_) {}
     // created. verifying:
     await waitForId('TransactionValue');
-    await waitForId('PayjoinSwitch');
     await element(by.id('TransactionDetailsButton')).tap();
     txhex = await extractTextFromElementById('TxhexInput');
     transaction = bitcoin.Transaction.fromHex(txhex);
@@ -143,7 +142,6 @@ describe('Shroud UI Tests - import BIP84 wallet', () => {
     } catch (_) {}
     // created. verifying:
     await waitForId('TransactionValue');
-    // dont verify payjoin since we scanned different address that didnt have `&pj=xxxxxx`
     await element(by.id('TransactionDetailsButton')).tap();
     txhex = await extractTextFromElementById('TxhexInput');
     transaction = bitcoin.Transaction.fromHex(txhex);

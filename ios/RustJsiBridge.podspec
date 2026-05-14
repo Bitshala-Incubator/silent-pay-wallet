@@ -16,11 +16,9 @@ Pod::Spec.new do |s|
   s.source_files = "RustJsiBridge/**/*.{h,m,mm,cpp}"
   s.public_header_files = "RustJsiBridge/**/*.h"
   
-  # Link Rust static libraries
-  s.vendored_frameworks = "rust_jsi_bridge/ios/RustJsiBridge.xcframework"
-  # OR if using fat binaries:
-  # s.vendored_libraries = "rust_jsi_bridge/ios/librust_jsi_bridge_device.a",
-  #                        "rust_jsi_bridge/ios/librust_jsi_bridge_sim.a"
+  # Link Rust static libraries. Built by `npm run rust:build`, which writes
+  # the xcframework here (alongside this podspec). See README iOS section.
+  s.vendored_frameworks = "RustJsiBridge.xcframework"
   
   s.dependency "React-Core"
   

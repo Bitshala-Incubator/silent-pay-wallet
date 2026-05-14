@@ -78,7 +78,6 @@ const SendDetails = () => {
   const frozenBalance = route.params?.frozenBalance ?? 0;
   const transactionMemo = route.params?.transactionMemo;
   const utxos = route.params?.utxos;
-  const payjoinUrl = route.params?.payjoinUrl;
   const isTransactionReplaceable = route.params?.isTransactionReplaceable;
   const routeParams = route.params;
   const scrollView = useRef<FlatList<any>>(null);
@@ -149,7 +148,7 @@ const SendDetails = () => {
     const currentAddress = addresses[scrollIndex.current];
     if (routeParams.uri) {
       try {
-        const { address, amount, memo, payjoinUrl: pjUrl } = DeeplinkSchemaMatch.decodeBitcoinUri(routeParams.uri);
+        const { address, amount, memo } = DeeplinkSchemaMatch.decodeBitcoinUri(routeParams.uri);
 
         setAddresses(addrs => {
           addrs[scrollIndex.current].unit = BitcoinUnit.BTC;
@@ -173,7 +172,7 @@ const SendDetails = () => {
         if (memo?.trim().length > 0) {
           setParams({ transactionMemo: memo });
         }
-        setParams({ payjoinUrl: pjUrl, amountUnit: BitcoinUnit.BTC });
+        setParams({ amountUnit: BitcoinUnit.BTC });
       } catch (error) {
         console.log(error);
         triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
@@ -449,7 +448,7 @@ const SendDetails = () => {
           addrs[scrollIndex.current].unit = BitcoinUnit.BTC;
           return [...addrs];
         });
-        setParams({ transactionMemo: options.label || '', amountUnit: BitcoinUnit.BTC, payjoinUrl: options.pj || '' }); // there used to be `options.message` here as well. bug?
+        setParams({ transactionMemo: options.label || '', amountUnit: BitcoinUnit.BTC }); // there used to be `options.message` here as well. bug?
         // RN Bug: contentOffset gets reset to 0 when state changes. Remove code once this bug is resolved.
         setTimeout(() => scrollView.current?.scrollToIndex({ index: currentIndex, animated: false }), 50);
       }
@@ -593,8 +592,6 @@ const SendDetails = () => {
       tx: tx.toHex(),
       recipients,
       satoshiPerByte: requestedSatPerByte,
-      payjoinUrl,
-      psbt,
     });
     setIsLoading(false);
   };
@@ -1007,7 +1004,7 @@ const SendDetails = () => {
         <View style={styles.addressInputContainer}>
           <AddressInput
             onChangeText={text => {
-              const { address, amount, memo, payjoinUrl: pjUrl } = DeeplinkSchemaMatch.decodeBitcoinUri(text.trim());
+              const { address, amount, memo } = DeeplinkSchemaMatch.decodeBitcoinUri(text.trim());
               setAddresses(addrs => {
                 item.address = address || text.trim();
                 item.amount = amount || item.amount;
@@ -1018,7 +1015,6 @@ const SendDetails = () => {
                 setParams({ transactionMemo: memo });
               }
               setIsLoading(false);
-              setParams({ payjoinUrl: pjUrl });
             }}
             address={item.address}
             isLoading={isLoading}

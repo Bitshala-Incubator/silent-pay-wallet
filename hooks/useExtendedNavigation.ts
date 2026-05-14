@@ -141,33 +141,33 @@ export const useExtendedNavigation = <T extends NavigationProp<ParamListBase>>()
   );
 
   const navigateToWalletsList = useCallback(() => {
-  if (navigationRef.isReady()) {
-    navigationRef.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'DrawerRoot',
-            state: {
-              routes: [
-                {
-                  name: 'DetailViewStackScreensStack',
-                  state: {
-                    routes: [
-                      {
-                        name: 'WalletsList',
-                      },
-                    ],
+    if (navigationRef.isReady()) {
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'DrawerRoot',
+              state: {
+                routes: [
+                  {
+                    name: 'DetailViewStackScreensStack',
+                    state: {
+                      routes: [
+                        {
+                          name: 'WalletsList',
+                        },
+                      ],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        ],
-      })
-    );
-  }
-}, []);
+          ],
+        }),
+      );
+    }
+  }, []);
 
   return useMemo(
     () => ({

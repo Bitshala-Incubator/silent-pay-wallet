@@ -75,7 +75,7 @@ jobs:
         with:
           xcode-version: latest
 
-      - name: Install Simulator Runtimes (iOS & watchOS)
+      - name: Install Simulator Runtimes (iOS)
         run: |
           echo "Available simulator runtimes (before):"
           xcrun simctl list runtimes
@@ -89,14 +89,6 @@ jobs:
             xcodebuild -downloadPlatform iOS
           else
             echo "iOS 17 or newer simulator runtime already present."
-          fi
-
-          # Ensure a watchOS 11+ runtime exists
-          if ! xcrun simctl list runtimes | grep -Eq "watchOS (1[1-9]|[2-9][0-9])"; then
-            echo "Installing watchOS simulator runtime (11 or newer)..."
-            xcodebuild -downloadPlatform watchOS
-          else
-            echo "watchOS 11 or newer simulator runtime already present."
           fi
 
           echo "Available simulator runtimes (after):"
@@ -133,7 +125,7 @@ jobs:
       - name: Determine Marketing Version
         id: determine_marketing_version
         run: |
-          MARKETING_VERSION=$(grep MARKETING_VERSION BlueWallet.xcodeproj/project.pbxproj | awk -F '= ' '{print $2}' | tr -d ' ;' | head -1)
+          MARKETING_VERSION=$(grep MARKETING_VERSION Shroud.xcodeproj/project.pbxproj | awk -F '= ' '{print $2}' | tr -d ' ;' | head -1)
           echo "PROJECT_VERSION=$MARKETING_VERSION" >> $GITHUB_ENV
           echo "project_version=$MARKETING_VERSION" >> $GITHUB_OUTPUT
         working-directory: ios

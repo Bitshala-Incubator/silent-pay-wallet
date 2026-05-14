@@ -75,7 +75,7 @@ class DeeplinkSchemaMatch {
   }
 
   /**
-   * Extracts the server from a deeplink like `shroud:setelectrumserver?server=electrum1.bluewallet.io%3A443%3As`.
+   * Extracts the server from a deeplink like `shroud:setelectrumserver?server=electrum.example.com%3A443%3As`.
    * Returns false if the URL is not a valid setelectrumserver action.
    */
   static getServerFromSetElectrumServerAction(url: string): string | false {
@@ -135,7 +135,6 @@ class DeeplinkSchemaMatch {
     let amount;
     let address = uri || '';
     let memo = '';
-    let payjoinUrl = '';
     try {
       const parsedBitcoinUri = DeeplinkSchemaMatch.bip21decode(uri);
       address = parsedBitcoinUri.address ? parsedBitcoinUri.address.toString() : address;
@@ -146,12 +145,9 @@ class DeeplinkSchemaMatch {
         if (parsedBitcoinUri.options.label) {
           memo = parsedBitcoinUri.options.label;
         }
-        if (parsedBitcoinUri.options.pj) {
-          payjoinUrl = parsedBitcoinUri.options.pj;
-        }
       }
     } catch (_) {}
-    return { address, amount, memo, payjoinUrl };
+    return { address, amount, memo };
   }
 }
 

@@ -1,13 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
-// @ts-ignore: no declaration file yet
-import { Camera, CameraApi, CameraType, Orientation } from 'react-native-camera-kit';
+import { Camera, CameraApi, CameraType, Orientation } from 'react-native-camera-kit-no-google';
+import { OnOrientationChangeData, OnReadCodeData } from 'react-native-camera-kit-no-google/dist/CameraProps';
+
+import { isDesktop } from '../modules/environment';
+import { triggerSelectionHapticFeedback } from '../modules/hapticFeedback';
 import loc from '../loc';
 import { Icon } from '@rneui/base';
-import { triggerSelectionHapticFeedback } from '../modules/hapticFeedback';
-import { isDesktop } from '../modules/environment';
-// @ts-ignore: no declaration file yet
-import { OnOrientationChangeData, OnReadCodeData } from 'react-native-camera-kit/dist/CameraProps';
 
 interface CameraScreenProps {
   onCancelButtonPress: () => void;

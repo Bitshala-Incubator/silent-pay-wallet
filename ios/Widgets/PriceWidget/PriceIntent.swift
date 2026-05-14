@@ -1,6 +1,6 @@
 //
 //  PriceIntent.swift
-//  BlueWallet
+//  Shroud
 //
 
 import AppIntents

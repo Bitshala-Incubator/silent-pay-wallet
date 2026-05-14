@@ -1268,8 +1268,6 @@ PODS:
     - ReactCommon/turbomodule/core
   - react-native-biometrics (3.0.1):
     - React-Core
-  - react-native-blue-crypto (1.0.0):
-    - React
   - react-native-bw-file-access (1.0.0):
     - React-Core
   - react-native-capture-protection (2.0.7):
@@ -1635,7 +1633,7 @@ PODS:
     - React-logger (= 0.78.2)
     - React-perflogger (= 0.78.2)
     - React-utils (= 0.78.2)
-  - ReactNativeCameraKit (15.0.1):
+  - ReactNativeCameraKit (17.0.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1691,8 +1689,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNHandoff (0.0.3):
-    - React
   - RNKeychain (9.1.0):
     - DoubleConversion
     - glog
@@ -1718,13 +1714,8 @@ PODS:
     - React-Core
   - RNPermissions (5.4.2):
     - React-Core
-  - RNQrGenerator (1.4.3):
-    - React
-    - ZXingObjC
   - RNQuickAction (0.3.13):
     - React
-  - RNRate (1.2.12):
-    - React-Core
   - RNReactNativeHapticFeedback (2.3.3):
     - DoubleConversion
     - glog
@@ -1931,15 +1922,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNWatch (1.1.0):
-    - React
   - RustJsiBridge (0.0.1):
     - React-Core
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
-  - ZXingObjC (3.6.9):
-    - ZXingObjC/All (= 3.6.9)
-  - ZXingObjC/All (3.6.9)
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
@@ -1985,7 +1971,6 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-biometrics (from `../node_modules/react-native-biometrics`)
-  - react-native-blue-crypto (from `../node_modules/react-native-blue-crypto`)
   - react-native-bw-file-access (from `../modules/react-native-bw-file-access`)
   - react-native-capture-protection (from `../node_modules/react-native-capture-protection`)
   - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
@@ -2024,7 +2009,7 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativeCameraKit (from `../node_modules/react-native-camera-kit`)
+  - ReactNativeCameraKit (from `../node_modules/react-native-camera-kit-no-google`)
   - RealmJS (from `../node_modules/realm`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
@@ -2033,20 +2018,16 @@ DEPENDENCIES:
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
-  - RNHandoff (from `../node_modules/react-native-handoff`)
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
-  - RNQrGenerator (from `../node_modules/rn-qr-generator`)
   - RNQuickAction (from `../node_modules/react-native-quick-actions`)
-  - RNRate (from `../node_modules/react-native-rate`)
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
-  - RNWatch (from `../node_modules/react-native-watch-connectivity`)
   - RustJsiBridge (from `.`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2055,7 +2036,6 @@ SPEC REPOS:
     - CocoaAsyncSocket
     - lottie-ios
     - SocketRocket
-    - ZXingObjC
 
 EXTERNAL SOURCES:
   boost:
@@ -2141,8 +2121,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-biometrics:
     :path: "../node_modules/react-native-biometrics"
-  react-native-blue-crypto:
-    :path: "../node_modules/react-native-blue-crypto"
   react-native-bw-file-access:
     :path: "../modules/react-native-bw-file-access"
   react-native-capture-protection:
@@ -2220,7 +2198,7 @@ EXTERNAL SOURCES:
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
   ReactNativeCameraKit:
-    :path: "../node_modules/react-native-camera-kit"
+    :path: "../node_modules/react-native-camera-kit-no-google"
   RealmJS:
     :path: "../node_modules/realm"
   RNCAsyncStorage:
@@ -2237,20 +2215,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
-  RNHandoff:
-    :path: "../node_modules/react-native-handoff"
   RNKeychain:
     :path: "../node_modules/react-native-keychain"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
-  RNQrGenerator:
-    :path: "../node_modules/rn-qr-generator"
   RNQuickAction:
     :path: "../node_modules/react-native-quick-actions"
-  RNRate:
-    :path: "../node_modules/react-native-rate"
   RNReactNativeHapticFeedback:
     :path: "../node_modules/react-native-haptic-feedback"
   RNReanimated:
@@ -2263,8 +2235,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
-  RNWatch:
-    :path: "../node_modules/react-native-watch-connectivity"
   RustJsiBridge:
     :path: "."
   Yoga:
@@ -2314,7 +2284,6 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 63278529b5cf531a7eaf8fc71244fabb062ca90c
   React-microtasksnativemodule: 6a39463c32ce831c4c2aa8469273114d894b6be9
   react-native-biometrics: 43ed5b828646a7862dbc7945556446be00798e7d
-  react-native-blue-crypto: de5babd59b17fbf3fc31d2e1e5d59ec859093fbc
   react-native-bw-file-access: fe925b77dbf48500df0b294c6851f8c84607a203
   react-native-capture-protection: d2d5ced5fead227abb1304518d55774de19c3021
   react-native-document-picker: d71fb688c2a16a1ad30a622ba2fe4461531dbd57
@@ -2353,7 +2322,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 4893bde33952f997a323eb1a1ee87a72764018ff
   ReactCodegen: 99ea3536c05be3c18d0c517acb56b5a6d726fc7b
   ReactCommon: 865ebe76504a95e115b6229dd00a31e56d2d4bfe
-  ReactNativeCameraKit: c7cec02191d24b6607c002dff403d349a61f5e49
+  ReactNativeCameraKit: 6a2051bec0e0a7a7d921d64c1219a9cd274c020b
   RealmJS: 9fd51c849eb552ade9f7b11db42a319b4f6cab4c
   RNCAsyncStorage: b44e8a4e798c3e1f56bffccd0f591f674fb9198f
   RNCClipboard: f6679d470d0da2bce2a37b0af7b9e0bf369ecda5
@@ -2362,25 +2331,20 @@ SPEC CHECKSUMS:
   RNDeviceInfo: d863506092aef7e7af3a1c350c913d867d795047
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNGestureHandler: 92e89a04cd0d1c77f383a55d14c15e7f423f4c00
-  RNHandoff: bc8af5a86853ff13b033e7ba1114c3c5b38e6385
   RNKeychain: fa7765e6af5a8ec866bea4e86d2a1086f562d69f
   RNLocalize: 3c4d0abd777a546fa77bdb6caef85a87fb9ea349
   RNPermissions: c48851513712284b650e8a166fdd409aa81b6104
-  RNQrGenerator: afacf12b55dfba0e3aaca963eec23691e8426431
   RNQuickAction: c2c8f379e614428be0babe4d53a575739667744d
-  RNRate: 7641919330e0d6688ad885a985b4bd697ed7d14c
   RNReactNativeHapticFeedback: f9cfb40676f21a52e9e172648d033f539156a5ec
   RNReanimated: 76e3bdba62bb728ea8d8d23b451e8070e6c2c2bc
   RNScreens: 9ef996b6041d0960a4794a845f7d0808b171b4ef
   RNShare: 5bc29e5794f5d451ca1308d6ad9101088eb15f8c
   RNSVG: cd580f422f3c4f0ffa490b6ac479c6602ae54bca
   RNVectorIcons: f7a99433a71f4b38891c14c64b21fc521d064392
-  RNWatch: 28fe1f5e0c6410d45fd20925f4796fce05522e3f
-  RustJsiBridge: 447d0a22e474006bd39ccf316108458f0a9b10b4
+  RustJsiBridge: 4d2e33eec3ba03119c1786253d35ce03a8d48cd9
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: e14bad835e12b6c7e2260fc320bd00e0f4b45add
-  ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: e8c31f5661c38147397989220300fb92a8f57136
+PODFILE CHECKSUM: bb9413d120e560e7bd3a2f4d963a8ac013dff89d
 
 COCOAPODS: 1.15.2

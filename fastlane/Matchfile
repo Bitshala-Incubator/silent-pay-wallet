@@ -9,10 +9,7 @@ type(ENV["MATCH_TYPE"] || "appstore")
 
 # App identifiers for all Shroud apps
 app_identifier([
-  "org.bitshala.shroud", 
-  "org.bitshala.shroud.watch", 
-  "org.bitshala.shroud.watch.extension", 
-  "org.bitshala.shroud.Stickers", 
+  "org.bitshala.shroud",
   "org.bitshala.shroud.MarketWidget"
 ])
 

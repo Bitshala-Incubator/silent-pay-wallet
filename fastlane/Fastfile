@@ -2,9 +2,6 @@
 def app_identifiers
   [
     "org.bitshala.shroud",
-    "org.bitshala.shroud.watch",
-    "org.bitshala.shroud.watch.extension",
-    "org.bitshala.shroud.Stickers",
     "org.bitshala.shroud.MarketWidget"
   ]
 end
@@ -442,7 +439,7 @@ platform :ios do
     
     # Set the new build number
     increment_build_number(
-      xcodeproj: "ios/BlueWallet.xcodeproj", 
+      xcodeproj: "ios/Shroud.xcodeproj",
       build_number: ENV["NEW_BUILD_NUMBER"]
     )
   
@@ -536,7 +533,7 @@ end
     Dir.chdir(project_root) do
       UI.message("Building the application from: #{Dir.pwd}")
 
-      workspace_path = File.join(project_root, "ios", "BlueWallet.xcworkspace")
+      workspace_path = File.join(project_root, "ios", "Shroud.xcworkspace")
       export_options_path = File.join(project_root, "ios", "export_options.plist")
 
       clear_derived_data_lane
@@ -554,7 +551,7 @@ end
       
       begin
         build_ios_app(
-          scheme: "BlueWallet",
+          scheme: "Shroud",
           workspace: workspace_path,
           export_method: "app-store",
           export_options: export_options_path,

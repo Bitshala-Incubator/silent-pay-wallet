@@ -3,7 +3,7 @@ import { fetchWithRetries } from '../../util/fetch';
 export class IndexerHttpClient {
   constructor(
     private baseUrl: string,
-    private timeout: number = 30000
+    private timeout: number = 30000,
   ) {}
 
   private async executeGet<T>(endpoint: string, errorContext: string): Promise<T> {

@@ -8,7 +8,6 @@ import { NetworkTransactionFeeType } from '../models/networkTransactionFees';
 export type SendDetailsParams = {
   transactionMemo?: string;
   isTransactionReplaceable?: boolean;
-  payjoinUrl?: string;
   feeUnit?: BitcoinUnit;
   frozenBalance?: number;
   amountUnit?: BitcoinUnit;
@@ -53,8 +52,6 @@ export type SendDetailsStackParamList = {
     tx: string;
     recipients: CreateTransactionTarget[];
     satoshiPerByte: number;
-    payjoinUrl?: string | null;
-    psbt: Psbt;
   };
   PsbtWithHardwareWallet: {
     memo?: string;

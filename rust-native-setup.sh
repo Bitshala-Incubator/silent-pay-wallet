@@ -152,47 +152,25 @@ build_ios_target() {
     fi
 }
 
-create_ios_fat_binaries() {
-    log "Creating iOS fat binaries and XCFramework..."
-    
+create_ios_xcframework() {
+    log "Creating iOS XCFramework..."
+
     mkdir -p "$IOS_DEST"
-    
-    # fat binary for simulator (arm64 + x86_64)
-    if [ -f "target/aarch64-apple-ios-sim/release/$LIB_NAME" ] && [ -f "target/x86_64-apple-ios/release/$LIB_NAME" ]; then
-        log "Creating universal simulator library..."
-        lipo -create \
-            "target/aarch64-apple-ios-sim/release/$LIB_NAME" \
-            "target/x86_64-apple-ios/release/$LIB_NAME" \
-            -output "$IOS_DEST/librust_jsi_bridge_sim.a"
-        success "Universal simulator library created"
-    else
-        warn "Simulator libraries not found, skipping fat binary creation"
+
+    local device_lib="target/aarch64-apple-ios/release/$LIB_NAME"
+    local sim_lib="target/aarch64-apple-ios-sim/release/$LIB_NAME"
+
+    if [ ! -f "$device_lib" ] || [ ! -f "$sim_lib" ]; then
+        warn "Missing iOS .a files; skipping XCFramework creation"
+        return
     fi
-    
-    if [ -f "target/aarch64-apple-ios/release/$LIB_NAME" ]; then
-        cp "target/aarch64-apple-ios/release/$LIB_NAME" "$IOS_DEST/librust_jsi_bridge_device.a"
-        success "Device library copied"
-    else
-        warn "Device library not found"
-    fi
-    
-    # create XCFramework (if both device and sim libraries exist)
-    if [ -f "$IOS_DEST/librust_jsi_bridge_device.a" ] && [ -f "$IOS_DEST/librust_jsi_bridge_sim.a" ]; then
-        log "Creating XCFramework..."
-        rm -rf "$IOS_DEST/RustJsiBridge.xcframework"
-        xcodebuild -create-xcframework \
-            -library "$IOS_DEST/librust_jsi_bridge_device.a" \
-            -library "$IOS_DEST/librust_jsi_bridge_sim.a" \
-            -output "$IOS_DEST/RustJsiBridge.xcframework" 2>/dev/null
-        
-        if [ $? -eq 0 ]; then
-            success "XCFramework created successfully"
-        else
-            warn "XCFramework creation failed (xcodebuild not available or failed)"
-        fi
-    else
-        warn "Missing required libraries for XCFramework creation"
-    fi
+
+    rm -rf "$IOS_DEST/RustJsiBridge.xcframework"
+    xcodebuild -create-xcframework \
+        -library "$device_lib" \
+        -library "$sim_lib" \
+        -output "$IOS_DEST/RustJsiBridge.xcframework" >/dev/null
+    success "XCFramework written to $IOS_DEST/RustJsiBridge.xcframework"
 }
 
 
@@ -224,8 +202,8 @@ main() {
             build_and_copy_android "$item"
         done
 
-        # WIP: iOS packaging
-        # create_ios_fat_binaries
+        echo
+        create_ios_xcframework
     else
         log "Non-macOS host detected. Building Android targets only."
         configure_android_toolchain

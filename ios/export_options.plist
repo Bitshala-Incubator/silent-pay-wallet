@@ -20,12 +20,6 @@
       <dict>
           <key>org.bitshala.shroud</key>
           <string>match AppStore org.bitshala.shroud</string>
-          <key>org.bitshala.shroud.watch</key>
-          <string>match AppStore org.bitshala.shroud.watch</string>
-          <key>org.bitshala.shroud.watch.extension</key>
-          <string>match AppStore org.bitshala.shroud.watch.extension</string>
-          <key>org.bitshala.shroud.Stickers</key>
-          <string>match AppStore org.bitshala.shroud.Stickers</string>
           <key>org.bitshala.shroud.MarketWidget</key>
           <string>match AppStore org.bitshala.shroud.MarketWidget</string>
       </dict>

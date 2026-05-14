@@ -99,10 +99,7 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
       },
     });
 
-    decoded = DeeplinkSchemaMatch.bip21decode(
-      `bitcoin:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001&pj=https://btc.donate.kukks.org/BTC/pj`,
-    );
-    assert.strictEqual(decoded.options.pj, 'https://btc.donate.kukks.org/BTC/pj');
+    decoded = DeeplinkSchemaMatch.bip21decode(`bitcoin:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001`);
 
     decoded = DeeplinkSchemaMatch.bip21decode(`BITCOIN:${suffix}1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH?amount=20.3&label=Foobar`);
     assert.deepStrictEqual(decoded, {
@@ -134,14 +131,11 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
 
   it('can decodeBitcoinUri', () => {
     assert.deepStrictEqual(
-      DeeplinkSchemaMatch.decodeBitcoinUri(
-        `bitcoin:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001&pj=https://btc.donate.kukks.org/BTC/pj`,
-      ),
+      DeeplinkSchemaMatch.decodeBitcoinUri(`bitcoin:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001`),
       {
         address: 'bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7',
         amount: 0.0001,
         memo: '',
-        payjoinUrl: 'https://btc.donate.kukks.org/BTC/pj',
       },
     );
 
@@ -151,7 +145,6 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
         address: '1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH',
         amount: 20.3,
         memo: 'Foobar',
-        payjoinUrl: '',
       },
     );
   });
@@ -176,11 +169,9 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
     );
   });
 
-  it('bitcoin+lightning BIP21 URI routes to on-chain SendDetails', async () => {
-    // A BIP21 URI with a lightning= param is treated as a plain Bitcoin address;
-    // isBitcoinAddress strips query params so the address validates correctly.
+  it('bitcoin BIP21 URI routes to on-chain SendDetails', async () => {
     const response = await asyncNavigationRouteFor({
-      url: 'bitcoin:BC1QR7P8NSYPZEJY4KP7CJS0HL5T9X0VF3AYF6UQPC?amount=0.00185579&lightning=LNBC1855790N1PNUPWSFPP5P5RVQJA067PV6NJQ3EFKLP78TN6MHUK842ZFGDCTXRDSGNTY765QDZ62PSKJEPQW3HJQSNPD36XJCEQFPHKUETEVFSKGEM9WGSRYVPJXSSZSNMJV3JHYGZFGSAZQARFVD4K2AR5V95KCMMJ9YCQZPUXQZ6GSP53E4EX9YTD2MGDN2C2CFA0J0SM3E7PVLPJ208H5LMYPNJMGZ7RLGS9QXPQYSGQ6GQMEQXJKKF2DHXJK8XQ4WGLM5NTE3RKEXGYQC6HYGFKS9SHHA6HL9X4339MXHNNQFSH7TS62PU8T9RSWTK6HQ4LV4GW3DPD25DQ8UQQYC909N',
+      url: 'bitcoin:BC1QR7P8NSYPZEJY4KP7CJS0HL5T9X0VF3AYF6UQPC?amount=0.00185579',
     });
 
     assert.strictEqual(response[0], 'SendDetailsRoot');

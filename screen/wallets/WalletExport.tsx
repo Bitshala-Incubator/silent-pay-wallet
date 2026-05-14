@@ -64,19 +64,19 @@ const WalletExport: React.FC = () => {
     root: { backgroundColor: colors.elevated },
   });
 
-  const secrets: string[] = useMemo(() => {
+  const secret: string = useMemo(() => {
     try {
-      const secret = wallet.getSecret();
-      return typeof secret === 'string' ? [secret] : Array.isArray(secret) ? secret : [];
+      const s = wallet.getSecret();
+      return typeof s === 'string' ? s : '';
     } catch (error) {
       console.error('Failed to get wallet secret:', error);
-      return [];
+      return '';
     }
   }, [wallet]);
 
   const secretIsMnemonic: boolean = useMemo(() => {
-    return validateMnemonic(wallet.getSecret());
-  }, [wallet]);
+    return secret.length > 0 && validateMnemonic(secret);
+  }, [secret]);
 
   const { enableScreenProtect, disableScreenProtect } = useScreenProtect();
 
@@ -118,55 +118,9 @@ const WalletExport: React.FC = () => {
     triggerHapticFeedback(HapticFeedbackTypes.Selection);
   }, [wallet]);
 
-  const Scroll = useCallback(
-    // eslint-disable-next-line react/no-unused-prop-types
-    ({ children }: { children: React.ReactNode | React.ReactNodeArray }) => (
-      <ScrollView
-        automaticallyAdjustContentInsets
-        contentInsetAdjustmentBehavior="automatic"
-        style={stylesHook.root}
-        contentContainerStyle={styles.scrollViewContent}
-        onLayout={onLayout}
-        testID="WalletExportScroll"
-      >
-        {children}
-      </ScrollView>
-    ),
-    [onLayout, stylesHook.root],
-  );
-
-  // for SLIP39
-  if (secrets.length !== 1) {
-    return (
-      <Scroll>
-        <DoNotDisclose />
-
-        <View>
-          <ShroudText style={styles.manualText}>{loc.wallets.write_down_header}</ShroudText>
-          <ShroudText style={styles.writeText}>{loc.wallets.write_down}</ShroudText>
-        </View>
-
-        {secrets.map((secret, index) => (
-          <React.Fragment key={secret}>
-            <ShroudText style={styles.scanText}>
-              {loc.formatString(loc.wallets.share_number, {
-                number: index + 1,
-              })}
-            </ShroudText>
-            <SeedWords word={secret} index={0} />
-          </React.Fragment>
-        ))}
-
-        <ShroudText style={styles.typeText}>
-          {loc.formatString(loc.wallets.wallet_type_this, {
-            type: wallet.typeReadable,
-          })}
-        </ShroudText>
-      </Scroll>
-    );
+  if (!secret) {
+    return null;
   }
-
-  const secret = secrets[0];
 
   return (
     <ScrollView

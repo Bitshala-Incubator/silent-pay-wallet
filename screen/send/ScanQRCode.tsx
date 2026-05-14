@@ -248,6 +248,9 @@ const ScanQRCode = () => {
         .then(data => {
           if (data) onBarCodeRead({ data });
         })
+        .catch(error => {
+          presentAlert({ title: loc.errors.error, message: error.message });
+        })
         .finally(() => setIsLoading(false));
     }
   };

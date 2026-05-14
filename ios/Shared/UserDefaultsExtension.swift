@@ -1,9 +1,9 @@
 //
 //  UserDefaultsExtension.swift
-//  BlueWallet
+//  Shroud
 //
 //  Created by Marcos Rodriguez on 2/8/21.
-//  Copyright © 2021 BlueWallet. All rights reserved.
+//  Copyright © 2026 Shroud contributors. All rights reserved.
 //
 
 import Foundation

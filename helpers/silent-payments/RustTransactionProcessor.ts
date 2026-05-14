@@ -2,14 +2,8 @@ import { Buffer } from 'buffer';
 import * as bitcoin from 'bitcoinjs-lib';
 import { getScanPrivateKey, getSpendPublicKey } from './SilentPaymentKeyDerivation';
 import { IndexerTransaction, SilentPaymentUTXO } from './types';
-import { 
-  spScanTransactions, 
-  spScanSingleTransaction,
-  RustMatchedUTXO,
-  RustBatchScanResult
-} from '../../modules/RustJsiBridge';
+import { spScanTransactions, spScanSingleTransaction, RustMatchedUTXO, RustBatchScanResult } from '../../modules/RustJsiBridge';
 import { hexToUint8Array } from '../../modules/uint8array-extras';
-
 
 export class RustTransactionProcessor {
   private scanPrivkeyHex: string;
@@ -18,15 +12,12 @@ export class RustTransactionProcessor {
   constructor(seed: Buffer) {
     const scanPrivkey = getScanPrivateKey(seed);
     const spendPubkey = getSpendPublicKey(seed);
-    
+
     this.scanPrivkeyHex = Buffer.from(scanPrivkey).toString('hex');
     this.spendPubkeyHex = Buffer.from(spendPubkey).toString('hex');
   }
 
-  private convertToSilentPaymentUTXO(
-    rustUtxo: RustMatchedUTXO,
-    silentPaymentAddress: string
-  ): SilentPaymentUTXO {
+  private convertToSilentPaymentUTXO(rustUtxo: RustMatchedUTXO, silentPaymentAddress: string): SilentPaymentUTXO {
     return {
       txid: rustUtxo.txid,
       vout: rustUtxo.vout,
@@ -35,9 +26,9 @@ export class RustTransactionProcessor {
       address: bitcoin.payments.p2tr({
         pubkey: hexToUint8Array(rustUtxo.pubKey),
       }).address!,
-      
+
       // sp specific fields
-      silentPaymentAddress: silentPaymentAddress,
+      silentPaymentAddress,
       pubKey: rustUtxo.pubKey,
       tweak: hexToUint8Array(rustUtxo.tweakHex),
       blockHash: rustUtxo.blockHash,
@@ -46,14 +37,9 @@ export class RustTransactionProcessor {
     };
   }
 
-
   process(tx: IndexerTransaction, silentPaymentAddress: string): SilentPaymentUTXO[] {
     try {
-      const matchedUtxos = spScanSingleTransaction(
-        this.scanPrivkeyHex,
-        this.spendPubkeyHex,
-        tx
-      );
+      const matchedUtxos = spScanSingleTransaction(this.scanPrivkeyHex, this.spendPubkeyHex, tx);
 
       return matchedUtxos.map(utxo => this.convertToSilentPaymentUTXO(utxo, silentPaymentAddress));
     } catch (error) {
@@ -62,13 +48,11 @@ export class RustTransactionProcessor {
     }
   }
 
-
   async processBatch(
-    transactions: IndexerTransaction[], 
+    transactions: IndexerTransaction[],
     silentPaymentAddress: string,
-    cancelScanCallback?: () => boolean
+    cancelScanCallback?: () => boolean,
   ): Promise<SilentPaymentUTXO[]> {
-
     if (transactions.length === 0) {
       return [];
     }
@@ -78,15 +62,11 @@ export class RustTransactionProcessor {
     }
 
     try {
-      const result: RustBatchScanResult = spScanTransactions(
-        this.scanPrivkeyHex,
-        this.spendPubkeyHex,
-        transactions
-      );
+      const result: RustBatchScanResult = spScanTransactions(this.scanPrivkeyHex, this.spendPubkeyHex, transactions);
 
       console.log(
         `[RustTransactionProcessor] Scanned ${result.transactionsScanned} txs, ` +
-        `${result.outputsScanned} outputs, found ${result.matchedUtxos.length} matches`
+          `${result.outputsScanned} outputs, found ${result.matchedUtxos.length} matches`,
       );
 
       return result.matchedUtxos.map(utxo => this.convertToSilentPaymentUTXO(utxo, silentPaymentAddress));
@@ -104,8 +84,6 @@ export class RustTransactionProcessor {
   }
 }
 
-
 export function createTransactionProcessor(seed: Buffer): RustTransactionProcessor {
   return new RustTransactionProcessor(seed);
 }
-  

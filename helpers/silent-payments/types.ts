@@ -1,6 +1,5 @@
 import { Utxo } from '../../class/wallets/types';
 
-
 export interface IndexerOutput {
   transactionId: string;
   vout: number;

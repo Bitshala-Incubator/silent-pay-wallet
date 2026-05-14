@@ -7,7 +7,7 @@ import presentAlert from '../components/Alert';
 import loc from '../loc';
 import { isDesktop } from './environment';
 import { readFile } from './react-native-bw-file-access';
-import RNQRGenerator from 'rn-qr-generator';
+import { detectQRCodeInImage } from 'react-native-camera-kit-no-google';
 
 const _sanitizeFileName = (fileName: string) => {
   // Remove any path delimiters and non-alphanumeric characters except for -, _, and .
@@ -134,6 +134,7 @@ export const showImagePickerAndReadImage = async (): Promise<string | undefined>
         console.error(error);
         presentAlert({ message: loc.send.qr_error_no_qrcode });
       }
+      throw new Error(loc.send.qr_error_no_qrcode);
     }
 
     return undefined;
@@ -178,7 +179,7 @@ export const showFilePickerAndReadFile = async function (): Promise<{ data: stri
   }
 };
 
-const handleImageFile = async (fileCopyUri: string): Promise<{ data: string | false; uri: string | false }> => {
+const readFileAsBase64 = async (uri: string): Promise<string> => {
   try {
     const info = await FileSystem.getInfoAsync(fileCopyUri);
     if (!info.exists) {
@@ -203,6 +204,15 @@ const handleImageFile = async (fileCopyUri: string): Promise<{ data: string | fa
     presentAlert({ message: loc.send.qr_error_no_qrcode });
     return { data: false, uri: false };
   }
+};
+
+const handleImageFile = async (fileCopyUri: string): Promise<{ data: string | false; uri: string | false }> => {
+  const base64 = await readFileAsBase64(fileCopyUri);
+  const result = await detectQRCodeInImage(base64);
+  if (result) {
+    return { data: result, uri: fileCopyUri };
+  }
+  throw new Error(loc.send.qr_error_no_qrcode);
 };
 
 export const readFileOutsideSandbox = (filePath: string) => {

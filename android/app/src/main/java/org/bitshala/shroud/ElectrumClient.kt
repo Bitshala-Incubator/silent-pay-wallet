@@ -194,7 +194,7 @@ class ElectrumClient {
             inputReader = BufferedReader(InputStreamReader(socket?.getInputStream()))
 
             // Testing the connection with simple version request
-            val versionRequest = "{\"id\": 0, \"method\": \"server.version\", \"params\": [\"BlueWallet\", \"1.4\"]}\n"
+            val versionRequest = "{\"id\": 0, \"method\": \"server.version\", \"params\": [\"Shroud\", \"1.4\"]}\n"
             Log.d(TAG, "Sending version request to verify connection")
             send(versionRequest.toByteArray())
 

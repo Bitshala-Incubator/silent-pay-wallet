@@ -1,9 +1,9 @@
 //
 //  MarketView.swift
-//  BlueWallet
+//  Shroud
 //
 //  Created by Marcos Rodriguez on 11/3/20.
-//  Copyright © 2020 BlueWallet. All rights reserved.
+//  Copyright © 2026 Shroud contributors. All rights reserved.
 //
 
 import SwiftUI

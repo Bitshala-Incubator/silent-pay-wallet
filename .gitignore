@@ -46,8 +46,6 @@ yarn-error.log
 # BUCK
 buck-out/
 \.buckd/
-*.keystore
-!debug.keystore
 
 # fastlane
 #
@@ -65,7 +63,7 @@ ios/fastlane
 # Bundle artifact
 *.jsbundle
 
-#BlueWallet
+# Build artifacts
 release-notes.json
 release-notes.txt
 current-branch.json
@@ -105,3 +103,4 @@ rust_jsi_bridge/target/
 .expo-shared/
 dist/
 eas-build-on-simulator.log
+ios/RustJsiBridge.xcframework/

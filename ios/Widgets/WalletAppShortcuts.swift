@@ -1,6 +1,6 @@
 //
 //  WalletAppShortcuts.swift
-//  BlueWallet
+//  Shroud
 
 
 import AppIntents

@@ -198,7 +198,7 @@ class SwiftTCPClient {
 
         do {
             try await withCheckedThrowingContinuation { [self] (continuation: CheckedContinuation<Void, Error>) in
-                let syncQueue = DispatchQueue(label: "com.bluewallet.continuationSync")
+                let syncQueue = DispatchQueue(label: "org.bitshala.shroud.continuationSync")
                 var isContinuationResolved = false
                 
                 // Safe completion function to avoid multiple resolutions
@@ -414,7 +414,7 @@ class SwiftTCPClient {
             group.addTask { @Sendable in
                 return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
                     // We'll use a dedicated flag with a lock for thread safety
-                    let syncQueue = DispatchQueue(label: "com.bluewallet.receiveSync")
+                    let syncQueue = DispatchQueue(label: "org.bitshala.shroud.receiveSync")
                     var isCompleted = false
                     
                     connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { data, _, isComplete, error in

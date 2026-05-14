@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useReducer } from 'react';
-import { ActivityIndicator, FlatList, TouchableOpacity, StyleSheet, Switch, View } from 'react-native';
+import { ActivityIndicator, FlatList, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { Text } from '@rneui/themed';
-import { PayjoinClient } from 'payjoin-client';
 import BigNumber from 'bignumber.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import { ShroudText, ShroudCard } from '../../ShroudComponents';
@@ -17,36 +16,27 @@ import { satoshiToBTC, satoshiToLocalCurrency } from '../../modules/currency';
 import * as Electrum from '../../modules/Electrum';
 import { unlockWithBiometrics, useBiometrics } from '../../hooks/useBiometrics';
 import { TWallet, CreateTransactionTarget } from '../../class/wallets/types';
-import PayjoinTransaction from '../../class/payjoin-transaction';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SendDetailsStackParamList } from '../../navigation/SendDetailsStackParamList';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { useStorage } from '../../hooks/context/useStorage';
-import { HDSilentPaymentsWallet } from '../../class';
 import { useSettings } from '../../hooks/context/useSettings';
 import { majorTomToGroundControl } from '../../modules/notifications';
-import { uint8ArrayToHex } from '../../modules/uint8array-extras';
 
 enum ActionType {
   SET_LOADING = 'SET_LOADING',
-  SET_PAYJOIN_ENABLED = 'SET_PAYJOIN_ENABLED',
   SET_BUTTON_DISABLED = 'SET_BUTTON_DISABLED',
 }
 
-type Action =
-  | { type: ActionType.SET_LOADING; payload: boolean }
-  | { type: ActionType.SET_PAYJOIN_ENABLED; payload: boolean }
-  | { type: ActionType.SET_BUTTON_DISABLED; payload: boolean };
+type Action = { type: ActionType.SET_LOADING; payload: boolean } | { type: ActionType.SET_BUTTON_DISABLED; payload: boolean };
 
 interface State {
   isLoading: boolean;
-  isPayjoinEnabled: boolean;
   isButtonDisabled: boolean;
 }
 
 const initialState: State = {
   isLoading: false,
-  isPayjoinEnabled: false,
   isButtonDisabled: false,
 };
 
@@ -54,8 +44,6 @@ const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case ActionType.SET_LOADING:
       return { ...state, isLoading: action.payload };
-    case ActionType.SET_PAYJOIN_ENABLED:
-      return { ...state, isPayjoinEnabled: action.payload };
     case ActionType.SET_BUTTON_DISABLED:
       return { ...state, isButtonDisabled: action.payload };
     default:
@@ -72,7 +60,7 @@ const Confirm: React.FC = () => {
   const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const navigation = useExtendedNavigation<ConfirmNavigationProp>();
   const route = useRoute<ConfirmRouteProp>(); // Get the route and its params
-  const { recipients, walletID, fee, memo, tx, satoshiPerByte, psbt, payjoinUrl } = route.params;
+  const { recipients, walletID, fee, memo, tx, satoshiPerByte } = route.params;
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const { navigate, setOptions, goBack } = navigation;
@@ -107,9 +95,6 @@ const Confirm: React.FC = () => {
     },
     root: {
       backgroundColor: colors.elevated,
-    },
-    payjoinWrapper: {
-      backgroundColor: colors.buttonDisabledBackgroundColor,
     },
   });
 
@@ -163,13 +148,6 @@ const Confirm: React.FC = () => {
     });
   }, [HeaderRightButton, colors, fee, feeSatoshi, memo, recipients, satoshiPerByte, setOptions, tx, wallet]);
 
-  const getPaymentScript = (): Uint8Array | undefined => {
-    if (!(recipients.length > 0) || !recipients[0].address) {
-      return undefined;
-    }
-    return bitcoin.address.toOutputScript(recipients[0].address, bitcoin.networks.bitcoin);
-  };
-
   const handleSendTransaction = async () => {
     dispatch({ type: ActionType.SET_BUTTON_DISABLED, payload: true });
     dispatch({ type: ActionType.SET_LOADING, payload: true });
@@ -185,35 +163,11 @@ const Confirm: React.FC = () => {
       }
 
       const txidsToWatch = [];
-      if (!state.isPayjoinEnabled) {
-        // Only broadcast the transaction after biometrics pass
-        const result = await broadcastTransaction(tx);
-        if (!result) {
-          dispatch({ type: ActionType.SET_LOADING, payload: false });
-          dispatch({ type: ActionType.SET_BUTTON_DISABLED, payload: false });
-          return;
-        }
-      } else {
-        const payJoinWallet = new PayjoinTransaction(
-          psbt,
-          (txHex: string) => broadcastTransaction(txHex),
-          wallet as HDSilentPaymentsWallet,
-        );
-        const paymentScript = getPaymentScript();
-        if (!paymentScript) {
-          throw new Error('Invalid payment script');
-        }
-        const payjoinClient = new PayjoinClient({
-          paymentScript: Buffer.from(uint8ArrayToHex(paymentScript), 'hex'),
-          wallet: payJoinWallet.getPayjoinPsbt(),
-          payjoinUrl: payjoinUrl as string,
-        });
-        await payjoinClient.run();
-        const payjoinPsbt = payJoinWallet.getPayjoinPsbt();
-        if (payjoinPsbt) {
-          const txToWatch = payjoinPsbt.extractTransaction();
-          txidsToWatch.push(txToWatch.getId());
-        }
+      const result = await broadcastTransaction(tx);
+      if (!result) {
+        dispatch({ type: ActionType.SET_LOADING, payload: false });
+        dispatch({ type: ActionType.SET_BUTTON_DISABLED, payload: false });
+        return;
       }
 
       const txid = bitcoin.Transaction.fromHex(tx).getId();
@@ -298,20 +252,6 @@ const Confirm: React.FC = () => {
           keyExtractor={(_item, index) => `${index}`}
           ItemSeparatorComponent={renderSeparator}
         />
-        {!!payjoinUrl && (
-          <View style={styles.cardContainer}>
-            <ShroudCard>
-              <View style={[styles.payjoinWrapper, stylesHook.payjoinWrapper]}>
-                <Text style={styles.payjoinText}>Payjoin</Text>
-                <Switch
-                  testID="PayjoinSwitch"
-                  value={state.isPayjoinEnabled}
-                  onValueChange={value => dispatch({ type: ActionType.SET_PAYJOIN_ENABLED, payload: value })}
-                />
-              </View>
-            </ShroudCard>
-          </View>
-        )}
       </View>
       <View style={styles.cardBottom}>
         <ShroudCard>
@@ -391,10 +331,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
-  cardContainer: {
-    flexGrow: 1,
-    width: '100%',
-  },
   cardText: {
     flexDirection: 'row',
     color: '#37c0a1',
@@ -415,18 +351,5 @@ const styles = StyleSheet.create({
   txText: {
     fontSize: 15,
     fontWeight: '600',
-  },
-  payjoinWrapper: {
-    flexDirection: 'row',
-    padding: 8,
-    borderRadius: 6,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  payjoinText: {
-    color: '#81868e',
-    fontSize: 15,
-    fontWeight: 'bold',
   },
 });

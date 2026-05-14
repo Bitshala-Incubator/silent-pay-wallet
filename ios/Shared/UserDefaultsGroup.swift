@@ -3,7 +3,7 @@
 //  MarketWidgetExtension
 //
 //  Created by Marcos Rodriguez on 10/31/20.
-//  Copyright © 2020 BlueWallet. All rights reserved.
+//  Copyright © 2026 Shroud contributors. All rights reserved.
 //
 
 import Foundation

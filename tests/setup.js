@@ -39,14 +39,6 @@ jest.mock('expo-clipboard', () => ({
   hasStringAsync: jest.fn().mockResolvedValue(false),
 }));
 
-jest.mock('react-native-watch-connectivity', () => {
-  return {
-    getIsWatchAppInstalled: jest.fn(() => Promise.resolve(false)),
-    subscribeToMessages: jest.fn(),
-    updateApplicationContext: jest.fn(),
-  };
-});
-
 jest.mock('react-native-secure-key-store', () => {
   return {};
 });
@@ -231,12 +223,12 @@ jest.mock('realm', () => {
   };
 });
 
-jest.mock('rn-qr-generator', () => ({
-  detect: jest.fn(uri => {
-    if (uri === 'invalid-image') {
-      return Promise.reject(new Error('Failed to decode QR code'));
+jest.mock('react-native-camera-kit-no-google', () => ({
+  detectQRCodeInImage: jest.fn(base64 => {
+    if (base64 === 'invalid-image') {
+      return Promise.reject(new Error('Invalid image data'));
     }
-    return Promise.resolve({ values: ['mocked-qr-code'] });
+    return Promise.resolve('mocked-qr-code');
   }),
 }));
 

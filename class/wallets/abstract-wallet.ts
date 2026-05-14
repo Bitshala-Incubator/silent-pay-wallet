@@ -155,10 +155,6 @@ export class AbstractWallet {
     return false;
   }
 
-  allowPayJoin(): boolean {
-    return false;
-  }
-
   allowCosignPsbt(): boolean {
     return false;
   }

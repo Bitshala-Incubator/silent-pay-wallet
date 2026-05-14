@@ -1,6 +1,6 @@
 //
 //  Bridge.swift
-//  BlueWallet
+//  Shroud
 //
 //  Created by Marcos Rodriguez on 9/19/19.
 //

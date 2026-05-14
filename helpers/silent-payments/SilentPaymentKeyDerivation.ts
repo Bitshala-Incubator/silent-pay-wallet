@@ -14,7 +14,7 @@ export function deriveSilentPaymentKeys(seed: Buffer): SilentPaymentKeys {
   const root = bip32.fromSeed(seed);
   const spendKey = root.derivePath("m/352'/0'/0'/0'/0");
   const scanKey = root.derivePath("m/352'/0'/0'/1'/0");
-  
+
   return { scanKey, spendKey };
 }
 
@@ -40,8 +40,5 @@ export function getSpendPublicKey(seed: Buffer): Uint8Array {
 
 export function getSilentPaymentAddress(seed: Buffer): string {
   const { scanKey, spendKey } = deriveSilentPaymentKeys(seed);
-  return encodeSilentPaymentAddress(
-    new Uint8Array(scanKey.publicKey),
-    new Uint8Array(spendKey.publicKey),
-  );
+  return encodeSilentPaymentAddress(new Uint8Array(scanKey.publicKey), new Uint8Array(spendKey.publicKey));
 }
