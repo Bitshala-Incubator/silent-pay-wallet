@@ -32,7 +32,7 @@ import { useExtendedNavigation } from './useExtendedNavigation';
 const useCompanionListeners = (skipIfNotInitialized = true) => {
   const { wallets, addWallet, saveToDisk, fetchAndSaveWalletTransactions, refreshAllWalletTransactions, walletsInitialized } = useStorage();
   const appState = useRef<AppStateStatus>(AppState.currentState);
-  const clipboardContent = useRef<undefined | string>();
+  const clipboardContent = useRef<string | undefined>(undefined);
   const navigation = useExtendedNavigation();
 
   const shouldActivateListeners = !skipIfNotInitialized || walletsInitialized;
@@ -97,19 +97,29 @@ const useCompanionListeners = (skipIfNotInitialized = true) => {
       }
 
       if (deliveredNotifications.length > 0) {
-        for (const payload of deliveredNotifications) {
-          const wasTapped = payload.foreground === false || (payload.foreground === true && payload.userInteraction);
+        for (const notification of deliveredNotifications) {
+          // expo-notifications returns Notification objects; custom data is in request.content.data
+          const data = notification.request.content.data as Record<string, any>;
+          const payload = {
+            foreground: false,
+            userInteraction: true,
+            type: data?.type as number | undefined,
+            address: data?.address as string | undefined,
+            txid: data?.txid as string | undefined,
+            hash: data?.hash as string | undefined,
+          };
+          const wasTapped = true; // delivered notifications were interacted with
 
           console.log('processing push notification:', payload);
           let wallet;
-          switch (+payload.type) {
+          switch (+(payload.type ?? 0)) {
             case 2:
             case 3:
-              wallet = wallets.find(w => w.weOwnAddress(payload.address));
+              wallet = wallets.find(w => w.weOwnAddress(payload.address ?? ''));
               break;
             case 1:
             case 4:
-              wallet = wallets.find(w => w.weOwnTransaction(payload.txid || payload.hash));
+              wallet = wallets.find(w => w.weOwnTransaction((payload.txid || payload.hash) ?? ''));
               break;
           }
 

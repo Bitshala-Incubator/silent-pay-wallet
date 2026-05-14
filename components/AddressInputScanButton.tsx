@@ -69,11 +69,12 @@ export const AddressInputScanButton = ({
             if (Platform.OS === 'android') {
               hasImage = true;
             } else {
-              hasImage = await Clipboard.hasImage();
+              hasImage = await Clipboard.hasImageAsync();
             }
 
             if (hasImage) {
-              getImage = await Clipboard.getImage();
+              const img = await Clipboard.getImageAsync({ format: 'png' });
+              getImage = img?.data ?? null;
             }
 
             if (getImage) {
