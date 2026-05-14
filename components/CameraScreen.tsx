@@ -1,7 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Camera, CameraApi, CameraType, Orientation } from 'react-native-camera-kit-no-google';
-import { OnOrientationChangeData, OnReadCodeData } from 'react-native-camera-kit-no-google/dist/CameraProps';
+import { CameraView, CameraType, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 
 import { isDesktop } from '../modules/environment';
 import { triggerSelectionHapticFeedback } from '../modules/hapticFeedback';
@@ -14,7 +13,7 @@ interface CameraScreenProps {
   showFilePickerButton?: boolean;
   onImagePickerButtonPress?: () => void;
   onFilePickerButtonPress?: () => void;
-  onReadCode?: (event: OnReadCodeData) => void;
+  onReadCode?: (event: BarcodeScanningResult) => void;
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({
@@ -25,16 +24,13 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   onFilePickerButtonPress,
   onReadCode,
 }) => {
-  const cameraRef = useRef<CameraApi>(null);
+  const [facing, setFacing] = React.useState<CameraType>('back');
   const [torchMode, setTorchMode] = useState(false);
-  const [cameraType, setCameraType] = useState(CameraType.Back);
-  const [zoom, setZoom] = useState<number | undefined>();
+  const [, requestPermission] = useCameraPermissions();
   const [orientationAnim] = useState(new Animated.Value(3));
 
   const onSwitchCameraPressed = () => {
-    const direction = cameraType === CameraType.Back ? CameraType.Front : CameraType.Back;
-    setCameraType(direction);
-    setZoom(1); // When changing camera type, reset to default zoom for that camera
+    setFacing(f => (f === 'back' ? 'front' : 'back'));
     triggerSelectionHapticFeedback();
   };
 
@@ -64,34 +60,17 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
 
   const handleZoom = (e: { nativeEvent: { zoom: number } }) => {
     console.debug('zoom', e.nativeEvent.zoom);
-    setZoom(e.nativeEvent.zoom);
   };
 
-  const handleOrientationChange = (e: OnOrientationChangeData) => {
-    switch (e.nativeEvent.orientation) {
-      case Orientation.PORTRAIT_UPSIDE_DOWN:
-        console.debug('orientationChange', 'PORTRAIT_UPSIDE_DOWN');
-        rotateUiTo(1);
-        break;
-      case Orientation.LANDSCAPE_LEFT:
-        console.debug('orientationChange', 'LANDSCAPE_LEFT');
-        rotateUiTo(2);
-        break;
-      case Orientation.PORTRAIT:
-        console.debug('orientationChange', 'PORTRAIT');
-        rotateUiTo(3);
-        break;
-      case Orientation.LANDSCAPE_RIGHT:
-        console.debug('orientationChange', 'LANDSCAPE_RIGHT');
-        rotateUiTo(4);
-        break;
-      default:
-        console.debug('orientationChange', e.nativeEvent);
-        break;
-    }
+  const handleOrientationChange = (e: any) => {
+    const orientation = e?.nativeEvent?.orientation;
+    if (orientation === 'portrait') rotateUiTo(3);
+    else if (orientation === 'portrait-upside-down') rotateUiTo(1);
+    else if (orientation === 'landscape-left') rotateUiTo(2);
+    else if (orientation === 'landscape-right') rotateUiTo(4);
   };
 
-  const handleReadCode = (event: OnReadCodeData) => {
+  const handleReadCode = (event: BarcodeScanningResult) => {
     onReadCode?.(event);
   };
 
@@ -138,19 +117,12 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         </View>
       )}
       <View style={styles.cameraContainer}>
-        <Camera
-          ref={cameraRef}
+        <CameraView
           style={styles.cameraPreview}
-          cameraType={cameraType}
-          scanBarcode
-          resizeMode="cover"
-          onReadCode={handleReadCode}
-          torchMode={torchMode ? 'on' : 'off'}
-          resetFocusWhenMotionDetected
-          zoom={zoom}
-          onZoom={handleZoom}
-          maxZoom={10}
-          onOrientationChange={handleOrientationChange}
+          facing={facing}
+          enableTorch={torchMode}
+          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          onBarcodeScanned={handleReadCode}
         />
       </View>
       <View style={styles.bottomButtons}>
@@ -190,7 +162,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
               {Platform.OS === 'ios' ? (
                 <Icon name="cameraswitch" type="font-awesome-6" color="#ffffff" />
               ) : (
-                <Icon name={cameraType === CameraType.Back ? 'camera-rear' : 'camera-front'} type="ionicons" color="#ffffff" />
+                <Icon name={facing === 'back' ? 'camera-rear' : 'camera-front'} type="ionicons" color="#ffffff" />
               )}
             </Animated.View>
           </TouchableOpacity>

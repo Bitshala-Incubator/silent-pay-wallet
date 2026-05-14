@@ -6,7 +6,7 @@ import loc from '../loc';
 import { showFilePickerAndReadFile, showImagePickerAndReadImage } from '../modules/fs';
 import presentAlert from './Alert';
 import { useTheme } from './themes';
-import { detectQRCodeInImage } from 'react-native-camera-kit-no-google';
+import RNQRGenerator from 'rn-qr-generator';
 import { CommonToolTipActions } from '../typings/CommonToolTipActions';
 import { useSettings } from '../hooks/context/useSettings';
 import { scanQrHelper } from '../helpers/scan-qr';
@@ -79,7 +79,8 @@ export const AddressInputScanButton = ({
             if (getImage) {
               try {
                 const base64Data = getImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
-                const result = await detectQRCodeInImage(base64Data);
+                const qrResult = await RNQRGenerator.detect({ base64: base64Data });
+                const result = qrResult?.values?.[0];
                 if (result) {
                   onChangeText(result);
                 } else {

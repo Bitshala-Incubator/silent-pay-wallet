@@ -178,6 +178,21 @@ jest.mock('expo-file-system', () => {
   };
 });
 
+jest.mock('expo-file-system/legacy', () => {
+  return {
+    documentDirectory: 'file:///mock/document/directory/',
+    cacheDirectory: 'file:///mock/cache/directory/',
+    readAsStringAsync: jest.fn().mockResolvedValue(''),
+    writeAsStringAsync: jest.fn().mockResolvedValue(),
+    deleteAsync: jest.fn().mockResolvedValue(),
+    getInfoAsync: jest.fn().mockResolvedValue({ exists: true }),
+    EncodingType: {
+      UTF8: 'utf8',
+      Base64: 'base64',
+    },
+  };
+});
+
 jest.mock('expo-document-picker', () => ({
   getDocumentAsync: jest.fn().mockResolvedValue({ canceled: true }),
 }));
@@ -223,13 +238,16 @@ jest.mock('realm', () => {
   };
 });
 
-jest.mock('react-native-camera-kit-no-google', () => ({
-  detectQRCodeInImage: jest.fn(base64 => {
-    if (base64 === 'invalid-image') {
-      return Promise.reject(new Error('Invalid image data'));
-    }
-    return Promise.resolve('mocked-qr-code');
-  }),
+jest.mock('rn-qr-generator', () => ({
+  default: {
+    detect: jest.fn(({ base64, uri }) => {
+      if (base64 === 'invalid-image' || uri === 'invalid-uri') {
+        return Promise.reject(new Error('Invalid image data'));
+      }
+      return Promise.resolve({ values: ['mocked-qr-code'], type: 'QRCode' });
+    }),
+    generate: jest.fn().mockResolvedValue({ uri: 'mock-qr-uri', width: 200, height: 200 }),
+  },
 }));
 
 
