@@ -11,7 +11,8 @@
         "gradleCommand": ":app:assembleDebug"
       },
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "scheme": "BlueWallet"
       }
     },
     "preview": {
@@ -25,7 +26,7 @@
     },
     "production": {
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       },
       "ios": {
         "simulator": false
