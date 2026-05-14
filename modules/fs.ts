@@ -1,13 +1,21 @@
 import { Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import {
+  cacheDirectory,
+  documentDirectory,
+  deleteAsync,
+  writeAsStringAsync,
+  readAsStringAsync,
+  getInfoAsync,
+  EncodingType,
+} from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import Share from 'react-native-share';
+import RNQRGenerator from 'rn-qr-generator';
 import presentAlert from '../components/Alert';
 import loc from '../loc';
 import { isDesktop } from './environment';
 import { readFile } from './react-native-bw-file-access';
-import { detectQRCodeInImage } from 'react-native-camera-kit-no-google';
 
 const _sanitizeFileName = (fileName: string) => {
   // Remove any path delimiters and non-alphanumeric characters except for -, _, and .
@@ -35,7 +43,7 @@ const _shareOpen = async (filePath: string, showShareDialog: boolean = false) =>
     }
   } finally {
     try {
-      await FileSystem.deleteAsync(filePath, { idempotent: true });
+      await deleteAsync(filePath, { idempotent: true });
     } catch (e) {}
   }
 };
@@ -49,13 +57,13 @@ export const writeFileAndExport = async function (fileName: string, contents: st
   const sanitizedFileName = _sanitizeFileName(fileName);
   try {
     if (Platform.OS === 'ios') {
-      const filePath = `${FileSystem.cacheDirectory}${sanitizedFileName}`;
-      await FileSystem.writeAsStringAsync(filePath, contents);
+      const filePath = `${cacheDirectory}${sanitizedFileName}`;
+      await writeAsStringAsync(filePath, contents);
       await _shareOpen(filePath, showShareDialog);
     } else if (Platform.OS === 'android') {
-      const filePath = `${FileSystem.documentDirectory}${sanitizedFileName}`;
+      const filePath = `${documentDirectory}${sanitizedFileName}`;
       try {
-        await FileSystem.writeAsStringAsync(filePath, contents);
+        await writeAsStringAsync(filePath, contents);
         if (showShareDialog) {
           await _shareOpen(filePath);
         } else {
@@ -97,7 +105,7 @@ export const openSignedTransaction = async function (): Promise<string | false> 
 };
 
 const _readPsbtFileIntoBase64 = async function (uri: string): Promise<string> {
-  const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+  const base64 = await readAsStringAsync(uri, { encoding: EncodingType.Base64 });
   const stringData = Buffer.from(base64, 'base64').toString(); // decode from base64
   if (stringData.startsWith('psbt')) {
     // file was binary, but outer code expects base64 psbt, so we return base64 we got from rn-fs;
@@ -169,7 +177,7 @@ export const showFilePickerAndReadFile = async function (): Promise<{ data: stri
       return await handleImageFile(fileCopyUri);
     }
 
-    const file = await FileSystem.readAsStringAsync(fileCopyUri, { encoding: FileSystem.EncodingType.UTF8 });
+    const file = await readAsStringAsync(fileCopyUri, { encoding: EncodingType.UTF8 });
     return { data: file, uri: fileCopyUri };
   } catch (err: any) {
     if (!isCancel(err)) {
@@ -181,45 +189,45 @@ export const showFilePickerAndReadFile = async function (): Promise<{ data: stri
 
 const readFileAsBase64 = async (uri: string): Promise<string> => {
   try {
-    const info = await FileSystem.getInfoAsync(fileCopyUri);
+    const info = await getInfoAsync(uri);
     if (!info.exists) {
-      presentAlert({ message: 'File does not exist' });
-      return { data: false, uri: false };
+      throw new Error('File does not exist');
     }
     // First attempt: use original URI
-    let result = await RNQRGenerator.detect({ uri: decodeURI(fileCopyUri) });
+    const result = await RNQRGenerator.detect({ uri: decodeURI(uri) });
     if (result?.values && result.values.length > 0) {
-      return { data: result.values[0], uri: fileCopyUri };
+      return result.values[0];
     }
     // Second attempt: remove file:// prefix and try again
-    const altUri = fileCopyUri.replace(/^file:\/\//, '');
-    result = await RNQRGenerator.detect({ uri: decodeURI(altUri) });
-    if (result?.values && result.values.length > 0) {
-      return { data: result.values[0], uri: fileCopyUri };
+    const altUri = uri.replace(/^file:\/\//, '');
+    const result2 = await RNQRGenerator.detect({ uri: decodeURI(altUri) });
+    if (result2?.values && result2.values.length > 0) {
+      return result2.values[0];
     }
-    presentAlert({ message: loc.send.qr_error_no_qrcode });
-    return { data: false, uri: false };
+    throw new Error(loc.send.qr_error_no_qrcode);
   } catch (error: any) {
     console.error(error);
-    presentAlert({ message: loc.send.qr_error_no_qrcode });
-    return { data: false, uri: false };
+    throw error;
   }
 };
 
 const handleImageFile = async (fileCopyUri: string): Promise<{ data: string | false; uri: string | false }> => {
-  const base64 = await readFileAsBase64(fileCopyUri);
-  const result = await detectQRCodeInImage(base64);
-  if (result) {
-    return { data: result, uri: fileCopyUri };
+  try {
+    const qrData = await readFileAsBase64(fileCopyUri);
+    if (qrData) {
+      return { data: qrData, uri: fileCopyUri };
+    }
+    throw new Error(loc.send.qr_error_no_qrcode);
+  } catch {
+    throw new Error(loc.send.qr_error_no_qrcode);
   }
-  throw new Error(loc.send.qr_error_no_qrcode);
 };
 
 export const readFileOutsideSandbox = (filePath: string) => {
   if (Platform.OS === 'ios') {
     return readFile(filePath);
   } else if (Platform.OS === 'android') {
-    return FileSystem.readAsStringAsync(filePath, { encoding: FileSystem.EncodingType.UTF8 });
+    return readAsStringAsync(filePath, { encoding: EncodingType.UTF8 });
   } else {
     presentAlert({ message: 'Not implemented for this platform' });
     throw new Error('Not implemented for this platform');
@@ -237,7 +245,7 @@ export const openSignedTransactionRaw: () => Promise<string> = async () => {
       throw { code: 'OPERATION_CANCELED' };
     }
 
-    const file = await FileSystem.readAsStringAsync(result.assets[0].uri, { encoding: FileSystem.EncodingType.UTF8 });
+    const file = await readAsStringAsync(result.assets[0].uri, { encoding: EncodingType.UTF8 });
     if (file) {
       return file;
     } else {
@@ -261,6 +269,6 @@ export const pickTransaction = async () => {
   if (result.canceled || !result.assets || result.assets.length === 0) {
     return null;
   }
-  
+
   return result.assets[0];
 };
