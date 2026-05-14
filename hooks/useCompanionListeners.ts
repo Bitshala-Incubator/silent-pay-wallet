@@ -62,14 +62,14 @@ const useCompanionListeners = (skipIfNotInitialized = true) => {
 
         console.log('processing push notification:', payload);
         let wallet;
-        switch (+payload.type) {
+        switch (+(payload.type ?? 0)) {
           case 2:
           case 3:
-            wallet = wallets.find(w => w.weOwnAddress(payload.address));
+            wallet = wallets.find(w => w.weOwnAddress(payload.address ?? ''));
             break;
           case 1:
           case 4:
-            wallet = wallets.find(w => w.weOwnTransaction(payload.txid || payload.hash));
+            wallet = wallets.find(w => w.weOwnTransaction((payload.txid || payload.hash) ?? ''));
             break;
         }
 
