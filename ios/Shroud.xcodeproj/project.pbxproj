@@ -166,13 +166,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		6D2A6466258BA92D0092292B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 6D2A6460258BA92C0092292B;
-			remoteInfo = Stickers;
-		};
+
 		6DD410A5266CADF40087DE03 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
@@ -798,7 +792,6 @@
 			);
 			dependencies = (
 				B40D4E4C225841ED00428FCC /* PBXTargetDependency */,
-				6D2A6467258BA92D0092292B /* PBXTargetDependency */,
 				6DD410A6266CADF40087DE03 /* PBXTargetDependency */,
 			);
 			name = BlueWallet;
@@ -1248,10 +1241,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		6D2A6467258BA92D0092292B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			targetProxy = 6D2A6466258BA92D0092292B /* PBXContainerItemProxy */;
-		};
+
 		6DD410A6266CADF40087DE03 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6DD4109B266CADF10087DE03 /* WidgetsExtension */;
