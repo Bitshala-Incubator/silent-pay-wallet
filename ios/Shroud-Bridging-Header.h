@@ -6,5 +6,4 @@
 //  Copyright © 2026 Shroud contributors. All rights reserved.
 //
 
-#import <RNCPushNotificationIOS.h>
 #import "RNQuickActionManager.h"
