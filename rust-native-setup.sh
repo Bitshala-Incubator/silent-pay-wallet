@@ -183,29 +183,31 @@ main() {
         error "Must run from the root or the $PROJECT_NAME directory."
     fi
 
-    echo "🦀 Starting Rust JSI Bridge Build System"
+    local platform="${1:-both}"
+    
+    echo "🦀 Starting Rust JSI Bridge Build System (Platform: $platform)"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    if is_macos; then
-        log "Detected macOS host. Building iOS + Android targets."
-        ensure_rust_targets "ios"
-        configure_android_toolchain
-        ensure_rust_targets "android"
+    if [[ "$platform" == "both" || "$platform" == "ios" ]]; then
+        if is_macos; then
+            log "Building iOS targets..."
+            ensure_rust_targets "ios"
+            
+            echo -e "\n📱 iOS Targets:"
+            for item in "${IOS_TARGETS[@]}"; do
+                build_ios_target "$item"
+            done
+            echo
+            create_ios_xcframework
+        else
+            if [[ "$platform" == "ios" ]]; then
+                error "Cannot build iOS targets on non-macOS host."
+            fi
+        fi
+    fi
 
-        echo -e "\n📱 iOS Targets:"
-        for item in "${IOS_TARGETS[@]}"; do
-            build_ios_target "$item"
-        done
-
-        echo -e "\n🤖 Android Targets:"
-        for item in "${ANDROID_TARGETS[@]}"; do
-            build_and_copy_android "$item"
-        done
-
-        echo
-        create_ios_xcframework
-    else
-        log "Non-macOS host detected. Building Android targets only."
+    if [[ "$platform" == "both" || "$platform" == "android" ]]; then
+        log "Building Android targets..."
         configure_android_toolchain
         ensure_rust_targets "android"
 

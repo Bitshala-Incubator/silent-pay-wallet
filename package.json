@@ -78,8 +78,10 @@
     "lint:quickfix": "git status --porcelain | grep -v '\\.json' | grep -E '\\.js|\\.ts' --color=never |  awk '{print $2}' | xargs eslint --fix; exit 0",
     "unit": "jest -b -w tests/unit/*",
     "rust:build": "bash rust-native-setup.sh",
+    "rust:ios": "bash rust-native-setup.sh ios",
     "rust:rebuild": "cd rust_jsi_bridge && cargo clean && cd .. && npm run rust:build",
-    "android:rust": "npm run rust:build && cd android && ./gradlew clean && cd .. && npm run android"
+    "android:rust": "npm run rust:build && cd android && ./gradlew clean && cd .. && npm run android",
+    "eas-build-pre-install": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && export PATH=\"$HOME/.cargo/bin:$PATH\" && npm run rust:ios"
   },
   "dependencies": {
     "@bugsnag/react-native": "8.4.0",
