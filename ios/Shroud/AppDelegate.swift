@@ -351,7 +351,6 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
             }
         }
 
-        RNCPushNotificationIOS.didReceive(response)
         completionHandler()
     }
     
