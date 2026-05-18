@@ -11,7 +11,7 @@ import {
 } from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import Share from 'react-native-share';
-import RNQRGenerator from 'rn-qr-generator';
+// import RNQRGenerator from 'rn-qr-generator';
 import presentAlert from '../components/Alert';
 import loc from '../loc';
 import { isDesktop } from './environment';
@@ -132,10 +132,11 @@ export const showImagePickerAndReadImage = async (): Promise<string | undefined>
       try {
         const uri = response.assets[0].uri;
         if (uri) {
-          const result = await RNQRGenerator.detect({ uri: decodeURI(uri) });
-          if (result?.values && result.values.length > 0) {
-            return result.values[0];
-          }
+          // Temporarily disabled due to missing rn-qr-generator dependency
+          // const result = await RNQRGenerator.detect({ uri: decodeURI(uri) });
+          // if (result?.values && result.values.length > 0) {
+          //   return result.values[0];
+          // }
         }
         throw new Error(loc.send.qr_error_no_qrcode);
       } catch (error) {
@@ -193,17 +194,18 @@ const readFileAsBase64 = async (uri: string): Promise<string> => {
     if (!info.exists) {
       throw new Error('File does not exist');
     }
+    // Temporarily disabled due to missing rn-qr-generator dependency
     // First attempt: use original URI
-    const result = await RNQRGenerator.detect({ uri: decodeURI(uri) });
-    if (result?.values && result.values.length > 0) {
-      return result.values[0];
-    }
+    // const result = await RNQRGenerator.detect({ uri: decodeURI(uri) });
+    // if (result?.values && result.values.length > 0) {
+    //   return result.values[0];
+    // }
     // Second attempt: remove file:// prefix and try again
-    const altUri = uri.replace(/^file:\/\//, '');
-    const result2 = await RNQRGenerator.detect({ uri: decodeURI(altUri) });
-    if (result2?.values && result2.values.length > 0) {
-      return result2.values[0];
-    }
+    // const altUri = uri.replace(/^file:\/\//, '');
+    // const result2 = await RNQRGenerator.detect({ uri: decodeURI(altUri) });
+    // if (result2?.values && result2.values.length > 0) {
+    //   return result2.values[0];
+    // }
     throw new Error(loc.send.qr_error_no_qrcode);
   } catch (error: any) {
     console.error(error);

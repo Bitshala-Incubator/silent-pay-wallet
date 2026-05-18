@@ -19,9 +19,6 @@
     "Bahrain (Bahraini Dinar)" : {
 
     },
-    "Balance" : {
-
-    },
     "Bitcoin (%@)" : {
 
     },
@@ -40,9 +37,6 @@
     "Central African Republic (Central African Franc)" : {
 
     },
-    "Checked at %@" : {
-
-    },
     "Chile (Chilean Peso)" : {
 
     },
@@ -52,19 +46,7 @@
     "Choose your preferred currency." : {
 
     },
-    "Choose your preferred fiat currency." : {
-
-    },
     "Colombia (Colombian Peso)" : {
-
-    },
-    "Configure Market Widget with ${electrumHost}" : {
-
-    },
-    "Configure Market Widget with ${electrumHost} and show error messages: ${showErrorMessages}" : {
-
-    },
-    "Configure the Market Widget to show the Electrum host connected to/being attempted and display error messages if data retrieval fails." : {
 
     },
     "Croatia (Croatian Kuna)" : {
@@ -73,13 +55,7 @@
     "Currency" : {
 
     },
-    "Currency: %@" : {
-
-    },
     "Current Bitcoin Market Rate" : {
-
-    },
-    "Current Bitcoin Price: %@" : {
 
     },
     "Czech Republic (Czech Koruna)" : {
@@ -89,6 +65,7 @@
 
     },
     "display_in_BROWSER_TITLE" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en_US" : {
           "stringUnit" : {
@@ -110,19 +87,10 @@
         }
       }
     },
-    "Electrum Host" : {
-
-    },
-    "Error" : {
-
-    },
     "European Union (Euro)" : {
 
     },
     "Failed to retrieve the Bitcoin market rate." : {
-
-    },
-    "Fiat Currency" : {
 
     },
     "from" : {
@@ -167,38 +135,13 @@
     "Last Updated" : {
 
     },
-    "Last updated %@ from %@" : {
-      "localizations" : {
-        "en_US" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Last updated %1$@ from %2$@"
-          }
-        }
-      }
-    },
-    "Latest transaction" : {
-
-    },
     "Lebanon (Lebanese Pound)" : {
 
     },
     "Malaysia (Malaysian Ringgit)" : {
 
     },
-    "Market" : {
-
-    },
     "Market Rate" : {
-
-    },
-    "Market Widget" : {
-
-    },
-    "Market Widget Configuration" : {
-
-    },
-    "Market Widget is connected to ${electrumHost}" : {
 
     },
     "Mexico (Mexican Peso)" : {
@@ -208,9 +151,6 @@
 
     },
     "New Zealand (New Zealand Dollar)" : {
-
-    },
-    "Next Block" : {
 
     },
     "Nigeria (Nigerian Naira)" : {
@@ -234,31 +174,16 @@
     "Qatar (Qatari Riyal)" : {
 
     },
-    "receive" : {
-
-    },
     "Romania (Romanian Leu)" : {
 
     },
     "Russia (Russian Ruble)" : {
 
     },
-    "Sats/%@" : {
-
-    },
     "Saudi Arabia (Saudi Riyal)" : {
 
     },
-    "send" : {
-
-    },
-    "Show Error Messages" : {
-
-    },
     "Singapore (Singapore Dollar)" : {
-
-    },
-    "Source: %@" : {
 
     },
     "South Africa (South African Rand)" : {
@@ -303,9 +228,6 @@
     "United States of America (US Dollar)" : {
 
     },
-    "Updated: %@" : {
-
-    },
     "Uruguay (Uruguayan Peso)" : {
 
     },
@@ -318,28 +240,7 @@
     "View the current Bitcoin market rate in your preferred currency." : {
 
     },
-    "View the current Bitcoin market rate in your preferred fiat currency." : {
-
-    },
-    "View the current Bitcoin market rate." : {
-
-    },
-    "View the current market information." : {
-
-    },
-    "View the current price of Bitcoin" : {
-
-    },
     "View the current price of Bitcoin." : {
-
-    },
-    "View the Electrum host connected to/being attempted" : {
-
-    },
-    "View your accumulated balance." : {
-
-    },
-    "View your total wallet balance and network prices." : {
 
     },
     "VIEW_ADDRESS_TRANSACTIONS_TITLE" : {
@@ -375,9 +276,6 @@
           }
         }
       }
-    },
-    "Wallet and Market" : {
-
     }
   },
   "version" : "1.0"

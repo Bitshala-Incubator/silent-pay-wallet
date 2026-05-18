@@ -6,7 +6,7 @@ import loc from '../loc';
 import { showFilePickerAndReadFile, showImagePickerAndReadImage } from '../modules/fs';
 import presentAlert from './Alert';
 import { useTheme } from './themes';
-import RNQRGenerator from 'rn-qr-generator';
+// import RNQRGenerator from 'rn-qr-generator';
 import { CommonToolTipActions } from '../typings/CommonToolTipActions';
 import { useSettings } from '../hooks/context/useSettings';
 import { scanQrHelper } from '../helpers/scan-qr';
@@ -79,14 +79,15 @@ export const AddressInputScanButton = ({
 
             if (getImage) {
               try {
-                const base64Data = getImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
-                const qrResult = await RNQRGenerator.detect({ base64: base64Data });
-                const result = qrResult?.values?.[0];
-                if (result) {
-                  onChangeText(result);
-                } else {
-                  presentAlert({ message: loc.send.qr_error_no_qrcode });
-                }
+                // Temporarily disabled due to missing rn-qr-generator dependency
+                // const base64Data = getImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+                // const qrResult = await RNQRGenerator.detect({ base64: base64Data });
+                // const result = qrResult?.values?.[0];
+                // if (result) {
+                //   onChangeText(result);
+                // } else {
+                //   presentAlert({ message: loc.send.qr_error_no_qrcode });
+                // }
               } catch (error) {
                 presentAlert({ message: (error as Error).message });
               }

@@ -1,7 +1,7 @@
 import { CommonActions } from '@react-navigation/native';
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState, AppStateStatus, Linking } from 'react-native';
-import RNQRGenerator from 'rn-qr-generator';
+// import RNQRGenerator from 'rn-qr-generator';
 import { readAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import A from '../modules/analytics';
 import { getClipboardContent } from '../modules/clipboard';
@@ -194,17 +194,18 @@ const useCompanionListeners = (skipIfNotInitialized = true) => {
           } catch {
             base64 = await readAsStringAsync(decodedUrl.replace(/^file:\/\//, ''), { encoding: EncodingType.Base64 });
           }
-          const qrResult = await RNQRGenerator.detect({ base64 });
-          const qrValue = qrResult?.values?.[0];
-          if (!qrValue) {
-            throw new Error(loc.send.qr_error_no_qrcode);
-          }
-          triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-          DeeplinkSchemaMatch.navigationRouteFor({ url: qrValue }, (value: [string, any]) => navigationRef.navigate(...value), {
-            wallets,
-            addWallet,
-            saveToDisk,
-          });
+          // Temporarily disabled due to missing rn-qr-generator dependency
+          // const qrResult = await RNQRGenerator.detect({ base64 });
+          // const qrValue = qrResult?.values?.[0];
+          // if (!qrValue) {
+          //   throw new Error(loc.send.qr_error_no_qrcode);
+          // }
+          // triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+          // DeeplinkSchemaMatch.navigationRouteFor({ url: qrValue }, (value: [string, any]) => navigationRef.navigate(...value), {
+          //   wallets,
+          //   addWallet,
+          //   saveToDisk,
+          // });
         } else {
           DeeplinkSchemaMatch.navigationRouteFor(event, (value: [string, any]) => navigationRef.navigate(...value), {
             wallets,
