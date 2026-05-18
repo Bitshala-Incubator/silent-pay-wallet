@@ -15,7 +15,7 @@ const config = {
       crypto: require.resolve('crypto-browserify'),
       net: require.resolve('react-native-tcp-socket'),
       tls: require.resolve('react-native-tcp-socket'),
-      'bc-bech32': path.resolve(__dirname, 'modules/bc-bech32'),
+      'bc-bech32': path.resolve(__dirname, 'src/modules/bc-bech32'),
     },
   },
 };

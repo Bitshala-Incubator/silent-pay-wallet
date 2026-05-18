@@ -4,7 +4,7 @@
     "slug": "shroud-wallet",
     "version": "0.0.1",
     "orientation": "portrait",
-    "icon": "./img/icon.png",
+    "icon": "./src/img/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "resizeMode": "contain",
@@ -23,7 +23,7 @@
     "android": {
       "package": "org.bitshala.shroud",
       "adaptiveIcon": {
-        "foregroundImage": "./img/icon.png",
+        "foregroundImage": "./src/img/icon.png",
         "backgroundColor": "#000000"
       },
       "permissions": [
