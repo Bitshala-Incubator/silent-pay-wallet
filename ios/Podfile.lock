@@ -3464,7 +3464,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-biometrics (from `../node_modules/react-native-biometrics`)
-  - react-native-bw-file-access (from `../modules/react-native-bw-file-access`)
+  - react-native-bw-file-access (from `../src/modules/react-native-bw-file-access`)
   - react-native-capture-protection (from `../node_modules/react-native-capture-protection`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
@@ -3681,7 +3681,7 @@ EXTERNAL SOURCES:
   react-native-biometrics:
     :path: "../node_modules/react-native-biometrics"
   react-native-bw-file-access:
-    :path: "../modules/react-native-bw-file-access"
+    :path: "../src/modules/react-native-bw-file-access"
   react-native-capture-protection:
     :path: "../node_modules/react-native-capture-protection"
   react-native-get-random-values:
@@ -3930,6 +3930,6 @@ SPEC CHECKSUMS:
   Yoga: cf2a67aa1c8a225f0cb98a5f531d6f305d3f12e5
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: 7fa516f1878bc797481133c6a11254daf899e303
+PODFILE CHECKSUM: 3b6ae82641bd75add3220d9a9c08518644915cee
 
 COCOAPODS: 1.16.2
