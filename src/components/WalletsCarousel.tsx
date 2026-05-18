@@ -21,7 +21,6 @@ import { useStorage } from '../hooks/context/useStorage';
 import { WalletTransactionsStatus } from './Context/StorageProvider';
 import { Transaction, TWallet } from '../class/wallets/types';
 import { Spacing10 } from './Spacing';
-import { useLocale } from '@react-navigation/native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -101,7 +100,6 @@ export const WalletCarouselItem: React.FC<WalletCarouselItemProps> = React.memo(
     const { width } = useWindowDimensions();
     const itemWidth = width * 0.82 > 375 ? 375 : width * 0.82;
     const { sizeClass } = useSizeClass();
-    const { direction } = useLocale();
 
     const springConfig = useMemo(() => ({ useNativeDriver: true, tension: 100 }), []);
     const animateScale = useCallback(
@@ -125,7 +123,7 @@ export const WalletCarouselItem: React.FC<WalletCarouselItemProps> = React.memo(
       onPress(item);
     }, [item, onPress]);
 
-    const image = direction === 'rtl' ? require('../img/btc-shape-rtl.png') : require('../img/btc-shape.png');
+    const image = require('../img/btc-shape.png');
 
     let latestTransactionText;
 
@@ -168,7 +166,7 @@ export const WalletCarouselItem: React.FC<WalletCarouselItemProps> = React.memo(
             <LinearGradient colors={WalletGradient.gradientsFor(item.type)} style={iStyles.grad}>
               <ImageBackground source={image} style={iStyles.image} />
               <Text style={iStyles.br} />
-              <Text numberOfLines={1} style={[iStyles.label, { color: colors.inverseForegroundColor, writingDirection: direction }]}>
+              <Text numberOfLines={1} style={[iStyles.label, { color: colors.inverseForegroundColor }]}>
                 {item.getLabel()}
               </Text>
               <View style={iStyles.balanceContainer}>
@@ -182,17 +180,17 @@ export const WalletCarouselItem: React.FC<WalletCarouselItemProps> = React.memo(
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     key={`${balance}`}
-                    style={[iStyles.balance, { color: colors.inverseForegroundColor, writingDirection: direction }]}
+                    style={[iStyles.balance, { color: colors.inverseForegroundColor }]}
                   >
                     {`${balance} `}
                   </Text>
                 )}
               </View>
               <Text style={iStyles.br} />
-              <Text numberOfLines={1} style={[iStyles.latestTx, { color: colors.inverseForegroundColor, writingDirection: direction }]}>
+              <Text numberOfLines={1} style={[iStyles.latestTx, { color: colors.inverseForegroundColor }]}>
                 {loc.wallets.list_latest_transaction}
               </Text>
-              <Text numberOfLines={1} style={[iStyles.latestTxTime, { color: colors.inverseForegroundColor, writingDirection: direction }]}>
+              <Text numberOfLines={1} style={[iStyles.latestTxTime, { color: colors.inverseForegroundColor }]}>
                 {latestTransactionText}
               </Text>
             </LinearGradient>

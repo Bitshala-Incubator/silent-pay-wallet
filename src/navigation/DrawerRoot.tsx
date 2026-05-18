@@ -1,5 +1,4 @@
 import { createDrawerNavigator, DrawerNavigationOptions, DrawerContentComponentProps } from '@react-navigation/drawer';
-import { useLocale } from '@react-navigation/native';
 import React, { useEffect, useMemo } from 'react';
 import { Animated, Easing } from 'react-native';
 import { useSizeClass, SizeClass } from '../modules/sizeClass';
@@ -35,7 +34,6 @@ const getAnimationConfig = (isDrawerTransitionConfigured: boolean) => {
 
 const DrawerRoot = () => {
   const { sizeClass, isLargeScreen } = useSizeClass();
-  const { direction } = useLocale();
   useCompanionListeners();
 
   const getDrawerWidth = useMemo(() => {
@@ -51,7 +49,7 @@ const DrawerRoot = () => {
 
   const drawerStyle: DrawerNavigationOptions = useMemo(
     () => ({
-      drawerPosition: direction === 'rtl' ? 'right' : 'left',
+      drawerPosition: 'left',
       drawerStyle: {
         width: getDrawerWidth,
         height: '100%',
@@ -63,7 +61,7 @@ const DrawerRoot = () => {
 
       ...getAnimationConfig(true),
     }),
-    [getDrawerWidth, isLargeScreen, direction],
+    [getDrawerWidth, isLargeScreen],
   );
 
   useEffect(() => {

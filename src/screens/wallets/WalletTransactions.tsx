@@ -1,4 +1,4 @@
-import { RouteProp, useFocusEffect, useRoute, useLocale } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -50,7 +50,6 @@ type TransactionListItem = Transaction & { type: 'transaction' | 'header' };
 const WalletTransactions: React.FC<WalletTransactionsProps> = ({ route }: { route: WalletTransactionsRouteProps }) => {
   const { saveToDisk } = useStorage();
   const { isBiometricUseCapableAndEnabled } = useBiometrics();
-  const { direction } = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const { params } = useRoute<RouteProps>();
   const { walletID } = params;
@@ -89,10 +88,10 @@ const WalletTransactions: React.FC<WalletTransactionsProps> = ({ route }: { rout
       backgroundColor: colors.background,
     },
     sendIcon: {
-      transform: [{ rotate: direction === 'rtl' ? '-225deg' : '225deg' }],
+      transform: [{ rotate: '225deg' }],
     },
     receiveIcon: {
-      transform: [{ rotate: direction === 'rtl' ? '-45deg' : '45deg' }],
+      transform: [{ rotate: '45deg' }],
     },
   });
 

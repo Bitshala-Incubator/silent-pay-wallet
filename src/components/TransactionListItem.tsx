@@ -63,7 +63,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
     const { navigate } = useExtendedNavigation<NavigationProps>();
     const menuRef = useRef<ToolTipMenuProps>();
     const { txMetadata } = useStorage();
-    const { language, selectedBlockExplorer } = useSettings();
+    const { selectedBlockExplorer } = useSettings();
     const insets = useSafeAreaInsets();
     const containerStyle = useMemo(
       () => ({
@@ -88,8 +88,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
       } else {
         return transactionTimeToReadable(item.timestamp);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [relevantAddress, item.confirmations, item.timestamp, language]);
+    }, [relevantAddress, item.confirmations, item.timestamp]);
 
     const timeText = useMemo(() => {
       if (item.confirmations === 0) {
@@ -111,8 +110,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
           return transactionTimeToReadable(item.timestamp);
         }
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [item.confirmations, item.timestamp, language]);
+    }, [item.confirmations, item.timestamp]);
 
     const txMemo = txMetadata[item.hash]?.memo ?? '';
     const subtitle = useMemo(() => {

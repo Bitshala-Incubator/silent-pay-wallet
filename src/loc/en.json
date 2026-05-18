@@ -217,9 +217,7 @@
         "general": "General",
         "groundcontrol_explanation": "GroundControl is a free, open-source push notifications server for Bitcoin wallets. You can install your own GroundControl server and put its URL here to not rely on Shroud’s infrastructure. Leave blank to use GroundControl’s default server.",
         "header": "Settings",
-        "language": "Language",
         "last_updated": "Last Updated",
-        "language_isRTL": "Restarting Shroud is required for the language orientation to take effect.",
         "license": "License",
         "network": "Network",
         "network_broadcast": "Broadcast Transaction",
@@ -460,5 +458,41 @@
         "error_empty_mnemonic": "Please enter a valid mnemonic phrase or private key.",
         "error_invalid_mnemonic": "Invalid mnemonic phrase or private key.",
         "error_network": "Unable to connect to the network. Please check your connection and try again."
+    },
+    "track_payment": {
+        "title": "Track Payment",
+        "description": "Paste a transaction ID to find your payment without waiting for a full scan.",
+        "txid_label": "Transaction ID",
+        "txid_placeholder": "Enter transaction ID",
+        "txid_helper": "64-character hexadecimal string",
+        "whats_txid": "What's a TXID?",
+        "txid_explanation": "A Transaction ID is a unique code that identifies a Bitcoin transaction. The sender can find it in their wallet after broadcasting.",
+        "check_transaction": "Check Transaction",
+        "banner_title": "Track a payment",
+        "banner_subtitle": "Find it faster with a TXID"
+    },
+    "payment_found": {
+        "title": "Payment Found",
+        "found_it": "Found it!",
+        "status": "Status",
+        "confirming_label": "Confirming",
+        "confirmed": "Confirmed",
+        "attention_highlight": "Almost there!",
+        "attention": "This payment needs {count} more confirmations before it's fully settled.",
+        "view_details": "View Details",
+        "done": "Done"
+    },
+    "no_payment_found": {
+        "title": "No Payment Found",
+        "heading": "No payment to your wallet",
+        "subheading": "in this transaction",
+        "could_mean": "This could mean:",
+        "reason_not_broadcast": "Sender hasn't broadcast yet",
+        "reason_different_address": "Payment sent to different address",
+        "reason_incorrect_txid": "The TXID is incorrect",
+        "reason_not_silent_payment": "Sender used a regular address instead of Silent Payment",
+        "tip_label": "Tip:",
+        "tip": "Double-check with the sender that they used your Silent Payment address.",
+        "copy_my_address": "Copy My Address"
     }
 }

@@ -64,4 +64,8 @@ export interface ScanProgress {
   utxosFound: number;
 }
 
+export interface TransactionByTxidResponse {
+  transaction: IndexerTransaction;
+}
+
 export type ScanProgressCallback = (progress: ScanProgress) => void | Promise<void>;

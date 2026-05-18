@@ -7,6 +7,7 @@ import type {
   IndexerTransaction,
   SilentPaymentIndexerConfig,
   ScanProgressCallback,
+  TransactionByTxidResponse,
 } from '../helpers/silent-payments/types';
 
 export class SilentPaymentIndexer {
@@ -49,6 +50,10 @@ export class SilentPaymentIndexer {
       `/transactions/timestamp-to-height?timestamp=${timestamp}`,
       `Error fetching block height for timestamp ${timestamp}`,
     );
+  }
+
+  async getTransactionByTxid(txid: string): Promise<TransactionByTxidResponse> {
+    return this.httpClient.get<TransactionByTxidResponse>(`/transactions/txid/${txid}`, `Error fetching transaction by txid ${txid}`);
   }
 
   /**

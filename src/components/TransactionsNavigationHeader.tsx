@@ -11,7 +11,6 @@ import { BlurredBalanceView } from './BlurredBalanceView';
 import { useSettings } from '../hooks/context/useSettings';
 import ToolTipMenu from './TooltipMenu';
 import useAnimateOnChange from '../hooks/useAnimateOnChange';
-import { useLocale } from '@react-navigation/native';
 
 interface TransactionsNavigationHeaderProps {
   wallet: TWallet;
@@ -28,7 +27,6 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
 }) => {
   const { hideBalance } = wallet;
   const { preferredFiatCurrency } = useSettings();
-  const { direction } = useLocale();
 
   const handleCopyPress = useCallback(() => {
     const value = formatBalance(wallet.getBalance(), unit);
@@ -107,9 +105,9 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
   const imageSource = useMemo(() => {
     switch (wallet.type) {
       default:
-        return direction === 'rtl' ? require('../img/btc-shape-rtl.png') : require('../img/btc-shape.png');
+        return require('../img/btc-shape.png');
     }
-  }, [direction, wallet.type]);
+  }, [wallet.type]);
 
   useAnimateOnChange(balance);
   useAnimateOnChange(hideBalance);
@@ -124,7 +122,7 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
     >
       <ImageBackground source={imageSource} style={styles.chainIcon} />
 
-      <Text testID="WalletLabel" numberOfLines={1} style={[styles.walletLabel, { writingDirection: direction }]}>
+      <Text testID="WalletLabel" numberOfLines={1} style={styles.walletLabel}>
         {wallet.getLabel()}
       </Text>
       <View style={styles.walletBalanceAndUnitContainer}>

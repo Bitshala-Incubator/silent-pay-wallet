@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from 'react';
 import { Platform, TouchableOpacity } from 'react-native';
 import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';
 import { ToolTipMenuProps, Action } from './types';
-import { useSettings } from '../hooks/context/useSettings';
 
 const ToolTipMenu = (props: ToolTipMenuProps) => {
   const {
@@ -16,8 +15,6 @@ const ToolTipMenu = (props: ToolTipMenuProps) => {
     isButton = false,
     ...restProps
   } = props;
-
-  const { language } = useSettings();
 
   // Map Menu Items for RN Menu (supports subactions and displayInline)
   const mapMenuItemForMenuView = useCallback((action: Action): MenuAction | null => {
@@ -117,7 +114,7 @@ const ToolTipMenu = (props: ToolTipMenuProps) => {
         accessibilityLabel={props.accessibilityLabel}
         accessibilityHint={props.accessibilityHint}
         accessibilityRole={props.accessibilityRole}
-        accessibilityLanguage={language}
+        accessibilityLanguage="en"
       >
         {isMenuPrimaryAction || isButton ? (
           <TouchableOpacity style={buttonStyle} disabled={disabled} onPress={onPress} {...restProps}>

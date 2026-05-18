@@ -53,7 +53,6 @@ export type DetailViewStackParamList = {
   ElectrumSettings: { server?: ElectrumServerItem; onBarScanned?: string };
   SettingsBlockExplorer: undefined;
   EncryptStorage: undefined;
-  Language: undefined;
   NotificationSettings: undefined;
   SelfTest: undefined;
   ReleaseNotes: undefined;
@@ -74,4 +73,7 @@ export type DetailViewStackParamList = {
   ScanQRCode: ScanQRCodeParamList;
   Onboarding: undefined;
   DeleteWallet: undefined;
+  TrackPayment: undefined;
+  PaymentFound: { txid: string; blockHeight: number; tipHeight: number };
+  NoPaymentFound: undefined;
 };

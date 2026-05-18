@@ -31,7 +31,6 @@ import About from '../screens/settings/About';
 import DefaultView from '../screens/settings/DefaultView';
 import ElectrumSettings from '../screens/settings/ElectrumSettings';
 import EncryptStorage from '../screens/settings/EncryptStorage';
-import Language from '../screens/settings/Language';
 import NotificationSettings from '../screens/settings/NotificationSettings';
 import SelfTest from '../screens/settings/SelfTest';
 import ReleaseNotes from '../screens/settings/ReleaseNotes';
@@ -42,6 +41,9 @@ import getWalletTransactionsOptions from './helpers/getWalletTransactionsOptions
 import { useSizeClass, SizeClass } from '../modules/sizeClass';
 import { isDesktop } from '../modules/environment';
 import ReceiveDetails from '../screens/receive/ReceiveDetails';
+import TrackPayment from '../screens/wallets/TrackPayment';
+import PaymentFound from '../screens/wallets/PaymentFound';
+import NoPaymentFound from '../screens/wallets/NoPaymentFound';
 import OnboardingStack from './OnboardingStack';
 
 const DetailViewStackScreensStack = () => {
@@ -206,7 +208,6 @@ const DetailViewStackScreensStack = () => {
         component={EncryptStorage}
         options={navigationStyle({ title: loc.settings.encrypt_title })(theme)}
       />
-      <DetailViewStack.Screen name="Language" component={Language} options={navigationStyle({ title: loc.settings.language })(theme)} />
       <DetailViewStack.Screen
         name="NotificationSettings"
         component={NotificationSettings}
@@ -223,6 +224,30 @@ const DetailViewStackScreensStack = () => {
         name="SettingsPrivacy"
         component={SettingsPrivacy}
         options={navigationStyle({ title: loc.settings.privacy })(theme)}
+      />
+      <DetailViewStack.Screen
+        name="TrackPayment"
+        component={TrackPayment}
+        options={navigationStyle({
+          title: loc.track_payment.title,
+          statusBarStyle: 'auto',
+        })(theme)}
+      />
+      <DetailViewStack.Screen
+        name="PaymentFound"
+        component={PaymentFound}
+        options={navigationStyle({
+          title: loc.payment_found.title,
+          statusBarStyle: 'auto',
+        })(theme)}
+      />
+      <DetailViewStack.Screen
+        name="NoPaymentFound"
+        component={NoPaymentFound}
+        options={navigationStyle({
+          title: loc.no_payment_found.title,
+          statusBarStyle: 'auto',
+        })(theme)}
       />
       <DetailViewStack.Screen
         name="ReceiveDetails"

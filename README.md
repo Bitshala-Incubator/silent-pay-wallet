@@ -86,6 +86,12 @@ npm start
 
 Open ios/Shroud.xcworkspace. Once the project loads, select the scheme/target Shroud. Click Run.
 
+* To generate the debug APK:
+
+```bash
+bash scripts/build-debug-apk.sh
+```
+
 ## TESTS
 
 ```bash

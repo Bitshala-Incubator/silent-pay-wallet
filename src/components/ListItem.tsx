@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
 import { ActivityIndicator, Pressable, PressableProps, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { Avatar, ListItem as RNElementsListItem, Button } from '@rneui/themed'; // Replace with actual import paths
-import { useLocale } from '@react-navigation/native';
-
 import { useTheme } from './themes';
 
 // Update the type for the props
@@ -87,17 +85,14 @@ const ListItem: React.FC<ListItemProps> = React.memo(
     swipeableRightContent,
   }: ListItemProps) => {
     const { colors } = useTheme();
-    const { direction } = useLocale();
     const stylesHook = StyleSheet.create({
       title: {
         color: disabled ? colors.buttonDisabledTextColor : colors.foregroundColor,
         fontSize: 16,
         fontWeight: '500',
-        writingDirection: direction,
       },
       subtitle: {
         flexWrap: 'wrap',
-        writingDirection: direction,
         color: colors.alternativeTextColor,
         fontWeight: '400',
         paddingVertical: switchProps ? 8 : 0,
@@ -154,7 +149,7 @@ const ListItem: React.FC<ListItemProps> = React.memo(
           <ActivityIndicator />
         ) : (
           <>
-            {chevron && <RNElementsListItem.Chevron iconStyle={{ transform: [{ scaleX: direction === 'rtl' ? -1 : 1 }] }} />}
+            {chevron && <RNElementsListItem.Chevron />}
             {rightIcon && <Avatar icon={rightIcon} />}
             {switchProps && (
               <Switch {...memoizedSwitchProps} accessibilityLabel={title} style={styles.margin16} accessible accessibilityRole="switch" />

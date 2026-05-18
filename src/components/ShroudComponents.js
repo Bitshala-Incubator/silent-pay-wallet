@@ -39,11 +39,9 @@ export const ShroudCard = props => {
 
 export const ShroudText = ({ bold = false, ...props }) => {
   const { colors } = useTheme();
-  const { direction } = useLocale();
   const style = StyleSheet.compose(
     {
       color: colors.foregroundColor,
-      writingDirection: direction,
       fontWeight: bold ? 'bold' : 'normal',
     },
     props.style,
@@ -58,7 +56,6 @@ export const ShroudTextCentered = props => {
 
 export const ShroudFormLabel = props => {
   const { colors } = useTheme();
-  const { direction } = useLocale();
 
   return (
     <Text
@@ -67,7 +64,6 @@ export const ShroudFormLabel = props => {
         color: colors.foregroundColor,
         fontWeight: '400',
         marginHorizontal: 20,
-        writingDirection: direction,
       }}
     />
   );

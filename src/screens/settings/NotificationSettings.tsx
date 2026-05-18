@@ -28,13 +28,11 @@ import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SafeAreaScrollView from '../../components/SafeAreaScrollView';
 import { Spacing20, Spacing40 } from '../../components/Spacing';
-import { useLocale } from '@react-navigation/native';
 
 const NotificationSettings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isNotificationsEnabledState, setNotificationsEnabledState] = useState<boolean | undefined>(undefined);
   const [tokenInfo, setTokenInfo] = useState('<empty>');
-  const { direction } = useLocale();
   const [URI, setURI] = useState<string | undefined>();
   const [tapCount, setTapCount] = useState(0);
   const { colors } = useTheme();
@@ -48,7 +46,7 @@ const NotificationSettings: React.FC = () => {
       borderBottomColor: colors.formBorder,
       backgroundColor: colors.inputBackgroundColor,
     },
-    buttonStyles: { flexDirection: direction === 'rtl' ? 'row-reverse' : 'row' },
+    buttonStyles: { flexDirection: 'row' },
   });
   const handleTap = () => {
     setTapCount(prevCount => prevCount + 1);

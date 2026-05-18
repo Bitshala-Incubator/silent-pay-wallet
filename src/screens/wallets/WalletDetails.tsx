@@ -25,7 +25,7 @@ import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
 import { useStorage } from '../../hooks/context/useStorage';
-import { useFocusEffect, useRoute, RouteProp, usePreventRemove, useLocale } from '@react-navigation/native';
+import { useFocusEffect, useRoute, RouteProp, usePreventRemove } from '@react-navigation/native';
 import { Transaction, TWallet } from '../../class/wallets/types';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 import HeaderMenuButton from '../../components/HeaderMenuButton';
@@ -40,7 +40,6 @@ const WalletDetails: React.FC = () => {
   const { saveToDisk, wallets, txMetadata, handleWalletDeletion } = useStorage();
   const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const { walletID } = useRoute<RouteProps>().params;
-  const { direction } = useLocale();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [backdoorPressed, setBackdoorPressed] = useState<number>(0);
   const walletRef = useRef<TWallet | undefined>(wallets.find(w => w.getID() === walletID));
@@ -221,11 +220,9 @@ const WalletDetails: React.FC = () => {
   const stylesHook = StyleSheet.create({
     textLabel1: {
       color: colors.feeText,
-      writingDirection: direction,
     },
     textLabel2: {
       color: colors.feeText,
-      writingDirection: direction,
     },
     textValue: {
       color: colors.outputValue,
@@ -378,7 +375,7 @@ const WalletDetails: React.FC = () => {
                   onBlur={walletNameTextInputOnBlur}
                   numberOfLines={1}
                   placeholderTextColor="#81868e"
-                  style={[styles.inputText, { writingDirection: direction }]}
+                  style={styles.inputText}
                   editable={!isLoading}
                   underlineColorAndroid="transparent"
                   testID="WalletNameInput"

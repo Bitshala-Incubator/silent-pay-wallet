@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BLOCK_EXPLORERS, getBlockExplorerUrl, saveBlockExplorer, BlockExplorer, normalizeUrl } from '../../models/blockExplorer';
 import * as Electrum from '../../modules/Electrum';
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
@@ -7,7 +6,7 @@ import { isReadClipboardAllowed, setReadClipboardAllowed } from '../../modules/c
 import { getPreferredCurrency, GROUP_IO_SHROUD, initCurrencyDaemon, setPreferredCurrency } from '../../modules/currency';
 import { clearUseURv1, isURv1Enabled, setUseURv1 } from '../../modules/ur';
 import { ShroudApp } from '../../class';
-import { saveLanguage, STORAGE_KEY } from '../../loc';
+
 import { FiatUnit, TFiatUnit } from '../../models/fiatUnit';
 import {
   getEnabled as getIsDeviceQuickActionsEnabled,
@@ -75,8 +74,6 @@ export const getTotalBalancePreferredUnit = async (): Promise<BitcoinUnit> => {
 interface SettingsContextType {
   preferredFiatCurrency: TFiatUnit;
   setPreferredFiatCurrencyStorage: (currency: TFiatUnit) => Promise<void>;
-  language: string;
-  setLanguageStorage: (language: string) => Promise<void>;
   isPrivacyBlurEnabled: boolean;
   setIsPrivacyBlurEnabled: (value: boolean) => void;
   isDoNotTrackEnabled: boolean;
@@ -100,8 +97,6 @@ interface SettingsContextType {
 const defaultSettingsContext: SettingsContextType = {
   preferredFiatCurrency: FiatUnit.USD,
   setPreferredFiatCurrencyStorage: async () => {},
-  language: 'en',
-  setLanguageStorage: async () => {},
   isPrivacyBlurEnabled: true,
   setIsPrivacyBlurEnabled: () => {},
   isDoNotTrackEnabled: false,
@@ -126,7 +121,6 @@ export const SettingsContext = createContext<SettingsContextType>(defaultSetting
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.memo(({ children }: { children: React.ReactNode }) => {
   const [preferredFiatCurrency, setPreferredFiatCurrencyState] = useState<TFiatUnit>(FiatUnit.USD);
-  const [language, setLanguage] = useState<string>('en');
   const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState<boolean>(true);
   const [isDoNotTrackEnabled, setIsDoNotTrackEnabled] = useState<boolean>(false);
   const [isLegacyURv1Enabled, setIsLegacyURv1Enabled] = useState<boolean>(false);
@@ -150,9 +144,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       const promises: Promise<void>[] = [
         Electrum.isDisabled().then(disabled => {
           setIsElectrumDisabled(disabled);
-        }),
-        AsyncStorage.getItem(STORAGE_KEY).then(lang => {
-          setLanguage(lang ?? 'en');
         }),
         isURv1Enabled().then(urv1Enabled => {
           setIsLegacyURv1Enabled(urv1Enabled);
@@ -214,15 +205,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
       setPreferredFiatCurrencyState(currency);
     } catch (e) {
       console.error('Error setting preferredFiatCurrency:', e);
-    }
-  }, []);
-
-  const setLanguageStorage = useCallback(async (newLanguage: string): Promise<void> => {
-    try {
-      await saveLanguage(newLanguage);
-      setLanguage(newLanguage);
-    } catch (e) {
-      console.error('Error setting language:', e);
     }
   }, []);
 
@@ -305,8 +287,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
     () => ({
       preferredFiatCurrency,
       setPreferredFiatCurrencyStorage,
-      language,
-      setLanguageStorage,
       isPrivacyBlurEnabled,
       setIsPrivacyBlurEnabled,
       isDoNotTrackEnabled,
@@ -329,8 +309,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = React.m
     [
       preferredFiatCurrency,
       setPreferredFiatCurrencyStorage,
-      language,
-      setLanguageStorage,
       isPrivacyBlurEnabled,
       setIsPrivacyBlurEnabled,
       isDoNotTrackEnabled,

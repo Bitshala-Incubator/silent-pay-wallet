@@ -69,7 +69,8 @@ class MainApplication : Application(), ReactApplication {
         registerReceiver(themeChangeReceiver, IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED))
         
         val sharedI18nUtilInstance = I18nUtil.getInstance()
-        sharedI18nUtilInstance.allowRTL(applicationContext, true)
+        sharedI18nUtilInstance.allowRTL(applicationContext, false)
+        sharedI18nUtilInstance.forceRTL(applicationContext, false)
         SoLoader.init(this, OpenSourceMergedSoMapping)
         if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
             // If you opted-in for the New Architecture, we load the native entry point for this app.

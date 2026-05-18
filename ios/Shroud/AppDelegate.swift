@@ -48,7 +48,8 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
         self.dependencyProvider = RCTAppDependencyProvider()
         self.initialProps = [:]
 
-        RCTI18nUtil.sharedInstance().allowRTL(true)
+        RCTI18nUtil.sharedInstance().allowRTL(false)
+        RCTI18nUtil.sharedInstance().forceRTL(false)
 
         let center = UNUserNotificationCenter.current()
         center.delegate = self

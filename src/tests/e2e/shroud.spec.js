@@ -86,16 +86,6 @@ describe('Shroud UI Tests - no wallets', () => {
     await element(by.text('USD ($)')).tap();
     await device.pressBack();
 
-    // language
-    // change language to Chinese (ZH), test it and switch back to English
-    await element(by.id('Language')).tap();
-    await element(by.text('Chinese (ZH)')).tap();
-    await device.pressBack();
-    await expect(element(by.text('语言'))).toBeVisible();
-    await element(by.id('Language')).tap();
-    await element(by.text('English')).tap();
-    await device.pressBack();
-
     // security
     await element(by.id('SecurityButton')).tap();
     await device.pressBack();

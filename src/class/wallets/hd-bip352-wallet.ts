@@ -425,6 +425,33 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet {
     }
   }
 
+  async scanByTxid(txid: string): Promise<{ found: boolean; utxosFound: number; blockHeight: number; tipHeight: number }> {
+    const indexer = getDefaultIndexer();
+    const [response, tipResponse] = await Promise.all([indexer.getTransactionByTxid(txid), indexer.getLatestBlockHeight()]);
+    const tx = response.transaction;
+
+    const result = await this.processTransactions([tx]);
+
+    let newlyAdded = false;
+    for (const utxo of result.utxos) {
+      if (this.addUTXO(utxo)) {
+        newlyAdded = true;
+      }
+    }
+
+    if (newlyAdded) {
+      this.onBalanceChangeCallback?.();
+      this.onPersistCallback?.();
+    }
+
+    return {
+      found: result.utxos.length > 0,
+      utxosFound: result.utxos.length,
+      blockHeight: tx.blockHeight,
+      tipHeight: tipResponse.height,
+    };
+  }
+
   async fetchUtxo(): Promise<void> {
     const spUtxos = this.getSilentPaymentUTXOs();
 
