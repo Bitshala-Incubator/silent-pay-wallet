@@ -43,7 +43,17 @@ export class IndexerHttpClient {
         if (!response.ok) {
           throw new Error(`${errorContext}: HTTP error! status: ${response.status}`);
         }
-        return await response.json();
+        try {
+          return (await response.json()) as T;
+        } catch (parseError) {
+          const message = parseError instanceof Error ? parseError.message : String(parseError);
+          console.warn(`[IndexerHttpClient] Tor attempt ${attempt}/${RETRY_ATTEMPTS} JSON parse failed: ${message}`);
+          if (attempt < RETRY_ATTEMPTS) {
+            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+          continue;
+        }
       }
 
       torManager.markUnavailable();
@@ -52,10 +62,8 @@ export class IndexerHttpClient {
     if (torManager.isTorOnly) {
       throw new Error(
         this.onionUrl
-          ? `${errorContext}: Tor-only mode is enabled but Tor is unavailable. ` +
-            'Clearnet fallback is blocked. Ensure Orbot is running.'
-          : `${errorContext}: Tor-only mode is enabled but no .onion URL is configured. ` +
-            'Set an onion URL or disable Tor-only mode.',
+          ? `${errorContext}: Tor-only mode is enabled but Tor is unavailable. ` + 'Clearnet fallback is blocked. Ensure Orbot is running.'
+          : `${errorContext}: Tor-only mode is enabled but no .onion URL is configured. ` + 'Set an onion URL or disable Tor-only mode.',
       );
     }
 

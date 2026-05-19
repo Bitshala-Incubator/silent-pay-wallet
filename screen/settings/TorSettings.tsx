@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, View, Switch, TextInput, ActivityIndicator, Platform, TouchableOpacity, AppState } from 'react-native';
 import { BlueCard, BlueText } from '../../BlueComponents';
 import { useSettings } from '../../hooks/context/useSettings';
@@ -39,18 +40,20 @@ const TorSettings: React.FC = () => {
     [colors],
   );
 
-  useEffect(() => {
-    const check = () => {
-      TorManager.isOrbotInstalled()
-        .then(setOrbotInstalled)
-        .catch(() => setOrbotInstalled(null));
-    };
-    check();
-    const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') check();
-    });
-    return () => sub.remove();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const check = () => {
+        TorManager.isOrbotInstalled()
+          .then(setOrbotInstalled)
+          .catch(() => setOrbotInstalled(null));
+      };
+      check();
+      const sub = AppState.addEventListener('change', state => {
+        if (state === 'active') check();
+      });
+      return () => sub.remove();
+    }, []),
+  );
 
   useEffect(() => {
     setPortInput(String(torSocksPort));
@@ -122,7 +125,11 @@ const TorSettings: React.FC = () => {
         <BlueText style={styles.description}>{loc.settings.tor_description}</BlueText>
         <View style={styles.row}>
           <BlueText>{loc.settings.tor_enable}</BlueText>
-          {!settingsInitialized ? <ActivityIndicator size="small" /> : <Switch value={isTorEnabled} onValueChange={handleToggle} />}
+          {!settingsInitialized ? (
+            <ActivityIndicator size="small" />
+          ) : (
+            <Switch value={isTorEnabled} onValueChange={handleToggle} disabled={Platform.OS === 'android' && orbotInstalled === false} />
+          )}
         </View>
 
         {isTorEnabled && (

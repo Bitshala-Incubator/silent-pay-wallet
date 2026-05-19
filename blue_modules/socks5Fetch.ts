@@ -3,12 +3,14 @@ import TcpSocket from 'react-native-tcp-socket';
 const DEFAULT_SOCKS_HOST = '127.0.0.1';
 const DEFAULT_SOCKS_PORT = 9050;
 const DEFAULT_TIMEOUT = 30000;
+const DEFAULT_CONNECT_TIMEOUT = 10000;
 
 interface Socks5FetchOptions {
   method?: string;
   headers?: Record<string, string>;
   body?: string;
   timeout?: number;
+  connectTimeout?: number;
   socksHost?: string;
   socksPort?: number;
 }
@@ -71,6 +73,7 @@ export function socks5Fetch(url: string, options: Socks5FetchOptions = {}): Prom
     headers = {},
     body,
     timeout = DEFAULT_TIMEOUT,
+    connectTimeout = DEFAULT_CONNECT_TIMEOUT,
     socksHost = DEFAULT_SOCKS_HOST,
     socksPort = DEFAULT_SOCKS_PORT,
   } = options;
@@ -94,9 +97,9 @@ export function socks5Fetch(url: string, options: Socks5FetchOptions = {}): Prom
         try {
           client.destroy();
         } catch {}
-        reject(new Error(`SOCKS5 request timeout after ${timeout}ms`));
+        reject(new Error(`SOCKS5 connect timeout after ${connectTimeout}ms`));
       });
-    }, timeout);
+    }, connectTimeout);
 
     const client = TcpSocket.createConnection({ host: socksHost, port: socksPort }, () => {
       // Phase 1: SOCKS5 greeting - version 5, 1 auth method, no auth
@@ -164,7 +167,16 @@ export function socks5Fetch(url: string, options: Socks5FetchOptions = {}): Prom
           }
           pending = pending.subarray(replyLength);
 
-          // Phase 3: Tunnel established - send HTTP request
+          // Phase 3: Tunnel established - swap to full request timeout and send HTTP request
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            finish(() => {
+              try {
+                client.destroy();
+              } catch {}
+              reject(new Error(`SOCKS5 request timeout after ${timeout}ms`));
+            });
+          }, timeout);
           phase = 'http';
           const requestHeaders: Record<string, string> = {
             Host: host,
