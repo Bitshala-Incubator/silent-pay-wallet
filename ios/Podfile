@@ -44,7 +44,7 @@ def configure_target()
 end
 
 
-target 'BlueWallet' do
+target 'Shroud' do
   configure_target()
 end
 

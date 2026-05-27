@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { Icon } from '@rneui/themed';
 import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
@@ -31,7 +31,7 @@ const NoPaymentFound: React.FC = () => {
 
   const handleCopyAddress = useCallback(() => {
     if (!spAddress) return;
-    Clipboard.setString(spAddress);
+    Clipboard.setStringAsync(spAddress);
     triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
   }, [spAddress]);
 

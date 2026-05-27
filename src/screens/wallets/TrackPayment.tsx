@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { Icon } from '@rneui/themed';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -56,7 +56,7 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
   });
 
   const handlePasteFromClipboard = useCallback(async () => {
-    const clipboard = await Clipboard.getString();
+    const clipboard = await Clipboard.getStringAsync();
     if (clipboard) {
       setTxid(clipboard.trim());
     }
