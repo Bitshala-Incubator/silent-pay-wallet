@@ -10,7 +10,7 @@ import type {
   TransactionByTxidResponse,
 } from '../helpers/silent-payments/types';
 
-export class SilentPaymentIndexer {
+class SilentPaymentIndexer {
   private httpClient: IndexerHttpClient;
 
   constructor(config: SilentPaymentIndexerConfig) {
@@ -141,5 +141,3 @@ export function getDefaultIndexer(): SilentPaymentIndexer {
 export function disconnectIndexer(): void {
   defaultIndexer = null;
 }
-
-export default SilentPaymentIndexer;

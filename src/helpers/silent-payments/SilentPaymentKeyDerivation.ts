@@ -5,12 +5,12 @@ import ecc from '../../modules/noble_ecc';
 
 const bip32 = BIP32Factory(ecc);
 
-export interface SilentPaymentKeys {
+interface SilentPaymentKeys {
   scanKey: BIP32Interface;
   spendKey: BIP32Interface;
 }
 
-export function deriveSilentPaymentKeys(seed: Buffer): SilentPaymentKeys {
+function deriveSilentPaymentKeys(seed: Buffer): SilentPaymentKeys {
   const root = bip32.fromSeed(seed);
   const spendKey = root.derivePath("m/352'/0'/0'/0'/0");
   const scanKey = root.derivePath("m/352'/0'/0'/1'/0");

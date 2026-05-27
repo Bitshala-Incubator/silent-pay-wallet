@@ -11,26 +11,20 @@ const AddWalletStack = lazy(() => import('./AddWalletStack'));
 const SendDetailsStack = lazy(() => import('./SendDetailsStack'));
 const WalletExportStack = lazy(() => import('./WalletExportStack'));
 const WalletXpubStackRoot = lazy(() => import('./WalletXpubStack'));
-const SignVerifyStackRoot = lazy(() => import('./SignVerifyStack'));
 const ScanQRCode = lazy(() => import('../screens/send/ScanQRCode'));
 
-export const NavigationDefaultOptions: NativeStackNavigationOptions = {
+const NavigationDefaultOptions: NativeStackNavigationOptions = {
   headerShown: false,
   presentation: 'modal',
   headerShadowVisible: false,
 };
-export const NavigationFormModalOptions: NativeStackNavigationOptions = {
-  headerShown: false,
-  presentation: 'formSheet',
-};
-
-export const NavigationFormNoSwipeDefaultOptions: NativeStackNavigationOptions = {
+const NavigationFormNoSwipeDefaultOptions: NativeStackNavigationOptions = {
   headerShown: false,
   presentation: 'modal',
   headerShadowVisible: false,
   fullScreenGestureEnabled: false,
 };
-export const StatusBarLightOptions: NativeStackNavigationOptions = { statusBarStyle: 'light' };
+const StatusBarLightOptions: NativeStackNavigationOptions = { statusBarStyle: 'light' };
 
 const DetailViewStack = createNativeStackNavigator<DetailViewStackParamList>();
 
@@ -62,12 +56,6 @@ const LazyWalletExportStack = () => (
 const LazyWalletXpubStackRoot = () => (
   <Suspense fallback={<LazyLoadingIndicator />}>
     <WalletXpubStackRoot />
-  </Suspense>
-);
-
-const LazySignVerifyStackRoot = () => (
-  <Suspense fallback={<LazyLoadingIndicator />}>
-    <SignVerifyStackRoot />
   </Suspense>
 );
 
@@ -108,11 +96,6 @@ const MainRoot = () => {
           <DetailViewStack.Screen
             name="WalletXpubRoot"
             component={LazyWalletXpubStackRoot}
-            options={{ ...NavigationDefaultOptions, ...StatusBarLightOptions }}
-          />
-          <DetailViewStack.Screen
-            name="SignVerifyRoot"
-            component={LazySignVerifyStackRoot}
             options={{ ...NavigationDefaultOptions, ...StatusBarLightOptions }}
           />
 

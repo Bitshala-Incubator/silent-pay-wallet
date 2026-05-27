@@ -362,10 +362,6 @@ function getCurrencySymbol(): string {
   return preferredFiatCurrency.symbol;
 }
 
-function formatBTC(btc: BigNumber.Value): string {
-  return new BigNumber(btc).toFormat(8);
-}
-
 function _setPreferredFiatCurrency(currency: FiatUnitType): void {
   preferredFiatCurrency = currency;
 }
@@ -398,5 +394,4 @@ export {
   satoshiToLocalCurrency,
   setPreferredCurrency,
   updateExchangeRate,
-  formatBTC,
 };

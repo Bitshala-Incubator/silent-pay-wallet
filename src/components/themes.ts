@@ -78,7 +78,7 @@ export const BlueDefaultTheme = {
 
 export type Theme = typeof BlueDefaultTheme;
 
-export const BlueDarkTheme: Theme = {
+const BlueDarkTheme: Theme = {
   ...DarkTheme,
   closeImage: require('../img/close-white.png'),
   barStyle: 'light-content',

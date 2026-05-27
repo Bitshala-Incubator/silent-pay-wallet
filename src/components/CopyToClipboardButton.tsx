@@ -10,7 +10,7 @@ type CopyToClipboardButtonProps = {
   displayText?: string;
 };
 
-export const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ stringToCopy, displayText }) => {
+const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ stringToCopy, displayText }) => {
   const onPress = () => {
     Clipboard.setStringAsync(stringToCopy);
     triggerHapticFeedback(HapticFeedbackTypes.Selection);

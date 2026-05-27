@@ -1,6 +1,6 @@
 import { Utxo } from '../../class/wallets/types';
 
-export interface IndexerOutput {
+interface IndexerOutput {
   transactionId: string;
   vout: number;
   pubKey: string;
@@ -56,7 +56,7 @@ export interface HealthResponse {
   message?: string;
 }
 
-export interface ScanProgress {
+interface ScanProgress {
   currentBlock: number;
   totalBlocks: number;
   blocksScanned: number;

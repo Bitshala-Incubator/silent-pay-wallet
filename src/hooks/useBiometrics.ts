@@ -10,10 +10,6 @@ import { useStorage } from './context/useStorage';
 const STORAGEKEY = 'Biometrics';
 const rnBiometrics = new ReactNativeBiometrics({ allowDeviceCredentials: true });
 
-const FaceID = 'Face ID';
-const TouchID = 'Touch ID';
-const Biometrics = 'Biometrics';
-
 const clearKeychain = async () => {
   try {
     console.debug('Wiping keychain');
@@ -192,4 +188,4 @@ const useBiometrics = () => {
   };
 };
 
-export { FaceID, TouchID, Biometrics, RNBiometryTypes as BiometricType, useBiometrics, showKeychainWipeAlert, unlockWithBiometrics };
+export { RNBiometryTypes as BiometricType, useBiometrics, showKeychainWipeAlert, unlockWithBiometrics };

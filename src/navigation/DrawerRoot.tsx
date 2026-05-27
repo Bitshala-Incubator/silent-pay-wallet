@@ -2,7 +2,6 @@ import { createDrawerNavigator, DrawerNavigationOptions, DrawerContentComponentP
 import React, { useEffect, useMemo } from 'react';
 import { Animated, Easing } from 'react-native';
 import { useSizeClass, SizeClass } from '../modules/sizeClass';
-import useCompanionListeners from '../hooks/useCompanionListeners';
 import DrawerList from '../screens/wallets/DrawerList';
 import DetailViewStackScreensStack from './DetailViewScreensStack';
 import { DrawerParamList } from './DrawerParamList';
@@ -34,7 +33,6 @@ const getAnimationConfig = (isDrawerTransitionConfigured: boolean) => {
 
 const DrawerRoot = () => {
   const { sizeClass, isLargeScreen } = useSizeClass();
-  useCompanionListeners();
 
   const getDrawerWidth = useMemo(() => {
     switch (sizeClass) {

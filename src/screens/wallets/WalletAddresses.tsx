@@ -126,7 +126,6 @@ const WalletAddresses: React.FC = () => {
 
   const balanceUnit = wallet?.getPreferredBalanceUnit() ?? BitcoinUnit.BTC;
   const walletInstance = wallet;
-  const allowSignVerifyMessage = (wallet && 'allowSignVerifyMessage' in wallet && wallet.allowSignVerifyMessage()) ?? false;
 
   const { colors } = useTheme();
   const { isPrivacyBlurEnabled } = useSettings();
@@ -203,11 +202,9 @@ const WalletAddresses: React.FC = () => {
 
   const renderRow = useCallback(
     ({ item }: { item: Address }) => {
-      return (
-        <AddressItem item={item} {...item} balanceUnit={balanceUnit} walletID={walletID} allowSignVerifyMessage={allowSignVerifyMessage} />
-      );
+      return <AddressItem item={item} {...item} balanceUnit={balanceUnit} walletID={walletID} />;
     },
-    [balanceUnit, walletID, allowSignVerifyMessage],
+    [balanceUnit, walletID],
   );
 
   if (!wallet) {

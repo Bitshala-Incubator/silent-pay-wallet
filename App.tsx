@@ -10,11 +10,15 @@ import { useLogger } from '@react-navigation/devtools';
 import { StorageProvider } from './src/components/Context/StorageProvider';
 import { initializeIndexer } from './src/modules/SilentPaymentIndexer';
 import { initializeRustJsiBridge } from './src/modules/RustJsiBridge';
+import { INDEXER_BASE_URL } from '@env';
 
 const App = () => {
   initializeRustJsiBridge();
+
+  if (!INDEXER_BASE_URL) throw new Error('INDEXER_BASE_URL is not set');
+
   initializeIndexer({
-    baseUrl: 'https://superparamount-kendal-halting.ngrok-free.dev/',
+    baseUrl: INDEXER_BASE_URL,
     timeout: 100000, // 100 seconds for blockchain scanning operations (increased for slower connections)
   });
 

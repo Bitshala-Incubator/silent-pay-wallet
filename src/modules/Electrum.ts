@@ -192,18 +192,6 @@ export const getPreferredServer = async (): Promise<ElectrumServerItem | undefin
   }
 };
 
-export const removePreferredServer = async () => {
-  try {
-    await DefaultPreference.setName(GROUP_IO_SHROUD);
-    console.log('Removing preferred server');
-    await DefaultPreference.clear(ELECTRUM_HOST);
-    await DefaultPreference.clear(ELECTRUM_TCP_PORT);
-    await DefaultPreference.clear(ELECTRUM_SSL_PORT);
-  } catch (error) {
-    console.error('Error in removePreferredServer:', error);
-  }
-};
-
 export async function isDisabled(): Promise<boolean> {
   let result;
   try {
@@ -534,10 +522,6 @@ export const getConfig = async function () {
     serverName,
     connected: mainClient.timeLastCall !== 0 && mainClient.status,
   };
-};
-
-export const getSecondsSinceLastRequest = function () {
-  return mainClient && mainClient.timeLastCall ? (+new Date() - mainClient.timeLastCall) / 1000 : -1;
 };
 
 export const getTransactionsByAddress = async function (address: string): Promise<ElectrumHistory[]> {
@@ -1172,16 +1156,6 @@ export const serverFeatures = async function () {
   return mainClient.server_features();
 };
 
-export const broadcast = async function (hex: string) {
-  if (!mainClient) throw new Error('Electrum client is not connected');
-  try {
-    const res = await mainClient.blockchainTransaction_broadcast(hex);
-    return res;
-  } catch (error) {
-    return error;
-  }
-};
-
 export const broadcastV2 = async function (hex: string): Promise<string> {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return mainClient.blockchainTransaction_broadcast(hex);
@@ -1199,7 +1173,7 @@ export const estimateCurrentBlockheight = function (): number {
   return Math.floor(baseHeight + (+new Date() - baseTs) / 1000 / 60 / 9.93);
 };
 
-export const calculateBlockTime = function (height: number): number {
+const calculateBlockTime = function (height: number): number {
   if (latestBlock.height) {
     return Math.floor(latestBlock.time + (height - latestBlock.height) * 9.93 * 60);
   }

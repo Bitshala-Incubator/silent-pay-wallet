@@ -5,7 +5,6 @@ import { BackHandler, InteractionManager, Platform, StyleSheet, Text, View } fro
 import Share from 'react-native-share';
 import * as Electrum from '../../modules/Electrum';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
-import { majorTomToGroundControl, tryToObtainPermissions } from '../../modules/notifications';
 import { ShroudCard, ShroudText } from '../../components/ShroudComponents';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import presentAlert from '../../components/Alert';
@@ -105,12 +104,6 @@ const ReceiveDetails = () => {
     }
     if (address) {
       setAddressBIP21Encoded(address);
-      try {
-        await tryToObtainPermissions();
-        majorTomToGroundControl([address], [], []);
-      } catch (error) {
-        console.error('Error obtaining notifications permissions:', error);
-      }
       return;
     }
 
@@ -147,13 +140,6 @@ const ReceiveDetails = () => {
     }
 
     setAddressBIP21Encoded(newAddress);
-
-    try {
-      await tryToObtainPermissions();
-      majorTomToGroundControl([newAddress], [], []);
-    } catch (error) {
-      console.error('Error obtaining notifications permissions:', error);
-    }
   }, [wallet, saveToDisk, address, setAddressBIP21Encoded, isElectrumDisabled, sleep]);
 
   useEffect(() => {

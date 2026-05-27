@@ -4,11 +4,10 @@ import { RouteProp, useFocusEffect, usePreventRemove, useRoute } from '@react-na
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import assert from 'assert';
 import dayjs from 'dayjs';
-import { InteractionManager, Linking, StyleSheet, Text, TextInput, View } from 'react-native';
+import { InteractionManager, StyleSheet, TextInput, View } from 'react-native';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
 import { ShroudCard, ShroudText } from '../../components/ShroudComponents';
 import { Transaction, TWallet } from '../../class/wallets/types';
-import presentAlert from '../../components/Alert';
 import CopyToClipboardButton from '../../components/CopyToClipboardButton';
 import { useTheme } from '../../components/themes';
 import ToolTipMenu from '../../components/TooltipMenu';
@@ -16,7 +15,6 @@ import loc from '../../loc';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 import { useStorage } from '../../hooks/context/useStorage';
-import { useSettings } from '../../hooks/context/useSettings';
 import SafeAreaScrollView from '../../components/SafeAreaScrollView';
 import { Loading } from '../../components/Loading';
 
@@ -48,14 +46,6 @@ function arrDiff(a1: any[], a2: any[]) {
   return ret;
 }
 
-const toolTipMenuActions = [
-  {
-    id: actionKeys.CopyToClipboard,
-    text: loc.transactions.copy_link,
-    icon: actionIcons.Clipboard,
-  },
-];
-
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList, 'TransactionDetails'>;
 type RouteProps = RouteProp<DetailViewStackParamList, 'TransactionDetails'>;
 
@@ -63,7 +53,6 @@ const TransactionDetails = () => {
   const { navigate } = useExtendedNavigation<NavigationProps>();
   const { hash, walletID } = useRoute<RouteProps>().params;
   const { saveToDisk, txMetadata, wallets, getTransactions } = useStorage();
-  const { selectedBlockExplorer } = useSettings();
   const [from, setFrom] = useState<string[]>([]);
   const [to, setTo] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,12 +64,6 @@ const TransactionDetails = () => {
       borderColor: colors.formBorder,
       borderBottomColor: colors.formBorder,
       backgroundColor: colors.inputBackgroundColor,
-    },
-    greyButton: {
-      backgroundColor: colors.lightButton,
-    },
-    Link: {
-      color: colors.buttonTextColor,
     },
   });
 
@@ -135,33 +118,8 @@ const TransactionDetails = () => {
     saveTransactionDetails();
   }, [saveTransactionDetails]);
 
-  const handleOnOpenTransactionOnBlockExplorerTapped = () => {
-    const url = `${selectedBlockExplorer.url}/tx/${tx?.hash}`;
-    Linking.canOpenURL(url)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(url).catch(e => {
-            console.log('openURL failed in handleOnOpenTransactionOnBlockExplorerTapped');
-            console.log(e.message);
-            triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
-            presentAlert({ message: e.message });
-          });
-        } else {
-          console.log('canOpenURL supported is false in handleOnOpenTransactionOnBlockExplorerTapped');
-          triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
-          presentAlert({ message: loc.transactions.open_url_error });
-        }
-      })
-      .catch(e => {
-        console.log('canOpenURL failed in handleOnOpenTransactionOnBlockExplorerTapped');
-        console.log(e.message);
-        triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
-        presentAlert({ message: e.message });
-      });
-  };
-
   const handleCopyPress = (stringToCopy: string) => {
-    Clipboard.setStringAsync(stringToCopy !== actionKeys.CopyToClipboard ? stringToCopy : `${selectedBlockExplorer.url}/tx/${tx?.hash}`);
+    Clipboard.setStringAsync(stringToCopy);
   };
 
   if (isLoading || !tx) {
@@ -299,15 +257,6 @@ const TransactionDetails = () => {
             <View style={styles.marginBottom18} />
           </>
         )}
-        <ToolTipMenu
-          isButton
-          actions={toolTipMenuActions}
-          onPressMenuItem={handleCopyPress}
-          onPress={handleOnOpenTransactionOnBlockExplorerTapped}
-          buttonStyle={StyleSheet.flatten([styles.greyButton, stylesHooks.greyButton])}
-        >
-          <Text style={[styles.Link, stylesHooks.Link]}>{loc.transactions.details_view_in_browser}</Text>
-        </ToolTipMenu>
       </ShroudCard>
     </SafeAreaScrollView>
   );
@@ -335,10 +284,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  Link: {
-    fontWeight: '600',
-    fontSize: 15,
-  },
   weOwnAddress: {
     fontWeight: '700',
   },
@@ -353,17 +298,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 8,
     color: '#81868e',
-  },
-  greyButton: {
-    borderRadius: 9,
-    minHeight: 49,
-    paddingHorizontal: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    alignSelf: 'auto',
-    flexGrow: 1,
-    marginHorizontal: 4,
   },
 });
 

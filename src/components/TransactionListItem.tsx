@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import * as Clipboard from 'expo-clipboard';
-import { Linking, View, ViewStyle, StyleSheet, Text } from 'react-native';
+import { View, ViewStyle, StyleSheet, Text } from 'react-native';
 import { Transaction } from '../class/wallets/types';
 import loc, { formatBalanceWithoutSuffix, transactionTimeToReadable } from '../loc';
 import { BitcoinUnit } from '../models/bitcoinUnits';
-import { useSettings } from '../hooks/context/useSettings';
 import ListItem from './ListItem';
 import { useTheme } from './themes';
 import { Action, ToolTipMenuProps } from './types';
@@ -63,7 +62,6 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
     const { navigate } = useExtendedNavigation<NavigationProps>();
     const menuRef = useRef<ToolTipMenuProps>();
     const { txMetadata } = useStorage();
-    const { selectedBlockExplorer } = useSettings();
     const insets = useSafeAreaInsets();
     const containerStyle = useMemo(
       () => ({
@@ -183,17 +181,6 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
     const handleOnCopyAmountTap = useCallback(() => Clipboard.setStringAsync(rowTitle.replace(/[\s\\-]/g, '')), [rowTitle]);
     const handleOnCopyTransactionID = useCallback(() => Clipboard.setStringAsync(item.hash), [item.hash]);
     const handleOnCopyNote = useCallback(() => Clipboard.setStringAsync(subtitle ?? ''), [subtitle]);
-    const handleOnViewOnBlockExplorer = useCallback(() => {
-      const url = `${selectedBlockExplorer.url}/tx/${item.hash}`;
-      Linking.canOpenURL(url).then(supported => {
-        if (supported) {
-          Linking.openURL(url);
-        }
-      });
-    }, [item.hash, selectedBlockExplorer]);
-    const handleCopyOpenInBlockExplorerPress = useCallback(() => {
-      Clipboard.setStringAsync(`${selectedBlockExplorer.url}/tx/${item.hash}`);
-    }, [item.hash, selectedBlockExplorer]);
 
     const onToolTipPress = useCallback(
       (id: any) => {
@@ -201,27 +188,15 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
           handleOnCopyAmountTap();
         } else if (id === CommonToolTipActions.CopyNote.id) {
           handleOnCopyNote();
-        } else if (id === CommonToolTipActions.OpenInBlockExplorer.id) {
-          handleOnViewOnBlockExplorer();
         } else if (id === CommonToolTipActions.ExpandNote.id) {
           handleOnExpandNote();
-        } else if (id === CommonToolTipActions.CopyBlockExplorerLink.id) {
-          handleCopyOpenInBlockExplorerPress();
         } else if (id === CommonToolTipActions.CopyTXID.id) {
           handleOnCopyTransactionID();
         } else if (id === CommonToolTipActions.Details.id) {
           handleOnDetailsPress();
         }
       },
-      [
-        handleCopyOpenInBlockExplorerPress,
-        handleOnCopyAmountTap,
-        handleOnCopyNote,
-        handleOnCopyTransactionID,
-        handleOnDetailsPress,
-        handleOnExpandNote,
-        handleOnViewOnBlockExplorer,
-      ],
+      [handleOnCopyAmountTap, handleOnCopyNote, handleOnCopyTransactionID, handleOnDetailsPress, handleOnExpandNote],
     );
     const toolTipActions = useMemo((): Action[] => {
       const actions: (Action | Action[])[] = [
@@ -236,11 +211,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
           ...CommonToolTipActions.CopyTXID,
           hidden: !item.hash,
         },
-        {
-          ...CommonToolTipActions.CopyBlockExplorerLink,
-          hidden: !item.hash,
-        },
-        [{ ...CommonToolTipActions.OpenInBlockExplorer, hidden: !item.hash }, CommonToolTipActions.Details],
+        CommonToolTipActions.Details,
         [
           {
             ...CommonToolTipActions.ExpandNote,

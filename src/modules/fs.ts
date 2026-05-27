@@ -15,7 +15,7 @@ import Share from 'react-native-share';
 import presentAlert from '../components/Alert';
 import loc from '../loc';
 import { isDesktop } from './environment';
-import { readFile } from './react-native-bw-file-access';
+
 
 const _sanitizeFileName = (fileName: string) => {
   // Remove any path delimiters and non-alphanumeric characters except for -, _, and .
@@ -80,29 +80,6 @@ export const writeFileAndExport = async function (fileName: string, contents: st
   }
 };
 
-/**
- * Opens & reads *.psbt files, and returns base64 psbt. FALSE if something went wrong (wont throw).
- */
-export const openSignedTransaction = async function (): Promise<string | false> {
-  try {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: Platform.OS === 'ios' ? ['application/json', '*/*'] : '*/*',
-      copyToCacheDirectory: true,
-    });
-
-    if (result.canceled || !result.assets || result.assets.length === 0) {
-      throw { code: 'OPERATION_CANCELED' };
-    }
-
-    return await _readPsbtFileIntoBase64(result.assets[0].uri);
-  } catch (err: any) {
-    if (!isCancel(err)) {
-      presentAlert({ message: loc.send.details_no_signed_tx });
-    }
-  }
-
-  return false;
-};
 
 const _readPsbtFileIntoBase64 = async function (uri: string): Promise<string> {
   const base64 = await readAsStringAsync(uri, { encoding: EncodingType.Base64 });
@@ -225,16 +202,6 @@ const handleImageFile = async (fileCopyUri: string): Promise<{ data: string | fa
   }
 };
 
-export const readFileOutsideSandbox = (filePath: string) => {
-  if (Platform.OS === 'ios') {
-    return readFile(filePath);
-  } else if (Platform.OS === 'android') {
-    return readAsStringAsync(filePath, { encoding: EncodingType.UTF8 });
-  } else {
-    presentAlert({ message: 'Not implemented for this platform' });
-    throw new Error('Not implemented for this platform');
-  }
-};
 
 export const openSignedTransactionRaw: () => Promise<string> = async () => {
   try {
@@ -262,15 +229,3 @@ export const openSignedTransactionRaw: () => Promise<string> = async () => {
   }
 };
 
-export const pickTransaction = async () => {
-  const result = await DocumentPicker.getDocumentAsync({
-    type: '*/*',
-    copyToCacheDirectory: true,
-  });
-
-  if (result.canceled || !result.assets || result.assets.length === 0) {
-    return null;
-  }
-
-  return result.assets[0];
-};

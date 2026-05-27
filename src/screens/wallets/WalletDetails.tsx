@@ -249,15 +249,6 @@ const WalletDetails: React.FC = () => {
         walletID,
       },
     });
-  const navigateToSignVerify = () =>
-    navigate('SignVerifyRoot', {
-      screen: 'SignVerify',
-      params: {
-        walletID,
-        address: wallet.getAllExternalAddresses()[0], // works for both single address and HD wallets
-      },
-    });
-
   const navigateToAddresses = () =>
     navigate('WalletAddresses', {
       walletID,
@@ -457,12 +448,6 @@ const WalletDetails: React.FC = () => {
                   <>
                     <Spacing20 />
                     <SecondButton onPress={navigateToXPub} testID="XpubButton" title={loc.wallets.details_show_xpub} />
-                  </>
-                )}
-                {wallet.allowSignVerifyMessage && wallet.allowSignVerifyMessage() && (
-                  <>
-                    <Spacing20 />
-                    <SecondButton onPress={navigateToSignVerify} testID="SignVerify" title={loc.addresses.sign_title} />
                   </>
                 )}
                 <Spacing20 />

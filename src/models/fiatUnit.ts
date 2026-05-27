@@ -220,7 +220,7 @@ export type TFiatUnit = {
   source: 'CoinDesk' | 'Yadio' | 'Exir' | 'coinpaprika' | 'Bitstamp' | 'Kraken';
 };
 
-export type TFiatUnits = {
+type TFiatUnits = {
   [key: string]: TFiatUnit;
 };
 

@@ -122,6 +122,3 @@ export function spScanSingleTransaction<
 
   return result as RustMatchedUTXO[];
 }
-
-// Export module for advanced use cases
-export { RustJsiBridgeModule };

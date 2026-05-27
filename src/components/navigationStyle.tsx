@@ -33,7 +33,7 @@ type OptionsFormatter = (
   deps: { theme: Theme; navigation: any; route: any },
 ) => NativeStackNavigationOptions;
 
-export type NavigationOptionsGetter = (theme: Theme) => (deps: { navigation: any; route: any }) => NativeStackNavigationOptions;
+type NavigationOptionsGetter = (theme: Theme) => (deps: { navigation: any; route: any }) => NativeStackNavigationOptions;
 
 const getCloseButtonPosition = (
   closeButtonPosition: CloseButtonPosition | undefined,

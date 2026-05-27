@@ -66,5 +66,3 @@ export const startAndDecrypt = async (retry?: boolean): Promise<boolean> => {
     return true;
   }
 };
-
-export default shroudApp;

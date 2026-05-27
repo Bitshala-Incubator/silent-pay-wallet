@@ -38,6 +38,8 @@ cd silent-pay-wallet
 npm install
 ```
 
+make sure to copy .env.example → .env, set INDEXER_BASE_URL in `.env`, then reset metro cache with `npx react-native start --reset-cache`.
+
 Please make sure that your console is running the most stable versions of npm and node (even-numbered versions).
 
 * To run on Android:

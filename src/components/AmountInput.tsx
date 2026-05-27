@@ -30,14 +30,10 @@ import loc, { formatBalancePlain, formatBalanceWithoutSuffix, removeTrailingZero
 import { BitcoinUnit } from '../models/bitcoinUnits';
 import { useTheme } from './themes';
 
-export const conversionCache: { [key: string]: string } = {};
+const conversionCache: { [key: string]: string } = {};
 
 export const getCachedSatoshis = (amount: string): string | undefined => {
   return conversionCache[amount + BitcoinUnit.LOCAL_CURRENCY];
-};
-
-export const setCachedSatoshis = (amount: string, sats: string): void => {
-  conversionCache[amount + BitcoinUnit.LOCAL_CURRENCY] = sats;
 };
 
 type AmountInputProps = Omit<TextInputProps, 'onChangeText' | 'value'> & {

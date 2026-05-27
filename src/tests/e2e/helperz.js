@@ -42,15 +42,6 @@ export async function waitForText(text, timeout = 33000) {
   }
 }
 
-export async function getSwitchValue(switchId) {
-  try {
-    await expect(element(by.id(switchId))).toHaveToggleValue(true);
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
-
 export async function helperImportWallet(importText, walletType, expectedWalletLabel, expectedBalance, passphrase) {
   await waitForId('WalletsList');
 
@@ -190,27 +181,6 @@ export async function tapAndTapAgainIfElementIsNotVisible(idToTap, idToCheckVisi
 
   // check visibility again, this time no try-catch, if it fails it fails
   await waitFor(element(by.id(idToCheckVisible)))
-    .toBeVisible()
-    .withTimeout(3_000);
-}
-
-export async function tapAndTapAgainIfTextIsNotVisible(textToTap, textToCheckVisible) {
-  // tap
-  await element(by.text(textToTap)).tap();
-
-  // check if visible
-  try {
-    await waitFor(element(by.text(textToCheckVisible)))
-      .toBeVisible()
-      .withTimeout(3_000);
-    return; // did not throw? its visible, return
-  } catch (_) {}
-
-  // did not return so its not visible, lets tap again
-  await element(by.text(textToTap)).tap();
-
-  // check visibility again, this time no try-catch, if it fails it fails
-  await waitFor(element(by.text(textToCheckVisible)))
     .toBeVisible()
     .withTimeout(3_000);
 }

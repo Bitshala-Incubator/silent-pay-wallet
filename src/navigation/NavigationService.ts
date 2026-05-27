@@ -23,12 +23,6 @@ export function reset() {
   }
 }
 
-export function popToTop() {
-  if (navigationRef.isReady()) {
-    navigationRef.current?.dispatch(StackActions.popToTop());
-  }
-}
-
 export function pop() {
   if (navigationRef.isReady()) {
     navigationRef.current?.dispatch(StackActions.pop());

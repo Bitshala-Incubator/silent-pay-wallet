@@ -15,7 +15,7 @@ import { useSettings } from '../../hooks/context/useSettings';
 import { Spacing20 } from '../../components/Spacing';
 
 type WalletXpubRouteProp = RouteProp<{ params: { walletID: string; xpub: string } }, 'params'>;
-export type RootStackParamList = {
+type RootStackParamList = {
   WalletXpub: {
     walletID: string;
     xpub: string;

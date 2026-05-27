@@ -18,7 +18,7 @@ export const MODAL_TYPES = {
   SUCCESS: 'SUCCESS',
 } as const;
 
-export type ModalType = (typeof MODAL_TYPES)[keyof typeof MODAL_TYPES];
+type ModalType = (typeof MODAL_TYPES)[keyof typeof MODAL_TYPES];
 
 interface PromptPasswordConfirmationModalProps {
   modalType: ModalType;

@@ -1,7 +1,6 @@
-import { Alert, Linking } from 'react-native';
+import { Linking } from 'react-native';
 
 import { isDesktop } from '../modules/environment';
-import loc from '../loc';
 
 export const openPrivacyDesktopSettings = () => {
   if (isDesktop) {
@@ -9,24 +8,4 @@ export const openPrivacyDesktopSettings = () => {
   } else {
     Linking.openSettings();
   }
-};
-
-export const presentCameraNotAuthorizedAlert = (error: string) => {
-  Alert.alert(
-    loc.errors.error,
-    error,
-    [
-      {
-        text: loc.send.open_settings,
-        onPress: openPrivacyDesktopSettings,
-        style: 'default',
-      },
-      {
-        text: loc._.ok,
-        onPress: () => {},
-        style: 'cancel',
-      },
-    ],
-    { cancelable: true },
-  );
 };

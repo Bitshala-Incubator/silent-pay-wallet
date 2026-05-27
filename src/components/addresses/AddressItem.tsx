@@ -3,18 +3,13 @@ import * as Clipboard from 'expo-clipboard';
 import { StyleSheet, Text, View } from 'react-native';
 import { ListItem } from '@rneui/themed';
 import Share from 'react-native-share';
-import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
-import confirm from '../../helpers/confirm';
-import { unlockWithBiometrics, useBiometrics } from '../../hooks/useBiometrics';
 import loc, { formatBalance } from '../../loc';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
-import presentAlert from '../Alert';
 import QRCodeComponent from '../QRCodeComponent';
 import { useTheme } from '../themes';
 import { AddressTypeBadge } from './AddressTypeBadge';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
-import { useStorage } from '../../hooks/context/useStorage';
 import ToolTipMenu from '../TooltipMenu';
 import { CommonToolTipActions } from '../../typings/CommonToolTipActions';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
@@ -24,7 +19,6 @@ interface AddressItemProps {
   item: any;
   balanceUnit: BitcoinUnit;
   walletID: string;
-  allowSignVerifyMessage: boolean;
   onPress?: () => void;
   searchQuery?: string;
   renderHighlightedText?: (text: string, query: string) => JSX.Element;
@@ -32,18 +26,8 @@ interface AddressItemProps {
 
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList>;
 
-const AddressItem = ({
-  item,
-  balanceUnit,
-  walletID,
-  allowSignVerifyMessage,
-  onPress,
-  searchQuery = '',
-  renderHighlightedText,
-}: AddressItemProps) => {
-  const { wallets } = useStorage();
+const AddressItem = ({ item, balanceUnit, walletID, onPress, searchQuery = '', renderHighlightedText }: AddressItemProps) => {
   const { colors } = useTheme();
-  const { isBiometricUseCapableAndEnabled } = useBiometrics();
 
   const hasTransactions = item.transactions > 0;
 
@@ -77,31 +61,7 @@ const AddressItem = ({
     }
   }, [navigate, walletID, item.address, onPress]);
 
-  const navigateToSignVerify = useCallback(() => {
-    navigate('SignVerifyRoot', {
-      screen: 'SignVerify',
-      params: {
-        walletID,
-        address: item.address,
-      },
-    });
-  }, [navigate, walletID, item.address]);
-
-  const menuActions = useMemo(
-    () => [
-      CommonToolTipActions.CopyTXID,
-      CommonToolTipActions.Share,
-      {
-        ...CommonToolTipActions.SignVerify,
-        hidden: !allowSignVerifyMessage,
-      },
-      {
-        ...CommonToolTipActions.ExportPrivateKey,
-        hidden: !allowSignVerifyMessage,
-      },
-    ],
-    [allowSignVerifyMessage],
-  );
+  const menuActions = useMemo(() => [CommonToolTipActions.CopyToClipboard, CommonToolTipActions.Share], []);
 
   const balance = formatBalance(item.balance, balanceUnit, true);
 
@@ -113,46 +73,16 @@ const AddressItem = ({
     Share.open({ message: item.address }).catch(error => console.log(error));
   }, [item.address]);
 
-  const handleCopyPrivkeyPress = useCallback(() => {
-    const wallet = wallets.find(w => w.getID() === walletID);
-    if (!wallet) {
-      presentAlert({ message: 'Internal error: cant find wallet' });
-      return;
-    }
-
-    try {
-      const wif = wallet._getWIFbyAddress(item.address);
-      if (!wif) {
-        presentAlert({ message: 'Internal error: cant get WIF from the wallet' });
-        return;
-      }
-      triggerHapticFeedback(HapticFeedbackTypes.Selection);
-      Clipboard.setStringAsync(wif);
-    } catch (error: any) {
-      presentAlert({ message: error.message });
-    }
-  }, [wallets, walletID, item.address]);
 
   const onToolTipPress = useCallback(
-    async (id: string) => {
-      if (id === CommonToolTipActions.CopyTXID.id) {
+    (id: string) => {
+      if (id === CommonToolTipActions.CopyToClipboard.id) {
         handleCopyPress();
       } else if (id === CommonToolTipActions.Share.id) {
         handleSharePress();
-      } else if (id === CommonToolTipActions.SignVerify.id) {
-        navigateToSignVerify();
-      } else if (id === CommonToolTipActions.ExportPrivateKey.id) {
-        if (await confirm(loc.addresses.sensitive_private_key)) {
-          if (await isBiometricUseCapableAndEnabled()) {
-            if (!(await unlockWithBiometrics())) {
-              return;
-            }
-          }
-          handleCopyPrivkeyPress();
-        }
       }
     },
-    [handleCopyPress, handleSharePress, navigateToSignVerify, handleCopyPrivkeyPress, isBiometricUseCapableAndEnabled],
+    [handleCopyPress, handleSharePress],
   );
 
   const renderPreview = useCallback(() => <QRCodeComponent value={item.address} isMenuAvailable={false} />, [item.address]);

@@ -10,7 +10,7 @@ export enum SizeClass {
 }
 
 // Interface for the result of getSizeClass
-export interface SizeClassInfo {
+interface SizeClassInfo {
   // Size classes
   horizontalSizeClass: SizeClass;
   verticalSizeClass: SizeClass;
@@ -32,7 +32,7 @@ export interface SizeClassInfo {
 /**
  * Get current size class information based on device dimensions
  */
-export function getSizeClass(): SizeClassInfo {
+function getSizeClass(): SizeClassInfo {
   // Get device dimensions
   const { width, height } = Dimensions.get('window');
   const isLandscape = width > height;

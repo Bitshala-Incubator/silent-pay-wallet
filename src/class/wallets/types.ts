@@ -54,7 +54,7 @@ type TransactionInput = {
   value?: number;
 };
 
-export type TransactionOutput = {
+type TransactionOutput = {
   value: number;
   n: number;
   scriptPubKey: {

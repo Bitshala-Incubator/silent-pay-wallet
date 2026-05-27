@@ -9,7 +9,6 @@ import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import * as Electrum from '../../modules/Electrum';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
 import { startAndDecrypt } from '../../modules/start-and-decrypt';
-import { isNotificationsEnabled, majorTomToGroundControl, unsubscribe } from '../../modules/notifications';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
 import { navigationRef } from '../../navigation/NavigationService';
 
@@ -47,7 +46,7 @@ interface StorageContextType {
   cachedPassword: typeof shroudApp.cachedPassword;
   getItem: typeof shroudApp.getItem;
   setItem: typeof shroudApp.setItem;
-  handleWalletDeletion: (walletID: string, forceDelete?: boolean) => Promise<boolean>;
+  handleWalletDeletion: (walletID: string) => Promise<boolean>;
   confirmWalletDeletion: (wallet: any, onConfirmed: () => void) => void;
 }
 
@@ -211,7 +210,7 @@ export const StorageProvider = ({ children }: { children: React.ReactNode }) => 
   }, []);
 
   const handleWalletDeletion = useCallback(
-    async (walletID: string, forceDelete = false): Promise<boolean> => {
+    async (walletID: string): Promise<boolean> => {
       console.debug(`handleWalletDeletion: invoked for walletID ${walletID}`);
       const wallet = wallets.find(w => w.getID() === walletID);
       if (!wallet) {
@@ -219,69 +218,7 @@ export const StorageProvider = ({ children }: { children: React.ReactNode }) => 
         return false;
       }
 
-      if (forceDelete) {
-        deleteWallet(wallet);
-        await saveToDisk(true);
-        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-        return true;
-      }
-
-      let isNotificationsSettingsEnabled = false;
       try {
-        isNotificationsSettingsEnabled = await isNotificationsEnabled();
-      } catch (error) {
-        console.error(`handleWalletDeletion: error checking notifications for wallet ${walletID}`, error);
-        return await new Promise<boolean>(resolve => {
-          presentAlert({
-            title: loc.errors.error,
-            message: loc.wallets.details_delete_wallet_error_message,
-            buttons: [
-              {
-                text: loc.wallets.details_delete_anyway,
-                onPress: async () => {
-                  const result = await handleWalletDeletion(walletID, true);
-                  resolve(result);
-                },
-                style: 'destructive',
-              },
-              {
-                text: loc.wallets.list_tryagain,
-                onPress: async () => {
-                  const result = await handleWalletDeletion(walletID);
-                  resolve(result);
-                },
-              },
-              {
-                text: loc._.cancel,
-                onPress: () => resolve(false),
-                style: 'cancel',
-              },
-            ],
-            options: { cancelable: false },
-          });
-        });
-      }
-
-      try {
-        if (isNotificationsSettingsEnabled) {
-          const externalAddresses = wallet.getAllExternalAddresses();
-          if (externalAddresses.length > 0) {
-            console.debug(`handleWalletDeletion: unsubscribing addresses for wallet ${walletID}`);
-            try {
-              await unsubscribe(externalAddresses, [], []);
-              console.debug(`handleWalletDeletion: unsubscribe succeeded for wallet ${walletID}`);
-            } catch (unsubscribeError) {
-              console.error(`handleWalletDeletion: unsubscribe failed for wallet ${walletID}`, unsubscribeError);
-              presentAlert({
-                title: loc.errors.error,
-                message: loc.wallets.details_delete_wallet_error_message,
-                buttons: [{ text: loc._.ok, onPress: () => {} }],
-                options: { cancelable: false },
-              });
-              return false;
-            }
-          }
-        }
         deleteWallet(wallet);
         console.debug(`handleWalletDeletion: wallet ${walletID} deleted successfully`);
         await saveToDisk(true);
@@ -298,7 +235,7 @@ export const StorageProvider = ({ children }: { children: React.ReactNode }) => 
               {
                 text: loc.wallets.details_delete_anyway,
                 onPress: async () => {
-                  const result = await handleWalletDeletion(walletID, true);
+                  const result = await handleWalletDeletion(walletID);
                   resolve(result);
                 },
                 style: 'destructive',
@@ -480,12 +417,6 @@ export const StorageProvider = ({ children }: { children: React.ReactNode }) => 
       });
 
       await w.fetchBalance();
-      try {
-        await majorTomToGroundControl(w.getAllExternalAddresses(), [], []);
-      } catch (error) {
-        console.warn('Failed to setup notifications:', error);
-        // Consider if user should be notified of notification setup failure
-      }
     },
     [wallets, addWallet, saveToDisk],
   );

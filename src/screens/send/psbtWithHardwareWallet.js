@@ -17,7 +17,6 @@ import loc from '../../loc';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { useSettings } from '../../hooks/context/useSettings';
-import { majorTomToGroundControl } from '../../modules/notifications';
 import { openSignedTransactionRaw } from '../../modules/fs';
 import { Spacing20 } from '../../components/Spacing';
 
@@ -142,7 +141,6 @@ const PsbtWithHardwareWallet = () => {
         setIsLoading(false);
         const txDecoded = bitcoin.Transaction.fromHex(txHex);
         const txid = txDecoded.getId();
-        majorTomToGroundControl([], [], [txid]);
         if (memo) {
           txMetadata[txid] = { memo };
         }

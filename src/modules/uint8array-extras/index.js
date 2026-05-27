@@ -31,19 +31,19 @@ function isUint8ArrayOrArrayBuffer(value) {
   return isUint8Array(value) || isArrayBuffer(value);
 }
 
-export function assertUint8Array(value) {
+function assertUint8Array(value) {
   if (!isUint8Array(value)) {
     throw new TypeError(`Expected \`Uint8Array\`, got \`${typeof value}\``);
   }
 }
 
-export function assertUint8ArrayOrArrayBuffer(value) {
+function assertUint8ArrayOrArrayBuffer(value) {
   if (!isUint8ArrayOrArrayBuffer(value)) {
     throw new TypeError(`Expected \`Uint8Array\` or \`ArrayBuffer\`, got \`${typeof value}\``);
   }
 }
 
-export function toUint8Array(value) {
+function toUint8Array(value) {
   if (value instanceof ArrayBuffer) {
     return new Uint8Array(value);
   }
@@ -55,7 +55,7 @@ export function toUint8Array(value) {
   throw new TypeError(`Unsupported value, got \`${typeof value}\`.`);
 }
 
-export function concatUint8Arrays(arrays, totalLength) {
+function concatUint8Arrays(arrays, totalLength) {
   if (arrays.length === 0) {
     return new Uint8Array(0);
   }
@@ -74,7 +74,7 @@ export function concatUint8Arrays(arrays, totalLength) {
   return returnValue;
 }
 
-export function areUint8ArraysEqual(a, b) {
+function areUint8ArraysEqual(a, b) {
   assertUint8Array(a);
   assertUint8Array(b);
 
@@ -96,7 +96,7 @@ export function areUint8ArraysEqual(a, b) {
   return true;
 }
 
-export function compareUint8Arrays(a, b) {
+function compareUint8Arrays(a, b) {
   assertUint8Array(a);
   assertUint8Array(b);
 
@@ -135,7 +135,7 @@ function assertString(value) {
 
 const cachedEncoder = new globalThis.TextEncoder();
 
-export function stringToUint8Array(string) {
+function stringToUint8Array(string) {
   assertString(string);
   return cachedEncoder.encode(string);
 }
@@ -151,7 +151,7 @@ function base64UrlToBase64(base64url) {
 // Reference: https://phuoc.ng/collection/this-vs-that/concat-vs-push/
 const MAX_BLOCK_SIZE = 65_535;
 
-export function uint8ArrayToBase64(array, { urlSafe = false } = {}) {
+function uint8ArrayToBase64(array, { urlSafe = false } = {}) {
   assertUint8Array(array);
 
   let base64;
@@ -171,12 +171,12 @@ export function uint8ArrayToBase64(array, { urlSafe = false } = {}) {
   return urlSafe ? base64ToBase64Url(base64) : base64;
 }
 
-export function base64ToUint8Array(base64String) {
+function base64ToUint8Array(base64String) {
   assertString(base64String);
   return Uint8Array.from(globalThis.atob(base64UrlToBase64(base64String)), (x) => x.codePointAt(0));
 }
 
-export function stringToBase64(string, { urlSafe = false } = {}) {
+function stringToBase64(string, { urlSafe = false } = {}) {
   assertString(string);
   return uint8ArrayToBase64(stringToUint8Array(string), { urlSafe });
 }
@@ -255,7 +255,7 @@ export function hexToUint8Array(hexString) {
 @param {DataView} view
 @returns {number}
 */
-export function getUintBE(view) {
+function getUintBE(view) {
   const { byteLength } = view;
 
   if (byteLength === 6) {
@@ -288,7 +288,7 @@ export function getUintBE(view) {
 @param {Uint8Array} value
 @returns {number}
 */
-export function indexOf(array, value) {
+function indexOf(array, value) {
   const arrayLength = array.length;
   const valueLength = value.length;
 
@@ -324,6 +324,6 @@ export function indexOf(array, value) {
 @param {Uint8Array} value
 @returns {boolean}
 */
-export function includes(array, value) {
+function includes(array, value) {
   return indexOf(array, value) !== -1;
 }

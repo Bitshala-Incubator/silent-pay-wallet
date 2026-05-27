@@ -32,8 +32,6 @@ export type DetailViewStackParamList = {
   RBFBumpFee: { txid: string; wallet: TWallet | null };
   RBFCancel: { txid: string; wallet: TWallet | null };
   Broadcast: object;
-  IsItMyAddress: object;
-  GenerateWord: undefined;
   Success: undefined;
   WalletAddresses: { walletID: string };
   AddWalletRoot?: {
@@ -44,28 +42,13 @@ export type DetailViewStackParamList = {
   WalletExportRoot: undefined;
   Settings: undefined;
   Currency: undefined;
-  GeneralSettings: undefined;
   PlausibleDeniability: undefined;
   Licensing: undefined;
-  NetworkSettings: undefined;
   About: undefined;
-  DefaultView: undefined;
   ElectrumSettings: { server?: ElectrumServerItem; onBarScanned?: string };
-  SettingsBlockExplorer: undefined;
   EncryptStorage: undefined;
-  NotificationSettings: undefined;
   SelfTest: undefined;
-  ReleaseNotes: undefined;
-  ToolsScreen: undefined;
-  SettingsPrivacy: undefined;
   WalletXpubRoot: undefined;
-  SignVerifyRoot: {
-    screen: 'SignVerify';
-    params: {
-      walletID: string;
-      address: string;
-    };
-  };
   ReceiveDetails: {
     walletID?: string;
     address: string;

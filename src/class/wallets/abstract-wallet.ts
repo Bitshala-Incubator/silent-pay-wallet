@@ -159,10 +159,6 @@ export class AbstractWallet {
     return false;
   }
 
-  allowSignVerifyMessage(): boolean {
-    return false;
-  }
-
   allowMasterFingerprint(): boolean {
     return false;
   }

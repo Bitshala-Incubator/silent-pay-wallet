@@ -43,6 +43,7 @@
     "jest-environment-node": "^29.7.0",
     "node-fetch": "^2.6.7",
     "prettier": "^3.2.5",
+    "react-native-dotenv": "^3.4.11",
     "ts-jest": "^29.1.1",
     "typescript": "~5.9.2"
   },
@@ -52,7 +53,6 @@
   "scripts": {
     "clean": "cd android/; ./gradlew clean; cd ..; rm -r -f /tmp/metro-cache/; rm -r -f node_modules/; npm cache clean --force; npm i; npm start -- --reset-cache",
     "clean:ios": "rm -fr node_modules && rm -fr ios/Pods && npm i && cd ios && pod update && cd ..; npm start -- --reset-cache",
-    "releasenotes2json": "./scripts/release-notes.sh > release-notes.txt; node -e 'console.log(JSON.stringify(require(\"fs\").readFileSync(\"release-notes.txt\", \"utf8\")));' > release-notes.json",
     "branch2json": "./scripts/current-branch.sh > current-branch.json",
     "start": "expo start",
     "android": "expo run:android",
@@ -61,7 +61,7 @@
     "ios": "expo run:ios",
     "ios:sim:cloud": "npx eas-cli build --profile development --platform ios",
     "ios:sim:local": "npx expo run:ios --scheme Shroud",
-    "postinstall": "npm run releasenotes2json; npm run branch2json; npm run patches",
+    "postinstall": "npm run branch2json; npm run patches",
     "patches": "npx --yes patch-package",
     "test": "npm run tslint && npm run lint && npm run unit && npm run integration",
     "integration": "jest src/tests/integration/*",
@@ -81,7 +81,7 @@
     "rust:ios": "bash rust-native-setup.sh ios",
     "rust:rebuild": "cd rust_jsi_bridge && cargo clean && cd .. && npm run rust:build",
     "android:rust": "npm run rust:build && cd android && ./gradlew clean && cd .. && npm run android",
-    "eas-build-pre-install": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && export PATH=\"$HOME/.cargo/bin:$PATH\" && npm run rust:ios"
+    "eas-build-pre-install": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && export PATH=\"$HOME/.cargo/bin:$PATH\" && if [ \"$EAS_BUILD_PLATFORM\" = \"ios\" ]; then npm run rust:ios; else npm run rust:build; fi"
   },
   "dependencies": {
     "@bugsnag/react-native": "8.4.0",
@@ -152,7 +152,6 @@
     "react-native-keychain": "9.1.0",
     "react-native-prompt-android": "github:BlueWallet/react-native-prompt-android#ed168d66fed556bc2ed07cf498770f058b78a376",
     "react-native-qrcode-svg": "6.3.15",
-    "react-native-quick-actions": "0.3.13",
     "react-native-rate": "1.2.12",
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.2",

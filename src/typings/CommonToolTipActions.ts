@@ -3,9 +3,7 @@ import loc from '../loc';
 
 const keys = {
   CopyTXID: 'copyTX_ID',
-  CopyBlockExplorerLink: 'copy_blockExplorer',
   ExpandNote: 'expandNote',
-  OpenInBlockExplorer: 'open_in_blockExplorer',
   CopyAmount: 'copyAmount',
   CopyNote: 'copyNote',
   ImportWallet: 'importWallet',
@@ -35,8 +33,6 @@ const keys = {
   CopyToClipboard: 'copyToClipboard',
   Share: 'share',
   SaveFile: 'saveFile',
-  SignVerify: 'signVerify',
-  ExportPrivateKey: 'exportPrivateKey',
   PasteFromClipboard: 'pasteFromClipboard',
   Hide: 'hide',
   SortASC: 'sortASC',
@@ -74,9 +70,7 @@ const icons = {
   ScanQR: { iconValue: Platform.OS === 'ios' ? 'qrcode.viewfinder' : 'ic_menu_camera' },
   ChoosePhoto: { iconValue: Platform.OS === 'ios' ? 'photo.on.rectangle' : 'ic_menu_gallery' },
   Clipboard: { iconValue: Platform.OS === 'ios' ? 'document.on.clipboard' : 'ic_menu_file' },
-  ExportPrivateKey: { iconValue: Platform.OS === 'ios' ? 'key' : 'ic_lock_idle_lock' },
   Share: { iconValue: Platform.OS === 'ios' ? 'square.and.arrow.up' : 'ic_menu_share' },
-  Signature: { iconValue: Platform.OS === 'ios' ? 'signature' : 'ic_menu_edit' },
   PasteFromClipboard: { iconValue: Platform.OS === 'ios' ? 'document.on.clipboard' : 'ic_menu_paste' },
   ImportFile: { iconValue: Platform.OS === 'ios' ? 'document.viewfinder' : 'ic_menu_upload' },
   Hide: { iconValue: Platform.OS === 'ios' ? 'eye.slash' : 'ic_menu_close_clear_cancel' },
@@ -103,16 +97,6 @@ export const CommonToolTipActions: Record<string, ToolTipAction> = {
     id: keys.CopyTXID,
     text: loc.transactions.details_copy_txid,
     icon: icons.Clipboard,
-  },
-  CopyBlockExplorerLink: {
-    id: keys.CopyBlockExplorerLink,
-    text: loc.transactions.details_copy_block_explorer_link,
-    icon: icons.Clipboard,
-  },
-  OpenInBlockExplorer: {
-    id: keys.OpenInBlockExplorer,
-    text: loc.transactions.details_view_in_browser,
-    icon: icons.Link,
   },
   ExpandNote: {
     id: keys.ExpandNote,
@@ -266,18 +250,6 @@ export const CommonToolTipActions: Record<string, ToolTipAction> = {
     id: keys.Share,
     text: loc.receive.details_share,
     icon: icons.Share,
-  },
-  SignVerify: {
-    id: keys.SignVerify,
-    text: loc.addresses.sign_title,
-    icon: icons.Signature,
-    hidden: false,
-  },
-  ExportPrivateKey: {
-    id: keys.ExportPrivateKey,
-    text: loc.addresses.copy_private_key,
-    icon: icons.ExportPrivateKey,
-    hidden: false,
   },
   ResetToDefault: {
     id: keys.ResetToDefault,

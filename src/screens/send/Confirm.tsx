@@ -21,7 +21,6 @@ import { SendDetailsStackParamList } from '../../navigation/SendDetailsStackPara
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useSettings } from '../../hooks/context/useSettings';
-import { majorTomToGroundControl } from '../../modules/notifications';
 
 enum ActionType {
   SET_LOADING = 'SET_LOADING',
@@ -172,7 +171,6 @@ const Confirm: React.FC = () => {
 
       const txid = bitcoin.Transaction.fromHex(tx).getId();
       txidsToWatch.push(txid);
-      majorTomToGroundControl([], [], txidsToWatch);
       let amount = 0;
       for (const recipient of recipients) {
         if (recipient.value) {

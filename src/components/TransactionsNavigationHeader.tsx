@@ -211,21 +211,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export const actionKeys = {
-  CopyToClipboard: 'copyToClipboard',
-  WalletBalanceVisibility: 'walletBalanceVisibility',
-};
-
-export const actionIcons = {
-  Eye: {
-    iconValue: 'eye',
-  },
-  EyeSlash: {
-    iconValue: 'eye.slash',
-  },
-  Clipboard: {
-    iconValue: 'doc.on.doc',
-  },
-};
-
 export default TransactionsNavigationHeader;

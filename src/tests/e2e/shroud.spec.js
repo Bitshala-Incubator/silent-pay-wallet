@@ -3,7 +3,6 @@ import * as bitcoin from 'bitcoinjs-lib';
 
 import {
   scanText,
-  expectToBeVisible,
   extractTextFromElementById,
   hashIt,
   helperCreateWallet,
@@ -61,116 +60,15 @@ describe('Shroud UI Tests - no wallets', () => {
     await device.launchApp({ delete: true }); // reinstalling the app just for any case to clean up app's storage
     await waitForId('WalletsList');
 
-    // go to settings, press SelfTest and wait for OK
+    // go to settings
     await element(by.id('SettingsButton')).tap();
 
-    // general
-    await element(by.id('GeneralSettings')).tap();
-
-    // privacy
-    // trigger switches
-    await element(by.id('SettingsPrivacy')).tap();
-    await element(by.id('ClipboardSwitch')).tap();
-    await element(by.id('ClipboardSwitch')).tap();
-    await element(by.id('QuickActionsSwitch')).tap();
-    await element(by.id('QuickActionsSwitch')).tap();
-    await device.pressBack();
-    await device.pressBack();
-
-    //
     // currency
     // change currency to ARS ($) and switch it back to USD ($)
     await element(by.id('Currency')).tap();
     await element(by.text('ARS ($)')).tap();
     await expect(element(by.text('Rate is obtained from Yadio'))).toBeVisible();
     await element(by.text('USD ($)')).tap();
-    await device.pressBack();
-
-    // security
-    await element(by.id('SecurityButton')).tap();
-    await device.pressBack();
-
-    // network
-    await element(by.id('NetworkSettings')).tap();
-
-    // network -> electrum server
-    // change electrum server to electrum.blockstream.info and revert it back
-    await element(by.id('ElectrumSettings')).tap();
-    await element(by.id('ElectrumSettingsScrollView')).swipe('up', 'fast', 1); // in case emu screen is small and it doesnt fit
-    await element(by.id('HostInput')).replaceText('electrum.blockstream.info\n');
-    await element(by.id('PortInput')).replaceText('50001\n');
-    await element(by.id('ElectrumSettingsScrollView')).swipe('up', 'fast', 1); // in case emu screen is small and it doesnt fit
-    await element(by.id('Save')).tap();
-    await waitForText('OK');
-    await element(by.text('OK')).tap();
-    await element(by.id('HeaderMenuButton')).tap();
-    await element(by.text('Reset to default')).tap();
-    await element(by.text('RESET TO DEFAULT')).tap();
-    await waitForText('OK');
-    await element(by.text('OK')).tap();
-    await element(by.id('ElectrumSettingsScrollView')).swipe('up', 'fast', 1); // in case emu screen is small and it doesnt fit
-    await expect(element(by.id('HostInput'))).toHaveText('');
-    await expect(element(by.id('PortInput'))).toHaveText('');
-    await expect(element(by.id('SSLPortInput'))).toHaveToggleValue(false);
-    await device.pressBack();
-
-    // network -> lightning
-    // change URI and revert it back
-    /* muted since https://lndhub.herokuapp.com is down
-    await element(by.id('LightningSettings')).tap();
-    await element(by.id('URIInput')).replaceText('invalid\n');
-    await element(by.id('Save')).tap();
-    await waitForText('OK');
-    await expect(element(by.text('Invalid LNDHub URI'))).toBeVisible();
-    await element(by.text('OK')).tap();
-    await element(by.id('URIInput')).replaceText('https://lndhub.herokuapp.com\n');
-    await element(by.id('Save')).tap();
-    await waitForText('OK');
-    await expect(element(by.text('Your changes have been saved successfully.'))).toBeVisible();
-    await element(by.text('OK')).tap();
-    await element(by.id('URIInput')).replaceText('\n');
-    await element(by.id('Save')).tap();
-    await waitForText('OK');
-    await expect(element(by.text('Your changes have been saved successfully.'))).toBeVisible();
-    await element(by.text('OK')).tap();
-    await device.pressBack();
-    */
-
-    // notifications
-    // turn on notifications if available
-    // console.warn('waitForId');
-    // await sleep(300000);
-    if (await expectToBeVisible('NotificationSettings')) {
-      await element(by.id('NotificationSettings')).tap();
-      await element(by.id('NotificationsSwitch')).tap();
-      await sleep(3_000);
-      await element(by.id('NotificationsSwitch')).tap();
-      await device.pressBack();
-      await device.pressBack();
-    } else {
-      await device.pressBack();
-    }
-
-    // tools
-    await element(by.id('Tools')).tap();
-
-    // tools -> broadcast
-    // try to broadcast wrong tx
-    await element(by.id('Broadcast')).tap();
-    await element(by.id('TxHex')).replaceText('invalid\n');
-    await element(by.id('BroadcastButton')).tap();
-    await waitForText('OK');
-    // await expect(element(by.text('the transaction was rejected by network rules....'))).toBeVisible();
-    await element(by.text('OK')).tap();
-    await device.pressBack();
-
-    // IsItMyAddress
-    await element(by.id('IsItMyAddress')).tap();
-    await element(by.id('AddressInput')).replaceText('bc1q063ctu6jhe5k4v8ka99qac8rcm2tzjjnuktyrl');
-    await element(by.id('CheckAddress')).tap();
-    await expect(element(by.text('None of the available wallets own the provided address.'))).toBeVisible();
-    await element(by.text('OK')).tap();
-    await device.pressBack();
     await device.pressBack();
 
     // about
