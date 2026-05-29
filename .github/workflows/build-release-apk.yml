@@ -68,6 +68,12 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Rust native libs
+        run: bash rust-native-setup.sh
+
       - name: Update Version Code, Build, and Sign APK
         id: build_and_sign_apk
         run: |
