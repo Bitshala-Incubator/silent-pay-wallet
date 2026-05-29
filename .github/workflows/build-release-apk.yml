@@ -72,6 +72,17 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust_jsi_bridge/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('rust_jsi_bridge/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       - name: Build Rust native libs
         run: bash rust-native-setup.sh
 
