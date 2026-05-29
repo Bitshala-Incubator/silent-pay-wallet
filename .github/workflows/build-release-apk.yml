@@ -1,6 +1,7 @@
 name: BuildReleaseApk
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - master
@@ -94,7 +95,7 @@ jobs:
           else
             EXPECTED_FILENAME="Shroud-${VERSION_NAME}-${NEW_BUILD_NUMBER}.apk"
           fi
-      
+
           APK_PATH="android/app/build/outputs/apk/release/${EXPECTED_FILENAME}"
           echo "EXPECTED_FILENAME=${EXPECTED_FILENAME}" >> $GITHUB_ENV
           echo "APK_PATH=${APK_PATH}" >> $GITHUB_ENV
