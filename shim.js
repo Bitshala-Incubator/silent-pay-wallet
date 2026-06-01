@@ -25,11 +25,9 @@ process.nextTick = function (callback, ...args) {
 
 // global.location = global.location || { port: 80 }
 const isDev = typeof __DEV__ === 'boolean' && __DEV__;
-process.env.NODE_ENV = isDev ? 'development' : 'production';
+// NOTE: Do not assign process.env.NODE_ENV here — babel-preset-expo/react-native-dotenv
+// replaces process.env.* references with string literals (even on the left side of
+// assignments), which produces invalid JS like: 'production' = isDev ? ...
 if (typeof localStorage !== 'undefined') {
   localStorage.debug = isDev ? '*' : '';
 }
-
-// If using the crypto shim, uncomment the following line to ensure
-// crypto is loaded first, so it can populate global.crypto
-require('crypto');

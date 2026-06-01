@@ -15,12 +15,14 @@ import { INDEXER_BASE_URL } from '@env';
 const App = () => {
   initializeRustJsiBridge();
 
-  if (!INDEXER_BASE_URL) throw new Error('INDEXER_BASE_URL is not set');
-
-  initializeIndexer({
-    baseUrl: INDEXER_BASE_URL,
-    timeout: 100000, // 100 seconds for blockchain scanning operations (increased for slower connections)
-  });
+  if (!INDEXER_BASE_URL) {
+    console.warn('[App] INDEXER_BASE_URL is not set — silent payment scanning will not work. Set it in your .env file.');
+  } else {
+    initializeIndexer({
+      baseUrl: INDEXER_BASE_URL,
+      timeout: 100000, // 100 seconds for blockchain scanning operations (increased for slower connections)
+    });
+  }
 
   useLogger(navigationRef as any);
 
