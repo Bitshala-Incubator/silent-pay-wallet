@@ -2243,8 +2243,6 @@ PODS:
     - SocketRocket
   - react-native-biometrics (3.0.1):
     - React-Core
-  - react-native-bw-file-access (1.0.0):
-    - React-Core
   - react-native-capture-protection (2.0.7):
     - RCT-Folly
     - RCTRequired
@@ -3047,8 +3045,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNQuickAction (0.3.13):
-    - React
   - RNRate (1.2.12):
     - React-Core
   - RNReanimated (4.2.1):
@@ -3464,7 +3460,6 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-biometrics (from `../node_modules/react-native-biometrics`)
-  - react-native-bw-file-access (from `../src/modules/react-native-bw-file-access`)
   - react-native-capture-protection (from `../node_modules/react-native-capture-protection`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
@@ -3510,7 +3505,6 @@ DEPENDENCIES:
   - RNDefaultPreference (from `../node_modules/react-native-default-preference`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNKeychain (from `../node_modules/react-native-keychain`)
-  - RNQuickAction (from `../node_modules/react-native-quick-actions`)
   - RNRate (from `../node_modules/react-native-rate`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -3680,8 +3674,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-biometrics:
     :path: "../node_modules/react-native-biometrics"
-  react-native-bw-file-access:
-    :path: "../src/modules/react-native-bw-file-access"
   react-native-capture-protection:
     :path: "../node_modules/react-native-capture-protection"
   react-native-get-random-values:
@@ -3772,8 +3764,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNKeychain:
     :path: "../node_modules/react-native-keychain"
-  RNQuickAction:
-    :path: "../node_modules/react-native-quick-actions"
   RNRate:
     :path: "../node_modules/react-native-rate"
   RNReanimated:
@@ -3871,7 +3861,6 @@ SPEC CHECKSUMS:
   React-Mapbuffer: ceeccd6570db88ba4bc04278073392adf96a0fc1
   React-microtasksnativemodule: c71eb8a79998c20dd13de58a7525eb32d200d9c8
   react-native-biometrics: 43ed5b828646a7862dbc7945556446be00798e7d
-  react-native-bw-file-access: fe925b77dbf48500df0b294c6851f8c84607a203
   react-native-capture-protection: 9bcc879e5d577b55050dc12ff0f283595c9e5873
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-menu: d3cbac7d7bd6ae1c283f4f3c9993f69d209a61b4
@@ -3917,7 +3906,6 @@ SPEC CHECKSUMS:
   RNDefaultPreference: 8a089ee8ce829a66c5453e3c5434f0785499d1c3
   RNGestureHandler: b407c25a3f51d22dd7430e6b530f753f112b7e77
   RNKeychain: 6ade38fa11cde4337b5fe2e6c13c11550082f03b
-  RNQuickAction: c2c8f379e614428be0babe4d53a575739667744d
   RNRate: 7641919330e0d6688ad885a985b4bd697ed7d14c
   RNReanimated: 292cd58688552a22b3fc1cefcfbc49b336dfed68
   RNScreens: afaf526a9c804c3b4503f950cf3e67ed81e29ada
@@ -3930,6 +3918,6 @@ SPEC CHECKSUMS:
   Yoga: cf2a67aa1c8a225f0cb98a5f531d6f305d3f12e5
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: dab8a6989b5473be9fb51852924cf5ebdbcb851f
+PODFILE CHECKSUM: a124329d884372ff165711cea36f493cd70cda36
 
 COCOAPODS: 1.16.2

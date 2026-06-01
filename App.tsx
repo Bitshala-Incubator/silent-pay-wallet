@@ -22,7 +22,7 @@ const App = () => {
     timeout: 100000, // 100 seconds for blockchain scanning operations (increased for slower connections)
   });
 
-  useLogger(navigationRef);
+  useLogger(navigationRef as any);
 
   return (
     <SizeClassProvider>

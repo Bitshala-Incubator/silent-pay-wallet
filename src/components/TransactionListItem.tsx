@@ -41,7 +41,7 @@ interface TransactionListItemProps {
   item: Transaction;
   searchQuery?: string;
   style?: ViewStyle;
-  renderHighlightedText?: (text: string, query: string) => JSX.Element;
+  renderHighlightedText?: (text: string, query: string) => React.JSX.Element;
   onPress?: () => void;
 }
 
@@ -60,7 +60,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = memo(
     const [subtitleNumberOfLines, setSubtitleNumberOfLines] = useState(1);
     const { colors } = useTheme();
     const { navigate } = useExtendedNavigation<NavigationProps>();
-    const menuRef = useRef<ToolTipMenuProps>();
+    const menuRef = useRef<ToolTipMenuProps | undefined>(undefined);
     const { txMetadata } = useStorage();
     const insets = useSafeAreaInsets();
     const containerStyle = useMemo(

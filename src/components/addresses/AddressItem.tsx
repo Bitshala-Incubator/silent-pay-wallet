@@ -21,7 +21,7 @@ interface AddressItemProps {
   walletID: string;
   onPress?: () => void;
   searchQuery?: string;
-  renderHighlightedText?: (text: string, query: string) => JSX.Element;
+  renderHighlightedText?: (text: string, query: string) => React.JSX.Element;
 }
 
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList>;
