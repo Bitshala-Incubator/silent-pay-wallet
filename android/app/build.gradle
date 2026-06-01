@@ -150,7 +150,7 @@ android {
 }
 
 task copyFiatUnits(type: Copy) {
-    from '../../models/fiatUnits.json'
+    from '../../src/models/fiatUnits.json'
     into 'src/main/assets'
 }
 

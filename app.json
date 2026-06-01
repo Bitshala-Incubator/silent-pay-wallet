@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Shroud Wallet",
+    "slug": "shroud-wallet",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./src/img/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "org.bitshala.shroud",
+      "deploymentTarget": "16.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Shroud Wallet uses the camera to scan QR codes",
+        "NSFaceIDUsageDescription": "Shroud Wallet uses Face ID to unlock your wallet",
+        "NSPhotoLibraryUsageDescription": "Shroud Wallet needs access to photos to import wallet backups"
+      }
+    },
+    "android": {
+      "package": "org.bitshala.shroud",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/img/icon.png",
+        "backgroundColor": "#000000"
+      },
+      "permissions": [
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-dev-client",
+      "expo-localization",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f38beaef-9c29-4709-a6d9-c6aebe6149f2"
+      }
+    },
+    "owner": "shroud-developers"
+  }
+}

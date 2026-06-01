@@ -1,0 +1,30 @@
+import * as Clipboard from 'expo-clipboard';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../modules/hapticFeedback';
+import loc from '../loc';
+
+type CopyToClipboardButtonProps = {
+  stringToCopy: string;
+  displayText?: string;
+};
+
+const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({ stringToCopy, displayText }) => {
+  const onPress = () => {
+    Clipboard.setStringAsync(stringToCopy);
+    triggerHapticFeedback(HapticFeedbackTypes.Selection);
+  };
+
+  return (
+    <TouchableOpacity accessibilityRole="button" onPress={onPress}>
+      <Text style={styles.text}>{displayText && displayText.length > 0 ? displayText : loc.transactions.details_copy}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  text: { fontSize: 16, fontWeight: '400', color: '#68bbe1' },
+});
+
+export default CopyToClipboardButton;

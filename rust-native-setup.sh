@@ -73,6 +73,7 @@ ANDROID_TARGETS=(
 IOS_TARGETS=(
     "aarch64-apple-ios|iOS Device (ARM64)"
     "aarch64-apple-ios-sim|iOS Simulator (ARM64)"
+    "x86_64-apple-ios|iOS Simulator (x86_64)"
 )
 
 
@@ -145,10 +146,8 @@ build_ios_target() {
     
     if cargo build --release --target "$target"; then
         success "$name built successfully"
-        return 0
     else
-        warn "$name build failed. Try: rustup target add $target"
-        return 1
+        error "$name build failed. Try: rustup target add $target"
     fi
 }
 
@@ -158,17 +157,22 @@ create_ios_xcframework() {
     mkdir -p "$IOS_DEST"
 
     local device_lib="target/aarch64-apple-ios/release/$LIB_NAME"
-    local sim_lib="target/aarch64-apple-ios-sim/release/$LIB_NAME"
+    local sim_arm_lib="target/aarch64-apple-ios-sim/release/$LIB_NAME"
+    local sim_x86_lib="target/x86_64-apple-ios/release/$LIB_NAME"
+    local sim_fat_lib="target/universal-ios-sim/release/$LIB_NAME"
 
-    if [ ! -f "$device_lib" ] || [ ! -f "$sim_lib" ]; then
-        warn "Missing iOS .a files; skipping XCFramework creation"
-        return
+    if [ ! -f "$device_lib" ] || [ ! -f "$sim_arm_lib" ] || [ ! -f "$sim_x86_lib" ]; then
+        error "Missing iOS .a files; cannot create XCFramework. Ensure previous build steps succeeded."
     fi
+
+    log "Creating universal simulator binary..."
+    mkdir -p "target/universal-ios-sim/release"
+    lipo -create -output "$sim_fat_lib" "$sim_arm_lib" "$sim_x86_lib"
 
     rm -rf "$IOS_DEST/RustJsiBridge.xcframework"
     xcodebuild -create-xcframework \
         -library "$device_lib" \
-        -library "$sim_lib" \
+        -library "$sim_fat_lib" \
         -output "$IOS_DEST/RustJsiBridge.xcframework" >/dev/null
     success "XCFramework written to $IOS_DEST/RustJsiBridge.xcframework"
 }
@@ -183,29 +187,31 @@ main() {
         error "Must run from the root or the $PROJECT_NAME directory."
     fi
 
-    echo "🦀 Starting Rust JSI Bridge Build System"
+    local platform="${1:-both}"
+    
+    echo "🦀 Starting Rust JSI Bridge Build System (Platform: $platform)"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    if is_macos; then
-        log "Detected macOS host. Building iOS + Android targets."
-        ensure_rust_targets "ios"
-        configure_android_toolchain
-        ensure_rust_targets "android"
+    if [[ "$platform" == "both" || "$platform" == "ios" ]]; then
+        if is_macos; then
+            log "Building iOS targets..."
+            ensure_rust_targets "ios"
+            
+            echo -e "\n📱 iOS Targets:"
+            for item in "${IOS_TARGETS[@]}"; do
+                build_ios_target "$item"
+            done
+            echo
+            create_ios_xcframework
+        else
+            if [[ "$platform" == "ios" ]]; then
+                error "Cannot build iOS targets on non-macOS host."
+            fi
+        fi
+    fi
 
-        echo -e "\n📱 iOS Targets:"
-        for item in "${IOS_TARGETS[@]}"; do
-            build_ios_target "$item"
-        done
-
-        echo -e "\n🤖 Android Targets:"
-        for item in "${ANDROID_TARGETS[@]}"; do
-            build_and_copy_android "$item"
-        done
-
-        echo
-        create_ios_xcframework
-    else
-        log "Non-macOS host detected. Building Android targets only."
+    if [[ "$platform" == "both" || "$platform" == "android" ]]; then
+        log "Building Android targets..."
         configure_android_toolchain
         ensure_rust_targets "android"
 

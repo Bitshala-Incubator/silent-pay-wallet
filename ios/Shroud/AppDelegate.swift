@@ -4,7 +4,7 @@ import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import UserNotifications
 import Bugsnag
-
+public import ExpoModulesCore
 
 @main
 class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
@@ -64,13 +64,12 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
-    override func sourceURL(for bridge: RCTBridge) -> URL? {
-        return bundleURL()
-    }
-
     override func bundleURL() -> URL? {
         #if DEBUG
-        return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+        if let url = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index") {
+            return url
+        }
+        return URL(string: "http://localhost:8081/index.bundle?platform=ios&dev=true")
         #else
         return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
         #endif
@@ -329,7 +328,8 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
     }
 
     override func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
-        RNQuickActionManager.onQuickActionPress(shortcutItem, completionHandler: completionHandler)
+        // Quick actions (3D Touch shortcuts) are not implemented in this app
+        completionHandler(false)
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -352,7 +352,6 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
             }
         }
 
-        RNCPushNotificationIOS.didReceive(response)
         completionHandler()
     }
     

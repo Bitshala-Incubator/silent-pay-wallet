@@ -1,0 +1,271 @@
+/* global jest */
+
+
+
+const consoleWarnOrig = console.warn;
+console.warn = (...args) => {
+  if (
+    typeof args[0] === 'string' &&
+    (args[0].startsWith('WARNING: Sending to a future segwit version address can lead to loss of funds') ||
+      args[0].startsWith('only compressed public keys are good'))
+  ) {
+    return;
+  }
+  consoleWarnOrig.apply(consoleWarnOrig, args);
+};
+
+const consoleLogOrig = console.log;
+console.debug = console.log = (...args) => {
+  if (
+    typeof args[0] === 'string' &&
+    (args[0].startsWith('updating exchange rate') ||
+      args[0].startsWith('Created new currency formatter for') ||
+      args[0].startsWith('begin connection') ||
+      args[0].startsWith('TLS Connected to') ||
+      args[0].startsWith('connected to'))
+  ) {
+    return;
+  }
+  consoleLogOrig.apply(consoleLogOrig, args);
+};
+
+global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
+global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
+global.fetch = require('node-fetch');
+
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: jest.fn(),
+  getStringAsync: jest.fn().mockResolvedValue(''),
+  hasStringAsync: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock('react-native-secure-key-store', () => {
+  return {};
+});
+
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  getDevicePushTokenAsync: jest.fn().mockResolvedValue({ data: 'mock-push-token' }),
+  setNotificationHandler: jest.fn(),
+  addNotificationReceivedListener: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn(),
+  dismissAllNotificationsAsync: jest.fn(),
+  setBadgeCountAsync: jest.fn(),
+  getPresentedNotificationsAsync: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock('expo-device', () => {
+  return {
+    DeviceType: { PHONE: 1, TABLET: 2, DESKTOP: 3, TV: 4 },
+    deviceType: 1,
+    modelName: 'mock-model',
+    osVersion: '16.0',
+  };
+});
+
+jest.mock('expo-application', () => {
+  return {
+    getIosIdForVendorAsync: jest.fn().mockResolvedValue('mock-unique-id'),
+    getAndroidId: jest.fn().mockReturnValue('mock-unique-id'),
+    applicationName: 'Shroud',
+    nativeApplicationVersion: '0.0.1',
+    nativeBuildVersion: '1',
+  };
+});
+
+jest.mock('react-native-default-preference', () => {
+  let mockPreferences = {};
+  let currentSuiteName = 'default';
+
+  const getSuite = name => {
+    if (!mockPreferences[name]) {
+      mockPreferences[name] = {};
+    }
+    return mockPreferences[name];
+  };
+
+  return {
+    setName: jest.fn(name => {
+      currentSuiteName = name;
+      if (!mockPreferences[name]) {
+        mockPreferences[name] = {};
+      }
+      return Promise.resolve();
+    }),
+
+    getName: jest.fn(() => {
+      return Promise.resolve(currentSuiteName);
+    }),
+
+    get: jest.fn(key => {
+      const suite = getSuite(currentSuiteName);
+      return Promise.resolve(Object.prototype.hasOwnProperty.call(suite, key) ? suite[key] : null);
+    }),
+
+    set: jest.fn((key, value) => {
+      const suite = getSuite(currentSuiteName);
+      suite[key] = value;
+      return Promise.resolve();
+    }),
+
+    clear: jest.fn(key => {
+      const suite = getSuite(currentSuiteName);
+      delete suite[key];
+      return Promise.resolve();
+    }),
+
+    getMultiple: jest.fn(keys => {
+      const suite = getSuite(currentSuiteName);
+      const values = keys.map(key => (Object.prototype.hasOwnProperty.call(suite, key) ? suite[key] : null));
+      return Promise.resolve(values);
+    }),
+
+    setMultiple: jest.fn(keyValuePairs => {
+      const suite = getSuite(currentSuiteName);
+      Object.entries(keyValuePairs).forEach(([key, value]) => {
+        suite[key] = value;
+      });
+      return Promise.resolve();
+    }),
+
+    clearMultiple: jest.fn(keys => {
+      const suite = getSuite(currentSuiteName);
+      keys.forEach(key => delete suite[key]);
+      return Promise.resolve();
+    }),
+
+    getAll: jest.fn(() => {
+      const suite = getSuite(currentSuiteName);
+      return Promise.resolve({ ...suite });
+    }),
+
+    clearAll: jest.fn(() => {
+      mockPreferences[currentSuiteName] = {};
+      return Promise.resolve();
+    }),
+
+    reset: jest.fn(() => {
+      mockPreferences = {};
+      currentSuiteName = 'default'; // Reset the current suite name
+      return Promise.resolve();
+    }),
+  };
+});
+
+jest.mock('expo-file-system', () => {
+  return {
+    documentDirectory: 'file:///mock/document/directory/',
+    cacheDirectory: 'file:///mock/cache/directory/',
+    readAsStringAsync: jest.fn(),
+    writeAsStringAsync: jest.fn(),
+    deleteAsync: jest.fn(),
+    getInfoAsync: jest.fn().mockResolvedValue({ exists: true }),
+    readDirectoryAsync: jest.fn().mockResolvedValue([]),
+    moveAsync: jest.fn(),
+    EncodingType: {
+      UTF8: 'utf8',
+      Base64: 'base64',
+    },
+  };
+});
+
+jest.mock('expo-file-system/legacy', () => {
+  return {
+    documentDirectory: 'file:///mock/document/directory/',
+    cacheDirectory: 'file:///mock/cache/directory/',
+    readAsStringAsync: jest.fn().mockResolvedValue(''),
+    writeAsStringAsync: jest.fn().mockResolvedValue(),
+    deleteAsync: jest.fn().mockResolvedValue(),
+    getInfoAsync: jest.fn().mockResolvedValue({ exists: true }),
+    EncodingType: {
+      UTF8: 'utf8',
+      Base64: 'base64',
+    },
+  };
+});
+
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn().mockResolvedValue({ canceled: true }),
+}));
+
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: jest.fn().mockResolvedValue({ canceled: true }),
+}));
+
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  selectionAsync: jest.fn(),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
+  NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
+}));
+
+const realmInstanceMock = {
+  create: function () {},
+  delete: function () {},
+  close: function () {},
+  write: function (transactionFn) {
+    if (typeof transactionFn === 'function') {
+      // to test if something is not right in Realm transactional database write
+      transactionFn();
+    }
+  },
+  objectForPrimaryKey: function () {
+    return {};
+  },
+  objects: function () {
+    const wallets = {
+      filtered: function () {
+        return [];
+      },
+    };
+    return wallets;
+  },
+};
+jest.mock('realm', () => {
+  return {
+    UpdateMode: { Modified: 1 },
+    open: jest.fn(() => realmInstanceMock),
+  };
+});
+
+jest.mock('rn-qr-generator', () => ({
+  default: {
+    detect: jest.fn(({ base64, uri }) => {
+      if (base64 === 'invalid-image' || uri === 'invalid-uri') {
+        return Promise.reject(new Error('Invalid image data'));
+      }
+      return Promise.resolve({ values: ['mocked-qr-code'], type: 'QRCode' });
+    }),
+    generate: jest.fn().mockResolvedValue({ uri: 'mock-qr-uri', width: 200, height: 200 }),
+  },
+}));
+
+
+
+jest.mock('../modules/analytics', () => {
+  const ret = jest.fn();
+  ret.ENUM = { CREATED_WALLET: '' };
+  return ret;
+});
+
+jest.mock('react-native-share', () => {
+  return {
+    open: jest.fn(),
+  };
+});
+
+const mockKeychain = {
+  SECURITY_LEVEL_ANY: 'MOCK_SECURITY_LEVEL_ANY',
+  SECURITY_LEVEL_SECURE_SOFTWARE: 'MOCK_SECURITY_LEVEL_SECURE_SOFTWARE',
+  SECURITY_LEVEL_SECURE_HARDWARE: 'MOCK_SECURITY_LEVEL_SECURE_HARDWARE',
+  setGenericPassword: jest.fn().mockResolvedValue(),
+  getGenericPassword: jest.fn().mockResolvedValue(),
+  resetGenericPassword: jest.fn().mockResolvedValue(),
+};
+jest.mock('react-native-keychain', () => mockKeychain);
+
+jest.mock('react-native-tcp-socket', () => mockKeychain);
+
+global.alert = () => {};
