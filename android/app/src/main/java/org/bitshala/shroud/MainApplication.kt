@@ -15,6 +15,7 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
 import com.facebook.react.modules.i18nmanager.I18nUtil
+import org.bitshala.shroud.background.BackgroundScanPackage
 import org.bitshala.shroud.components.segmentedcontrol.CustomSegmentedControlPackage
 
 class MainApplication : Application(), ReactApplication {
@@ -29,6 +30,7 @@ class MainApplication : Application(), ReactApplication {
                     // add(MyReactNativePackage())
                     add(CustomSegmentedControlPackage())
                     add(RustJsiBridgePackage())
+                    add(BackgroundScanPackage())
                 }
 
             override fun getJSMainModuleName(): String = "index"
