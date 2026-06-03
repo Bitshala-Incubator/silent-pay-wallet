@@ -159,6 +159,8 @@
         "about_selftest_ok": "All internal tests have passed successfully. The wallet works well.",
         "about_sm_github": "GitHub",
         "about_sm_discord": "Discord Server",
+        "background_scan": "Background Scanning",
+        "background_scan_explain": "Periodically check for incoming payments while the app is closed and notify you when bitcoin arrives.",
         "biometrics": "Biometrics",
         "biometrics_no_longer_available": "Your device settings have changed and no longer match the selected security settings in the app. Please re-enable biometrics or passcode, then restart the app to apply these changes.",
         "biom_10times": "You have attempted to enter your password 10 times. Would you like to reset your storage? This will remove all wallets and decrypt your storage.",
