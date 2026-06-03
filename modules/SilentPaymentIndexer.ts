@@ -10,7 +10,7 @@ import type {
   TransactionByTxidResponse,
 } from '../helpers/silent-payments/types';
 
-class SilentPaymentIndexer {
+export class SilentPaymentIndexer {
   private httpClient: IndexerHttpClient;
 
   constructor(config: SilentPaymentIndexerConfig) {
