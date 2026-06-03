@@ -372,6 +372,10 @@
         "not_supported": "Silent Payments not supported by this wallet",
         "explanation": "Silent Payment addresses are reusable. Share one address for multiple payments without compromising privacy."
     },
+    "notifications": {
+        "received_title": "Payment received",
+        "received_body": "You received bitcoin. Open Shroud to see it."
+    },
     "onboarding": {
         "shroud": "Shroud",
         "subtitle": "A simple bitcoin wallet for\nall your payments.",
