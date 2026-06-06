@@ -448,6 +448,7 @@
         "btn_retry": "Retry",
         "privacy_info": "Shroud checks for your payments on your device, so the server never sees your address. Tor hides your connection.",
         "banner_scanning": "Checking pending payments.....",
+        "banner_pending": "Waiting to sync…",
         "banner_paused_at": "Sync paused at {blockHeight}",
         "banner_synced": "Synced to block {blockHeight}",
         "banner_error": "Can't connect right now",

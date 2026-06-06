@@ -82,7 +82,16 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
     return () => clearInterval(id);
   }, [scanState.status, scanState.eta, scanState.etaComputedAt]);
 
-  const effectiveStatus: EffectiveStatus = showDone ? 'done' : scanState.status === 'idle' ? 'done' : scanState.status;
+  // A never-scanned idle wallet (lastScannedBlock === 0) is "about to sync", not "caught up" —
+  // the home banner advertises it as "waiting to sync", so don't claim done here. Present it as
+  // scanning: the first real scan starts moments after mount and the state self-corrects.
+  const effectiveStatus: EffectiveStatus = showDone
+    ? 'done'
+    : scanState.status !== 'idle'
+      ? scanState.status
+      : scanState.lastScannedBlock > 0
+        ? 'done'
+        : 'scanning';
   const effectiveProgress = showDone ? (lastProgressRef.current ?? scanState.progress) : scanState.progress;
   const effectivePct = effectiveStatus === 'done' ? 100 : (effectiveProgress?.percentComplete ?? 0);
 

@@ -41,8 +41,11 @@ const ScanProgressBar: React.FC<Props> = ({ scanState, onResume }) => {
     return () => pulseAnimRef.current?.stop();
   }, [status, pulseAnim]);
 
+  // Never hide the banner: it's the only entry point to SyncScreen, and a
+  // hidden banner makes silent scan failures indistinguishable from "nothing
+  // to show". A never-scanned idle wallet renders as "waiting to sync".
   const isDone = status === 'idle' && lastScannedBlock > 0;
-  if (status === 'idle' && !isDone) return null;
+  const isPending = status === 'idle' && !isDone;
 
   if (isDone) {
     const blockText = loc.formatString(loc.sync.banner_synced, { blockHeight: lastScannedBlock.toLocaleString() });
@@ -94,7 +97,7 @@ const ScanProgressBar: React.FC<Props> = ({ scanState, onResume }) => {
   }
 
   const dotColor = status === 'error' ? colors.statusError : colors.brandPrimary;
-  const bannerText = status === 'error' ? loc.sync.banner_error : loc.sync.banner_scanning;
+  const bannerText = status === 'error' ? loc.sync.banner_error : isPending ? loc.sync.banner_pending : loc.sync.banner_scanning;
 
   return (
     <TouchableOpacity
