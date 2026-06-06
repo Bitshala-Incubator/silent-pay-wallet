@@ -12,6 +12,7 @@ import {
   RustTransactionProcessor,
   createTransactionProcessor,
   type IndexerTransaction,
+  type IScannableWallet,
   type SilentPaymentUTXO,
   type SilentPaymentUTXOSerializable,
   type ScanProgressCallback,
@@ -32,7 +33,11 @@ const SCAN_PROGRESS_THROTTLE_MS = 500;
 // Number of recent progress samples kept for the windowed ETA throughput estimate.
 const SCAN_ETA_ROLLING_WINDOW = 10;
 
-export class HDSilentPaymentsWallet extends HDTaprootWallet {
+// `implements IScannableWallet` is load-bearing: the isScannable() runtime guard
+// checks for every interface method structurally, so removing one (e.g. in an
+// "unused members" sweep) silently hides the entire scan UI. The implements
+// clause turns that into a compile error.
+export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannableWallet {
   static readonly type = 'HDSilentPaymentsWallet';
   static readonly typeReadable = 'HD Silent Payments';
   // @ts-ignore: override
@@ -102,6 +107,10 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet {
         this._emitScanState('scanning');
       }
     }
+  }
+
+  isScanActive(): boolean {
+    return this.activeScanPromise !== null;
   }
 
   private _emitScanState(status: ScanStatus, overrides?: Partial<ScanStateInfo>): void {
