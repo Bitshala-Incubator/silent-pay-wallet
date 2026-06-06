@@ -159,6 +159,8 @@
         "about_selftest_ok": "All internal tests have passed successfully. The wallet works well.",
         "about_sm_github": "GitHub",
         "about_sm_discord": "Discord Server",
+        "background_scan": "Background Scanning",
+        "background_scan_explain": "Periodically check for incoming payments while the app is closed and notify you when bitcoin arrives.",
         "biometrics": "Biometrics",
         "biometrics_no_longer_available": "Your device settings have changed and no longer match the selected security settings in the app. Please re-enable biometrics or passcode, then restart the app to apply these changes.",
         "biom_10times": "You have attempted to enter your password 10 times. Would you like to reset your storage? This will remove all wallets and decrypt your storage.",
@@ -372,6 +374,10 @@
         "not_supported": "Silent Payments not supported by this wallet",
         "explanation": "Silent Payment addresses are reusable. Share one address for multiple payments without compromising privacy."
     },
+    "notifications": {
+        "received_title": "Payment received",
+        "received_body": "You received bitcoin. Open Shroud to see it."
+    },
     "onboarding": {
         "shroud": "Shroud",
         "subtitle": "A simple bitcoin wallet for\nall your payments.",
@@ -442,6 +448,7 @@
         "btn_retry": "Retry",
         "privacy_info": "Shroud checks for your payments on your device, so the server never sees your address. Tor hides your connection.",
         "banner_scanning": "Checking pending payments.....",
+        "banner_pending": "Waiting to sync…",
         "banner_paused_at": "Sync paused at {blockHeight}",
         "banner_synced": "Synced to block {blockHeight}",
         "banner_error": "Can't connect right now",

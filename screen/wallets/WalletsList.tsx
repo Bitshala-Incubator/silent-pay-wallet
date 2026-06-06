@@ -506,9 +506,10 @@ const WalletsList: React.FC = () => {
   const TRACK_PAYMENT_BANNER_HEIGHT = 90;
   const SCAN_BANNER_HEIGHT = 66; // ScanProgressBar: 50 height + 8+8 vertical margins
 
-  // The scan banner renders inside the WALLET section (below the balance) only while a scan is
-  // active, so factor its height into the wallet section height to keep getItemLayout offsets correct.
-  const isScanBannerVisible = !!scanWallet && (scanState.status !== 'idle' || scanState.lastScannedBlock > 0);
+  // The scan banner renders inside the WALLET section (below the balance) whenever a scannable
+  // wallet exists, so factor its height into the wallet section height to keep getItemLayout
+  // offsets correct.
+  const isScanBannerVisible = !!scanWallet;
   const walletSectionHeight = WALLET_HEIGHT + (isScanBannerVisible ? SCAN_BANNER_HEIGHT : 0);
 
   const getSectionHeaderHeight = useCallback(() => {

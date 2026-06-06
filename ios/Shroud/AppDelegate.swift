@@ -56,12 +56,19 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
 
         setupUserDefaultsListener()
         registerNotificationCategories()
-        
+
         // Access the singleton via the class method
         _ = MenuElementsEmitter.sharedInstance()
         NSLog("[MenuElements] AppDelegate: Initialized emitter singleton")
-        
+
+        // BGTaskScheduler handlers must be registered before the app finishes launching.
+        BackgroundScanManager.registerBGTasks()
+
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    override func applicationDidEnterBackground(_ application: UIApplication) {
+        BackgroundScanManager.scheduleBGTasks()
     }
 
     override func sourceURL(for bridge: RCTBridge) -> URL? {
@@ -212,6 +219,8 @@ class AppDelegate: RCTAppDelegate, UNUserNotificationCenterDelegate {
             defaults.synchronize()
 
             DispatchQueue.main.async {
+                // Don't try to present UI during a background (BGTask) launch.
+                guard UIApplication.shared.applicationState != .background else { return }
                 let alert = UIAlertController(
                     title: "Cache Cleared",
                     message: "The document, cache, and temp directories have been cleared.",

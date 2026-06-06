@@ -9,12 +9,21 @@ export class RustTransactionProcessor {
   private scanPrivkeyHex: string;
   private spendPubkeyHex: string;
 
-  constructor(seed: Buffer) {
+  /**
+   * Scanning only needs the scan private key + spend public key (BIP-352) — never the seed.
+   * Use `fromSeed` when the seed is available, or pass the keys directly (e.g. background
+   * scanning, where only the scan-only credentials are accessible).
+   */
+  constructor(scanPrivkeyHex: string, spendPubkeyHex: string) {
+    this.scanPrivkeyHex = scanPrivkeyHex;
+    this.spendPubkeyHex = spendPubkeyHex;
+  }
+
+  static fromSeed(seed: Buffer): RustTransactionProcessor {
     const scanPrivkey = getScanPrivateKey(seed);
     const spendPubkey = getSpendPublicKey(seed);
 
-    this.scanPrivkeyHex = Buffer.from(scanPrivkey).toString('hex');
-    this.spendPubkeyHex = Buffer.from(spendPubkey).toString('hex');
+    return new RustTransactionProcessor(Buffer.from(scanPrivkey).toString('hex'), Buffer.from(spendPubkey).toString('hex'));
   }
 
   private convertToSilentPaymentUTXO(rustUtxo: RustMatchedUTXO, silentPaymentAddress: string): SilentPaymentUTXO {
@@ -74,5 +83,5 @@ export class RustTransactionProcessor {
 }
 
 export function createTransactionProcessor(seed: Buffer): RustTransactionProcessor {
-  return new RustTransactionProcessor(seed);
+  return RustTransactionProcessor.fromSeed(seed);
 }

@@ -5,6 +5,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>org.bitshala.shroud.fetchTxsForWallet</string>
+		<string>org.bitshala.shroud.scanCatchup</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>

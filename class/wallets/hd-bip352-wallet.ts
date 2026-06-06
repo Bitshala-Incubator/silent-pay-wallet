@@ -6,17 +6,20 @@ import { getDefaultIndexer } from '../../modules/SilentPaymentIndexer';
 import ecc from '../../modules/noble_ecc';
 import {
   getSilentPaymentAddress,
+  getScanPrivateKey,
   getSpendPrivateKey,
   getSpendPublicKey,
   RustTransactionProcessor,
   createTransactionProcessor,
   type IndexerTransaction,
+  type IScannableWallet,
   type SilentPaymentUTXO,
   type SilentPaymentUTXOSerializable,
   type ScanProgressCallback,
   type ScanStateInfo,
   type ScanStatus,
   IDLE_SCAN_STATE,
+  type StagedScanData,
 } from '../../helpers/silent-payments';
 import { BIP352_ACTIVATION_HEIGHT } from '../../modules/constants';
 import { CreateTransactionResult, CreateTransactionTarget, CreateTransactionUtxo, Transaction, Utxo } from './types.ts';
@@ -30,7 +33,11 @@ const SCAN_PROGRESS_THROTTLE_MS = 500;
 // Number of recent progress samples kept for the windowed ETA throughput estimate.
 const SCAN_ETA_ROLLING_WINDOW = 10;
 
-export class HDSilentPaymentsWallet extends HDTaprootWallet {
+// `implements IScannableWallet` is load-bearing: the isScannable() runtime guard
+// checks for every interface method structurally, so removing one (e.g. in an
+// "unused members" sweep) silently hides the entire scan UI. The implements
+// clause turns that into a compile error.
+export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannableWallet {
   static readonly type = 'HDSilentPaymentsWallet';
   static readonly typeReadable = 'HD Silent Payments';
   // @ts-ignore: override
@@ -100,6 +107,10 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet {
         this._emitScanState('scanning');
       }
     }
+  }
+
+  isScanActive(): boolean {
+    return this.activeScanPromise !== null;
   }
 
   private _emitScanState(status: ScanStatus, overrides?: Partial<ScanStateInfo>): void {
@@ -275,6 +286,71 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet {
   getSpendPublicKey(): Uint8Array {
     const seed = this.getSeed();
     return getSpendPublicKey(seed);
+  }
+
+  getScanPrivateKey(): Uint8Array {
+    const seed = this.getSeed();
+    return getScanPrivateKey(seed);
+  }
+
+  getBirthHeight(): number {
+    return this._birthHeight;
+  }
+
+  getLastScannedBlock(): number {
+    return this.lastScannedBlock;
+  }
+
+  /**
+   * Merge UTXOs found by background scans into the wallet. Idempotent: UTXOs
+   * dedup on txid:vout and the cursor never regresses, so re-merging stale
+   * staging (e.g. after a race with a finishing background run) is harmless.
+   *
+   * @returns number of newly added UTXOs
+   */
+  mergeStagedScanResults(staged: StagedScanData | null): number {
+    if (!staged || staged.walletID !== this.getID()) {
+      return 0;
+    }
+
+    let addedCount = 0;
+    for (const serializable of staged.utxos) {
+      const { tweakHex, ...rest } = serializable;
+      const utxo: SilentPaymentUTXO = {
+        ...rest,
+        tweak: new Uint8Array(Buffer.from(tweakHex, 'hex')),
+      };
+      if (this.addUTXO(utxo)) {
+        addedCount++;
+      }
+    }
+
+    // Only adopt the staged cursor when it's past the wallet's effective birth.
+    // A background scan run with stale credentials (birth height not yet set)
+    // may have scanned from the BIP-352 activation height; adopting such a low
+    // cursor into a never-scanned wallet (lastScannedBlock = 0) would drag the
+    // next foreground scan years behind its real birth height.
+    const effectiveBirthHeight = Math.max(this._birthHeight, BIP352_ACTIVATION_HEIGHT);
+    const cursorAdvanced = staged.cursor > this.lastScannedBlock && staged.cursor >= effectiveBirthHeight;
+    if (cursorAdvanced) {
+      this.lastScannedBlock = staged.cursor;
+      // Surface the advanced cursor to scan-state listeners (home-screen banner,
+      // sync screen). Without this the UI keeps the pre-merge cursor, and when
+      // the merge brings the wallet up to the tip the next foreground scan
+      // early-returns without emitting either — leaving the banner hidden
+      // forever. Re-emit the current status rather than forcing 'idle' so a
+      // paused scan isn't clobbered.
+      this._emitScanState(this._scanState.status);
+    }
+
+    if (addedCount > 0) {
+      this.onBalanceChangeCallback?.();
+    }
+    if (addedCount > 0 || cursorAdvanced) {
+      this.onPersistCallback?.();
+    }
+
+    return addedCount;
   }
 
   private getSeed(): Buffer {
