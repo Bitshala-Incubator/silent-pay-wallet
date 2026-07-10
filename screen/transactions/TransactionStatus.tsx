@@ -1,15 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ActivityIndicator, BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as Electrum from '../../modules/Electrum';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
 import { ShroudCard, ShroudText } from '../../ShroudComponents';
-import { HDSegwitBech32Transaction } from '../../class';
-import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet';
 import { Transaction, TWallet } from '../../class/wallets/types';
-import Button from '../../components/Button';
 import TransactionDirectionIcon from '../../components/icons/TransactionDirectionIcon';
 import TransactionPendingIcon from '../../components/icons/TransactionPendingIcon';
 import { getTransactionIconColors } from '../../components/icons/getTransactionIconColors';
@@ -21,35 +18,22 @@ import { useStorage } from '../../hooks/context/useStorage';
 import HeaderRightButton from '../../components/HeaderRightButton';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
-import { Spacing10, Spacing20 } from '../../components/Spacing';
+import { Spacing10 } from '../../components/Spacing';
 import { Loading } from '../../components/Loading';
-
-enum ButtonStatus {
-  Possible,
-  Unknown,
-  NotPossible,
-}
 
 type RouteProps = RouteProp<DetailViewStackParamList, 'TransactionStatus'>;
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList, 'TransactionStatus'>;
 
 enum ActionType {
-  SetCPFPPossible,
-  SetRBFBumpFeePossible,
-  SetRBFCancelPossible,
   SetTransaction,
   SetLoading,
   SetEta,
   SetIntervalMs,
-  SetAllButtonStatus,
   SetWallet,
   SetLoadingError,
 }
 
 interface State {
-  isCPFPPossible: ButtonStatus;
-  isRBFBumpFeePossible: ButtonStatus;
-  isRBFCancelPossible: ButtonStatus;
   tx: any;
   isLoading: boolean;
   eta: string;
@@ -59,9 +43,6 @@ interface State {
 }
 
 const initialState: State = {
-  isCPFPPossible: ButtonStatus.Unknown,
-  isRBFBumpFeePossible: ButtonStatus.Unknown,
-  isRBFCancelPossible: ButtonStatus.Unknown,
   tx: undefined,
   isLoading: true,
   eta: '',
@@ -72,12 +53,6 @@ const initialState: State = {
 
 const reducer = (state: State, action: { type: ActionType; payload?: any }): State => {
   switch (action.type) {
-    case ActionType.SetCPFPPossible:
-      return { ...state, isCPFPPossible: action.payload };
-    case ActionType.SetRBFBumpFeePossible:
-      return { ...state, isRBFBumpFeePossible: action.payload };
-    case ActionType.SetRBFCancelPossible:
-      return { ...state, isRBFCancelPossible: action.payload };
     case ActionType.SetTransaction:
       return { ...state, tx: action.payload };
     case ActionType.SetLoading:
@@ -86,8 +61,6 @@ const reducer = (state: State, action: { type: ActionType; payload?: any }): Sta
       return { ...state, eta: action.payload };
     case ActionType.SetIntervalMs:
       return { ...state, intervalMs: action.payload };
-    case ActionType.SetAllButtonStatus:
-      return { ...state, isCPFPPossible: action.payload, isRBFBumpFeePossible: action.payload, isRBFCancelPossible: action.payload };
     case ActionType.SetWallet:
       return { ...state, wallet: action.payload };
     case ActionType.SetLoadingError:
@@ -108,7 +81,7 @@ type TransactionStatusProps = {
 
 const TransactionStatus: React.FC<TransactionStatusProps> = ({ transaction, txid }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { isCPFPPossible, isRBFBumpFeePossible, isRBFCancelPossible, tx, isLoading, eta, intervalMs, wallet, loadingError } = state;
+  const { tx, isLoading, eta, intervalMs, wallet, loadingError } = state;
   const { wallets, txMetadata, fetchAndSaveWalletTransactions } = useStorage();
   const { hash, walletID } = useRoute<RouteProps>().params;
   const { navigate, setOptions, goBack } = useExtendedNavigation<NavigationProps>();
@@ -138,24 +111,8 @@ const TransactionStatus: React.FC<TransactionStatusProps> = ({ transaction, txid
     dispatch({ type: ActionType.SetEta, payload: value });
   };
 
-  const setAllButtonStatus = (status: ButtonStatus) => {
-    dispatch({ type: ActionType.SetAllButtonStatus, payload: status });
-  };
-
   const setIsLoading = (value: boolean) => {
     dispatch({ type: ActionType.SetLoading, payload: value });
-  };
-
-  const setIsCPFPPossible = (status: ButtonStatus) => {
-    dispatch({ type: ActionType.SetCPFPPossible, payload: status });
-  };
-
-  const setIsRBFBumpFeePossible = (status: ButtonStatus) => {
-    dispatch({ type: ActionType.SetRBFBumpFeePossible, payload: status });
-  };
-
-  const setIsRBFCancelPossible = (status: ButtonStatus) => {
-    dispatch({ type: ActionType.SetRBFCancelPossible, payload: status });
   };
 
   const navigateToTransactionDetails = useCallback(() => {
@@ -306,159 +263,15 @@ const TransactionStatus: React.FC<TransactionStatusProps> = ({ transaction, txid
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const initialButtonsState = async () => {
-    try {
-      await checkPossibilityOfCPFP();
-      await checkPossibilityOfRBFBumpFee();
-      await checkPossibilityOfRBFCancel();
-    } catch (e) {
-      console.error('Error in initialButtonsState:', e);
-      setAllButtonStatus(ButtonStatus.NotPossible);
-    }
-    setIsLoading(false);
-  };
-
   useEffect(() => {
-    initialButtonsState().catch(error => console.error('Unhandled error in initialButtonsState:', error));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tx, wallets]);
-
-  useEffect(() => {}, [tx, wallets]);
+    if (tx) {
+      setIsLoading(false);
+    }
+  }, [tx]);
 
   useEffect(() => {
     console.debug('transactionStatus - useEffect');
   }, []);
-
-  const checkPossibilityOfCPFP = async () => {
-    if (!wallet?.allowRBF()) {
-      return setIsCPFPPossible(ButtonStatus.NotPossible);
-    }
-
-    if (wallet) {
-      const cpfbTx = new HDSegwitBech32Transaction(null, tx.hash, wallet as HDSilentPaymentsWallet);
-      if ((await cpfbTx.isToUsTransaction()) && (await cpfbTx.getRemoteConfirmationsNum()) === 0) {
-        return setIsCPFPPossible(ButtonStatus.Possible);
-      } else {
-        return setIsCPFPPossible(ButtonStatus.NotPossible);
-      }
-    }
-    return setIsCPFPPossible(ButtonStatus.NotPossible);
-  };
-
-  const checkPossibilityOfRBFBumpFee = async () => {
-    if (!wallet?.allowRBF()) {
-      return setIsRBFBumpFeePossible(ButtonStatus.NotPossible);
-    }
-
-    const rbfTx = new HDSegwitBech32Transaction(null, tx.hash, wallet as HDSilentPaymentsWallet);
-    if (
-      (await rbfTx.isOurTransaction()) &&
-      (await rbfTx.getRemoteConfirmationsNum()) === 0 &&
-      (await rbfTx.isSequenceReplaceable()) &&
-      (await rbfTx.canBumpTx())
-    ) {
-      return setIsRBFBumpFeePossible(ButtonStatus.Possible);
-    } else {
-      return setIsRBFBumpFeePossible(ButtonStatus.NotPossible);
-    }
-  };
-
-  const checkPossibilityOfRBFCancel = async () => {
-    if (!wallet?.allowRBF()) {
-      return setIsRBFCancelPossible(ButtonStatus.NotPossible);
-    }
-
-    const rbfTx = new HDSegwitBech32Transaction(null, tx.hash, wallet as HDSilentPaymentsWallet);
-    if (
-      (await rbfTx.isOurTransaction()) &&
-      (await rbfTx.getRemoteConfirmationsNum()) === 0 &&
-      (await rbfTx.isSequenceReplaceable()) &&
-      (await rbfTx.canCancelTx())
-    ) {
-      return setIsRBFCancelPossible(ButtonStatus.Possible);
-    } else {
-      return setIsRBFCancelPossible(ButtonStatus.NotPossible);
-    }
-  };
-
-  const navigateToRBFBumpFee = () => {
-    navigate('RBFBumpFee', {
-      txid: tx.hash,
-      wallet,
-    });
-  };
-
-  const navigateToRBFCancel = () => {
-    navigate('RBFCancel', {
-      txid: tx.hash,
-      wallet,
-    });
-  };
-
-  const navigateToCPFP = () => {
-    navigate('CPFP', {
-      txid: tx.hash,
-      wallet,
-    });
-  };
-
-  const renderCPFP = () => {
-    if (isCPFPPossible === ButtonStatus.Unknown) {
-      return (
-        <>
-          <ActivityIndicator />
-          <Spacing20 />
-        </>
-      );
-    } else if (isCPFPPossible === ButtonStatus.Possible) {
-      return (
-        <>
-          <Button onPress={navigateToCPFP} title={loc.transactions.status_bump} />
-          <Spacing10 />
-        </>
-      );
-    }
-  };
-
-  const renderRBFCancel = () => {
-    if (isRBFCancelPossible === ButtonStatus.Unknown) {
-      return (
-        <>
-          <ActivityIndicator />
-        </>
-      );
-    } else if (isRBFCancelPossible === ButtonStatus.Possible) {
-      return (
-        <>
-          <TouchableOpacity accessibilityRole="button" style={styles.cancel}>
-            <Text onPress={navigateToRBFCancel} style={styles.cancelText}>
-              {loc.transactions.status_cancel}
-            </Text>
-          </TouchableOpacity>
-          <Spacing10 />
-        </>
-      );
-    }
-  };
-
-  const renderRBFBumpFee = () => {
-    if (isRBFBumpFeePossible === ButtonStatus.Unknown) {
-      return (
-        <>
-          <ActivityIndicator />
-          <Spacing20 />
-        </>
-      );
-    } else if (isRBFBumpFeePossible === ButtonStatus.Possible) {
-      return (
-        <>
-          <Button onPress={navigateToRBFBumpFee} title={loc.transactions.status_bump} />
-          <Spacing10 />
-        </>
-      );
-    }
-  };
 
   const renderTXMetadata = () => {
     if (txMetadata[tx.hash]) {
@@ -589,12 +402,6 @@ const TransactionStatus: React.FC<TransactionStatusProps> = ({ transaction, txid
                 </View>
               ) : null}
             </ShroudCard>
-
-            <View style={styles.actions}>
-              {renderCPFP()}
-              {renderRBFBumpFee()}
-              {renderRBFCancel()}
-            </View>
           </View>
         </>
       )}
@@ -674,18 +481,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  actions: {
-    alignSelf: 'center',
-    justifyContent: 'center',
-  },
-  cancel: {
-    marginVertical: 16,
-  },
-  cancelText: {
-    color: '#d0021b',
-    fontSize: 15,
-    fontWeight: '500',
-    textAlign: 'center',
   },
 });

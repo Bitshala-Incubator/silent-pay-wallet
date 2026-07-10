@@ -223,17 +223,10 @@
         "warning": "⚠️ Work in Progress - This wallet is currently under active development."
     },
     "transactions": {
-        "cancel_explain": "We will replace this transaction with one that pays you and has higher fees. This effectively cancels the current transaction. This is called RBF—Replace by Fee.",
-        "cancel_no": "This transaction is not replaceable.",
-        "cancel_title": "Cancel this transaction (RBF)",
         "transaction_loading_error": "There was an issue loading the transaction. Please try again later.",
         "transaction_not_available": "Transaction not available",
         "confirmations_lowercase": "{confirmations} confirmations",
         "expand_note": "Expand Note",
-        "cpfp_create": "Create",
-        "cpfp_exp": "We will create another transaction that spends your unconfirmed transaction. The total fee will be higher than the original transaction fee, so it should be mined faster. This is called CPFP—Child Pays for Parent.",
-        "cpfp_no_bump": "This transaction is not bumpable.",
-        "cpfp_title": "Bump Fee (CPFP)",
         "details_balance_hide": "Hide Balance",
         "details_copy": "Copy",
         "details_copy_note": "Copy Note",
@@ -254,10 +247,6 @@
         "view_wallet": "View {walletLabel}",
         "list_title": "Transactions",
         "transaction": "Transaction",
-        "rbf_explain": "We will replace this transaction with one with a higher fee so that it will be mined faster. This is called RBF—Replace by Fee.",
-        "rbf_title": "Bump Fee (RBF)",
-        "status_bump": "Bump Fee",
-        "status_cancel": "Cancel Transaction",
         "txid": "Transaction ID",
         "updating": "Updating..."
     },

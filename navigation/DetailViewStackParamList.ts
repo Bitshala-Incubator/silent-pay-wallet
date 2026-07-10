@@ -23,12 +23,6 @@ export type DetailViewStackParamList = {
   WalletsList: { onBarScanned?: string };
   TransactionDetails: { tx: Transaction; hash: string; walletID: string };
   TransactionStatus: { hash: string; walletID?: string };
-  CPFP: {
-    wallet: TWallet | null;
-    txid: string;
-  };
-  RBFBumpFee: { txid: string; wallet: TWallet | null };
-  RBFCancel: { txid: string; wallet: TWallet | null };
   Broadcast: object;
   Success: undefined;
   AddWalletRoot?: {
