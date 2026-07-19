@@ -1,0 +1,25 @@
+name: Rust Tests
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust_jsi_bridge
+    steps:
+    - name: Checkout project
+      uses: actions/checkout@v6
+
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          rust_jsi_bridge/target
+        key: cargo-${{ hashFiles('rust_jsi_bridge/Cargo.lock') }}
+
+    - name: Run tests
+      run: cargo test
