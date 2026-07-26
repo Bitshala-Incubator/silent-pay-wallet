@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Icon } from '@rneui/themed';
+import ClipboardIcon from '../../components/icons/ClipboardIcon';
+import InfoBadgeIcon from '../../components/icons/InfoBadgeIcon';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import SafeArea from '../../components/SafeArea';
@@ -13,6 +14,7 @@ import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet';
 import loc from '../../loc';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
 import { Spacing20 } from '../../components/Spacing';
+import { ClashFont } from '../../constants/fonts';
 
 type TrackPaymentProps = NativeStackScreenProps<DetailViewStackParamList, 'TrackPayment'>;
 
@@ -24,6 +26,9 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
   const [txid, setTxid] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const isValidTxid = txid.trim().length === 64 && /^[0-9a-fA-F]+$/.test(txid.trim());
+  const isCheckEnabled = isValidTxid && !!wallet;
+
   const stylesHook = StyleSheet.create({
     inputContainer: {
       borderColor: colors.formBorder,
@@ -33,25 +38,30 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
       color: colors.foregroundColor,
     },
     label: {
-      color: colors.foregroundColor,
+      color: colors.inputlabel,
     },
     description: {
-      color: colors.alternativeTextColor,
+      color: colors.trackpaymentdescription,
     },
     helperText: {
-      color: colors.alternativeTextColor,
+      color: colors.helpertext,
     },
     infoBox: {
-      backgroundColor: colors.ballOutgoingExpired,
+      backgroundColor: colors.infoboxbackground,
+      borderColor: colors.infoBoxBorder,
     },
     infoText: {
-      color: colors.secondButtonTextColor,
+      color: colors.infotext,
     },
-    outlineButton: {
-      borderColor: colors.formBorder,
+    checkButton: {
+      backgroundColor: isCheckEnabled ? colors.brandPrimary : colors.checkButtonDisabledBackground,
     },
-    outlineButtonText: {
-      color: colors.foregroundColor,
+    checkButtonText: {
+      color: isCheckEnabled ? colors.white : colors.buttonDisabledTextColor,
+    },
+    pasteButton: {
+      backgroundColor: colors.pasteButtonBackground,
+      borderColor: colors.pasteButtonBorder,
     },
   });
 
@@ -90,8 +100,6 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
     }
   }, [txid, wallet, navigate]);
 
-  const isValidTxid = txid.trim().length === 64 && /^[0-9a-fA-F]+$/.test(txid.trim());
-
   return (
     <SafeArea>
       <View style={styles.container}>
@@ -105,17 +113,17 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
             <TextInput
               style={[styles.input, stylesHook.input]}
               placeholder={loc.track_payment.txid_placeholder}
-              placeholderTextColor={colors.alternativeTextColor}
+              placeholderTextColor={colors.placeholdertext}
               value={txid}
               onChangeText={setTxid}
               autoCapitalize="none"
               autoCorrect={false}
-              multiline={false}
+              multiline={true}
               editable={!isLoading}
               testID="TrackPaymentTxidInput"
             />
-            <Pressable onPress={handlePasteFromClipboard} style={styles.pasteButton} testID="PasteButton">
-              <Icon name="content-paste" type="material" size={18} color={colors.alternativeTextColor} />
+            <Pressable onPress={handlePasteFromClipboard} style={[styles.pasteButton, stylesHook.pasteButton]} testID="PasteButton">
+              <ClipboardIcon size={14} color={colors.pasteButtonIcon} />
             </Pressable>
           </View>
           <Text style={[styles.helperText, stylesHook.helperText]}>{loc.track_payment.txid_helper}</Text>
@@ -124,8 +132,8 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
 
           <View style={[styles.infoBox, stylesHook.infoBox]}>
             <View style={styles.infoHeader}>
-              <Icon name="info-outline" type="material" size={18} color={colors.hdborderColor} />
-              <Text style={[styles.infoTitle, { color: colors.shadowColor }]}>{loc.track_payment.whats_txid}</Text>
+              <InfoBadgeIcon size={28} background={colors.infoBadgeBackground} glyphColor={colors.infoBadgeIcon} />
+              <Text style={[styles.infoTitle, { color: colors.infotitle }]}>{loc.track_payment.whats_txid}</Text>
             </View>
             <Text style={[styles.infoText, stylesHook.infoText]}>{loc.track_payment.txid_explanation}</Text>
           </View>
@@ -136,12 +144,12 @@ const TrackPayment: React.FC<TrackPaymentProps> = () => {
             <ActivityIndicator size="large" color={colors.mainColor} />
           ) : (
             <Pressable
-              style={[styles.outlineButton, stylesHook.outlineButton, (!isValidTxid || !wallet) && styles.disabled]}
+              style={[styles.checkButton, stylesHook.checkButton]}
               onPress={handleCheckTransaction}
-              disabled={!isValidTxid || isLoading || !wallet}
+              disabled={!isCheckEnabled || isLoading}
               testID="CheckTransactionButton"
             >
-              <Text style={[styles.outlineButtonText, stylesHook.outlineButtonText]}>{loc.track_payment.check_transaction}</Text>
+              <Text style={[styles.checkButtonText, stylesHook.checkButtonText]}>{loc.track_payment.check_transaction}</Text>
             </Pressable>
           )}
         </View>
@@ -163,12 +171,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 20,
+    fontFamily: ClashFont.regular,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 17,
+    fontFamily: ClashFont.medium,
     marginBottom: 8,
   },
   inputContainer: {
@@ -182,17 +191,25 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     fontSize: 14,
+    fontFamily: ClashFont.regular,
   },
   pasteButton: {
-    padding: 8,
+    width: 37,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   helperText: {
-    fontSize: 12,
+    fontSize: 14,
     marginTop: 6,
     marginLeft: 4,
+    fontFamily: ClashFont.regular,
   },
   infoBox: {
     borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
   },
   infoHeader: {
@@ -203,28 +220,25 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: ClashFont.medium,
     flex: 1,
   },
   infoText: {
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 20,
+    fontFamily: ClashFont.regular,
   },
   buttonContainer: {
     paddingBottom: 30,
   },
-  outlineButton: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 14,
+  checkButton: {
+    height: 56,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  disabled: {
-    opacity: 0.4,
-  },
-  outlineButtonText: {
+  checkButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: ClashFont.medium,
   },
 });
