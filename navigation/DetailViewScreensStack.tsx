@@ -158,6 +158,9 @@ const DetailViewStackScreensStack = () => {
         options={navigationStyle({
           title: loc.track_payment.title,
           statusBarStyle: 'auto',
+          headerStyle: {
+            backgroundColor: theme.colors.customHeader,
+          },
         })(theme)}
       />
       <DetailViewStack.Screen
@@ -166,6 +169,9 @@ const DetailViewStackScreensStack = () => {
         options={navigationStyle({
           title: loc.payment_found.title,
           statusBarStyle: 'auto',
+          headerStyle: {
+            backgroundColor: theme.colors.customHeader,
+          },
         })(theme)}
       />
       <DetailViewStack.Screen
@@ -174,6 +180,9 @@ const DetailViewStackScreensStack = () => {
         options={navigationStyle({
           title: loc.no_payment_found.title,
           statusBarStyle: 'auto',
+          headerStyle: {
+            backgroundColor: theme.colors.customHeader,
+          },
         })(theme)}
       />
       <DetailViewStack.Screen

@@ -209,10 +209,10 @@ export const ShroudDarkTheme: Theme = {
   colors: {
     ...ShroudDefaultTheme.colors,
     ...DarkTheme.colors,
-    customHeader: '#121212',
+    customHeader: '#0D0D0D',
     brandingColor: '#000000',
     borderTopColor: '#9aa0aa',
-    background: '#121212',
+    background: '#0D0D0D',
     brandPrimary: '#8763EB',
     foregroundColor: '#ffffff',
     buttonDisabledBackgroundColor: '#3A3A3C',
