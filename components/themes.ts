@@ -41,7 +41,7 @@ export const ShroudDefaultTheme = {
     lightBorder: '#ededed',
     ballOutgoingExpired: '#ECF1F7',
     modal: '#ffffff',
-    formBorder: '#d2d2d2',
+    formBorder: '#E5E7EB',
     modalButton: '#ccddf9',
     darkGray: '#9AA0AA',
     scanLabel: '#9AA0AA',
@@ -120,6 +120,8 @@ export const ShroudDefaultTheme = {
     shieldIconBackground: '#FAF5FF',
     shieldIconBorder: '#F3E8FF',
     shieldIconAccent: '#754CE8',
+    infoBadgeBackground: '#DBEAFE',
+    infoBadgeIcon: '#155DFC',
     shareAddrBorderColor: '#E6E2FA',
     shareAddrBackground: 'transparent',
     zeroBalanceRequestTextColor: '#ffffff',
@@ -144,6 +146,57 @@ export const ShroudDefaultTheme = {
     incomingIconBorder: '#E6E2FA',
     outgoingIconBackground: '#F5F5F7',
     outgoingIconBorder: '#D9D9D9',
+
+    // Track a payment tokens
+    trackpaymentdescription: '#64748B',
+    inputlabel: '#475569',
+    placeholdertext: '#94A3B8',
+    helpertext: '#94A3B8',
+    infoboxbackground: '#EEF2FF',
+    infotext: '#475569',
+    infotitle: '#1E293B',
+    infoBoxBorder: '#DBEAFE',
+    pasteButtonBackground: '#FFFFFF',
+    pasteButtonBorder: '#EDEDED',
+    pasteButtonIcon: '#8B5CF6',
+    checkButtonDisabledBackground: '#eef0f4',
+    headerTitleColor: '#1E293B',
+    headerChevronColor: '#1E293B',
+
+    // Payment found icon tokens
+    successCheckGradientStart: '#DCFCE7',
+    successCheckGradientEnd: '#D0FAE5',
+    successCheckIconColor: '#00A63E',
+
+    // Payment found "Almost there" box tokens
+    attentionBoxBackground: '#EFF6FF',
+    attentionBoxBorder: '#DBEAFE',
+    attentionHighlightColor: '#8B5CF6',
+    attentionBodyText: '#475569',
+
+    // Payment found details card tokens
+    detailsCardBackground: '#F6F7F8',
+    detailsCardBorder: '#E5E7EB',
+    detailsRowLabel: '#64748B',
+    statusConfirmingColor: '#E17100',
+    confirmationsProgressFill: '#FE9A00',
+    progressTrackBackground: '#E5E7EB',
+
+    // No Payment Found search badge tokens
+    searchBadgeGradientStart: '#F3F4F6',
+    searchBadgeGradientEnd: '#E5E7EB',
+    searchBadgeIconColor: '#64748B',
+
+    // No Payment Found reasons box tokens
+    reasonsBoxBackground: '#FFF9EC',
+    reasonsBoxBorder: '#FEF3C6',
+    reasonsAccentColor: '#E17100',
+    reasonsTitleColor: '#1E293B',
+    reasonsBodyText: '#475569',
+
+    // No Payment Found tip box tokens
+    tipBoxBackground: '#EEF4FF',
+    tipBodyText: '#475569',
   },
 };
 
@@ -156,10 +209,10 @@ export const ShroudDarkTheme: Theme = {
   colors: {
     ...ShroudDefaultTheme.colors,
     ...DarkTheme.colors,
-    customHeader: '#121212',
+    customHeader: '#0D0D0D',
     brandingColor: '#000000',
     borderTopColor: '#9aa0aa',
-    background: '#121212',
+    background: '#0D0D0D',
     brandPrimary: '#8763EB',
     foregroundColor: '#ffffff',
     buttonDisabledBackgroundColor: '#3A3A3C',
@@ -172,7 +225,7 @@ export const ShroudDarkTheme: Theme = {
     lightBorder: '#313030',
     ballOutgoingExpired: '#202020',
     modal: '#202020',
-    formBorder: '#202020',
+    formBorder: '#1F2228',
     inputBackgroundColor: '#262626',
     modalButton: '#000000',
     darkGray: '#3A3A3C',
@@ -225,6 +278,59 @@ export const ShroudDarkTheme: Theme = {
     outgoingIconBackground: '#161616',
     outgoingIconBorder: '#473F71',
     primary: '#754CE8',
+
+    // Track a payment tokens
+    trackpaymentdescription: '#64748B',
+    inputlabel: '#475569',
+    placeholdertext: '#94A3B8',
+    helpertext: '#94A3B8',
+    infoboxbackground: '#262626',
+    infotext: '#FFFFFF',
+    infotitle: '#FFFFFF',
+    infoBadgeBackground: '#C2DCFD',
+    infoBadgeIcon: '#4781FD',
+    infoBoxBorder: '#021B3D',
+    pasteButtonBackground: '#0D0D0D',
+    pasteButtonBorder: '#1F1F1F',
+    pasteButtonIcon: '#9C74F7',
+    checkButtonDisabledBackground: '#171717',
+    headerTitleColor: '#C4CFE1',
+    headerChevronColor: '#C4CFE1',
+
+    // Payment found icon tokens
+    successCheckGradientStart: '#DCFCE7',
+    successCheckGradientEnd: '#D0FAE5',
+    successCheckIconColor: '#00C046',
+
+    // Payment found "Almost there" box tokens
+    attentionBoxBackground: '#121212',
+    attentionBoxBorder: '#21242A',
+    attentionHighlightColor: '#8B5CF6',
+    attentionBodyText: '#FFFFFF',
+
+    // Payment found details card tokens
+    detailsCardBackground: '#121212',
+    detailsCardBorder: '#21242A',
+    detailsRowLabel: '#FFFFFF',
+    statusConfirmingColor: '#FF8A15',
+    confirmationsProgressFill: '#FFAD32',
+    progressTrackBackground: '#D7DAE0',
+
+    // No Payment Found search badge tokens
+    searchBadgeGradientStart: '#F3F4F6',
+    searchBadgeGradientEnd: '#E5E7EB',
+    searchBadgeIconColor: '#64748B',
+
+    // No Payment Found reasons box tokens (box stays cream-colored regardless of theme)
+    reasonsBoxBackground: '#FFF9EC',
+    reasonsBoxBorder: '#524201',
+    reasonsAccentColor: '#FB7D00',
+    reasonsTitleColor: '#64748B',
+    reasonsBodyText: '#475569',
+
+    // No Payment Found tip box tokens
+    tipBoxBackground: '#121212',
+    tipBodyText: '#FFFFFF',
   },
 };
 

@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Icon } from '@rneui/themed';
 import { CommonActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -15,6 +14,8 @@ import { satoshiToLocalCurrency } from '../../modules/currency';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
 import { Spacing20 } from '../../components/Spacing';
 import Button from '../../components/Button';
+import SuccessCheckIcon from '../../components/icons/SuccessCheckIcon';
+import { ClashFont } from '../../constants/fonts';
 
 const CONFIRMATIONS_THRESHOLD = 6;
 
@@ -60,16 +61,16 @@ const PaymentFound: React.FC<PaymentFoundProps> = ({ route }) => {
     );
   };
 
-  const confirmingColor = colors.warningColor;
+  const confirmingColor = colors.statusConfirmingColor;
 
   const stylesHook = StyleSheet.create({
     amount: { color: colors.foregroundColor },
     fiat: { color: colors.alternativeTextColor },
-    detailsCard: { backgroundColor: colors.ballOutgoingExpired },
-    rowLabel: { color: colors.alternativeTextColor },
-    progressTrack: { backgroundColor: colors.formBorder },
-    attentionBox: { backgroundColor: colors.ballOutgoingExpired },
-    attentionText: { color: colors.foregroundColor },
+    detailsCard: { backgroundColor: colors.detailsCardBackground, borderColor: colors.detailsCardBorder },
+    rowLabel: { color: colors.detailsRowLabel },
+    progressTrack: { backgroundColor: colors.progressTrackBackground },
+    attentionBox: { backgroundColor: colors.attentionBoxBackground, borderColor: colors.attentionBoxBorder },
+    attentionText: { color: colors.attentionBodyText, fontFamily: ClashFont.regular },
     outlineButton: { borderColor: colors.formBorder },
     outlineButtonText: { color: colors.foregroundColor },
   });
@@ -78,8 +79,13 @@ const PaymentFound: React.FC<PaymentFoundProps> = ({ route }) => {
     <SafeArea>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <View style={[styles.checkmarkContainer, { backgroundColor: colors.successColor + '20' }]}>
-            <Icon name="check" size={40} type="material" color={colors.successCheck} />
+          <View style={styles.checkmarkWrapper}>
+            <SuccessCheckIcon
+              size={120}
+              gradientStart={colors.successCheckGradientStart}
+              gradientEnd={colors.successCheckGradientEnd}
+              checkColor={colors.successCheckIconColor}
+            />
           </View>
           <Text style={[styles.foundItText, { color: colors.successCheck }]}>{loc.payment_found.found_it}</Text>
 
@@ -97,24 +103,32 @@ const PaymentFound: React.FC<PaymentFoundProps> = ({ route }) => {
                 {isConfirmed ? loc.payment_found.confirmed : loc.payment_found.confirming_label}
               </Text>
             </View>
-            <View style={[styles.progressTrackFull, stylesHook.progressTrack]}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${progressRatio * 100}%`, backgroundColor: isConfirmed ? colors.successCheck : confirmingColor },
-                ]}
-              />
+            <View style={styles.detailRow}>
+              <Text style={[styles.rowLabel, stylesHook.rowLabel]}>{loc.payment_found.progress}</Text>
+              <View style={styles.progressGroup}>
+                <View style={[styles.progressTrackInline, stylesHook.progressTrack]}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: `${progressRatio * 100}%`,
+                        backgroundColor: isConfirmed ? colors.successCheck : colors.confirmationsProgressFill,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={[styles.progressCountText, { color: colors.infotitle }]}>
+                  {confirmationsDisplay} of {CONFIRMATIONS_THRESHOLD}
+                </Text>
+              </View>
             </View>
-            <Text style={[styles.progressText, { color: colors.successCheck }]}>
-              {confirmationsDisplay} of {CONFIRMATIONS_THRESHOLD}
-            </Text>
           </View>
 
           <Spacing20 />
 
           {!isConfirmed && (
             <View style={[styles.attentionBox, stylesHook.attentionBox]}>
-              <Text style={[styles.attentionHighlight, { color: confirmingColor }]}>
+              <Text style={[styles.attentionHighlight, { color: colors.attentionHighlightColor }]}>
                 {loc.payment_found.attention_highlight}{' '}
                 <Text style={stylesHook.attentionText}>{loc.formatString(loc.payment_found.attention, { count: String(remaining) })}</Text>
               </Text>
@@ -127,7 +141,16 @@ const PaymentFound: React.FC<PaymentFoundProps> = ({ route }) => {
             <Text style={[styles.outlineButtonText, stylesHook.outlineButtonText]}>{loc.payment_found.view_details}</Text>
           </Pressable>
           <View style={styles.buttonSpacer} />
-          <Button title={loc.payment_found.done} onPress={handleDone} testID="DoneButton" />
+          <Button
+            title={loc.payment_found.done}
+            onPress={handleDone}
+            testID="DoneButton"
+            backgroundColor={colors.brandPrimary}
+            buttonTextColor={colors.white}
+            borderRadius={16}
+            style={styles.doneButton}
+            textStyle={styles.doneButtonText}
+          />
         </View>
       </ScrollView>
     </SafeArea>
@@ -146,31 +169,28 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
   },
-  checkmarkContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+  checkmarkWrapper: {
     marginTop: 16,
   },
   foundItText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: ClashFont.medium,
     marginTop: 12,
   },
   amount: {
-    fontSize: 36,
-    fontWeight: '700',
+    fontSize: 48,
+    fontFamily: ClashFont.semibold,
     textAlign: 'center',
   },
   fiat: {
-    fontSize: 16,
+    fontSize: 18,
+    fontFamily: ClashFont.regular,
     textAlign: 'center',
     marginTop: 4,
   },
   detailsCard: {
     borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
     width: '100%',
   },
@@ -182,35 +202,44 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 14,
+    fontFamily: ClashFont.regular,
   },
   statusText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: ClashFont.medium,
   },
-  progressTrackFull: {
-    width: '100%',
+  progressGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  progressTrackInline: {
+    flex: 1,
+    maxWidth: 140,
     height: 6,
     borderRadius: 3,
     overflow: 'hidden',
-    marginTop: 12,
   },
   progressFill: {
     height: '100%',
     borderRadius: 3,
   },
-  progressText: {
+  progressCountText: {
     fontSize: 14,
-    marginTop: 8,
+    fontFamily: ClashFont.medium,
   },
   attentionBox: {
     borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
     width: '100%',
   },
   attentionHighlight: {
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '600',
+    fontFamily: ClashFont.medium,
   },
   buttonContainer: {
     paddingBottom: 30,
@@ -220,14 +249,22 @@ const styles = StyleSheet.create({
     height: 12,
   },
   outlineButton: {
+    height: 56,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   outlineButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: ClashFont.medium,
+  },
+  doneButton: {
+    height: 56,
+    minHeight: 56,
+    maxHeight: 56,
+  },
+  doneButtonText: {
+    fontFamily: ClashFont.medium,
   },
 });

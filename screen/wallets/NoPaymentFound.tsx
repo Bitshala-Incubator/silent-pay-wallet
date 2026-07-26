@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Icon } from '@rneui/themed';
 import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
 import { useStorage } from '../../hooks/context/useStorage';
@@ -10,6 +9,10 @@ import loc from '../../loc';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/hapticFeedback';
 import { Spacing20 } from '../../components/Spacing';
 import Button from '../../components/Button';
+import CopyIcon from '../../components/icons/CopyIcon';
+import SearchBadgeIcon from '../../components/icons/SearchBadgeIcon';
+import HelpCircleIcon from '../../components/icons/HelpCircleIcon';
+import { ClashFont } from '../../constants/fonts';
 
 const NoPaymentFound: React.FC = () => {
   const { wallets } = useStorage();
@@ -27,7 +30,6 @@ const NoPaymentFound: React.FC = () => {
   );
 
   const spAddress = useMemo(() => wallet?.getSilentPaymentAddress() ?? '', [wallet]);
-  const warningColor = colors.warningColor;
 
   const handleCopyAddress = useCallback(() => {
     if (!spAddress) return;
@@ -38,19 +40,24 @@ const NoPaymentFound: React.FC = () => {
   const stylesHook = StyleSheet.create({
     heading: { color: colors.foregroundColor },
     subheading: { color: colors.alternativeTextColor },
-    reasonsBox: { backgroundColor: warningColor + '15' },
-    reasonsTitle: { color: colors.foregroundColor },
-    reasonText: { color: colors.alternativeTextColor },
-    tipBox: { backgroundColor: colors.ballOutgoingExpired },
-    tipText: { color: colors.shadowColor },
+    reasonsBox: { backgroundColor: colors.reasonsBoxBackground, borderColor: colors.reasonsBoxBorder },
+    reasonsTitle: { color: colors.reasonsTitleColor },
+    reasonText: { color: colors.reasonsBodyText },
+    tipBox: { backgroundColor: colors.tipBoxBackground, borderColor: colors.infoBoxBorder },
+    tipText: { color: colors.tipBodyText },
   });
 
   return (
     <SafeArea>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-          <View style={[styles.iconContainer, { backgroundColor: colors.inputBackgroundColor }]}>
-            <Icon name="search" type="material" size={40} color={colors.alternativeTextColor} />
+          <View style={styles.iconContainer}>
+            <SearchBadgeIcon
+              size={96}
+              gradientStart={colors.searchBadgeGradientStart}
+              gradientEnd={colors.searchBadgeGradientEnd}
+              iconColor={colors.searchBadgeIconColor}
+            />
           </View>
 
           <Text style={[styles.heading, stylesHook.heading]}>{loc.no_payment_found.heading}</Text>
@@ -60,12 +67,12 @@ const NoPaymentFound: React.FC = () => {
 
           <View style={[styles.reasonsBox, stylesHook.reasonsBox]}>
             <View style={styles.reasonsHeader}>
-              <Icon name="help-outline" type="material" size={20} color={warningColor} />
+              <HelpCircleIcon size={20} color={colors.reasonsAccentColor} />
               <Text style={[styles.reasonsTitle, stylesHook.reasonsTitle]}>{loc.no_payment_found.could_mean}</Text>
             </View>
             {reasons.map(reason => (
               <View key={reason} style={styles.reasonRow}>
-                <View style={[styles.bullet, { backgroundColor: warningColor }]} />
+                <View style={[styles.bullet, { backgroundColor: colors.reasonsAccentColor }]} />
                 <Text style={[styles.reasonText, stylesHook.reasonText]}>{reason}</Text>
               </View>
             ))}
@@ -75,7 +82,7 @@ const NoPaymentFound: React.FC = () => {
 
           <View style={[styles.tipBox, stylesHook.tipBox]}>
             <Text style={[styles.tipText, stylesHook.tipText]}>
-              <Text style={[styles.tipLabel, { color: colors.buttonBackgroundColor }]}>{loc.no_payment_found.tip_label} </Text>
+              <Text style={[styles.tipLabel, { color: colors.attentionHighlightColor }]}>{loc.no_payment_found.tip_label} </Text>
               {loc.no_payment_found.tip}
             </Text>
           </View>
@@ -85,8 +92,13 @@ const NoPaymentFound: React.FC = () => {
           <Button
             title={loc.no_payment_found.copy_my_address}
             onPress={handleCopyAddress}
-            icon={{ name: 'content-copy', type: 'material', color: colors.buttonTextColor }}
+            iconElement={<CopyIcon size={20} color={colors.white} />}
             testID="CopyMyAddressButton"
+            backgroundColor={colors.brandPrimary}
+            buttonTextColor={colors.white}
+            borderRadius={16}
+            style={styles.copyButton}
+            textStyle={styles.copyButtonText}
           />
         </View>
       </ScrollView>
@@ -107,26 +119,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 16,
   },
   heading: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: ClashFont.semibold,
     textAlign: 'center',
     marginTop: 20,
   },
   subheading: {
     fontSize: 14,
+    fontFamily: ClashFont.regular,
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 12,
   },
   reasonsBox: {
     borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
     width: '100%',
   },
@@ -138,7 +147,7 @@ const styles = StyleSheet.create({
   },
   reasonsTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: ClashFont.semibold,
   },
   reasonRow: {
     flexDirection: 'row',
@@ -155,23 +164,34 @@ const styles = StyleSheet.create({
   },
   reasonText: {
     fontSize: 14,
+    fontFamily: ClashFont.regular,
     lineHeight: 20,
     flex: 1,
   },
   tipBox: {
     borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
     width: '100%',
   },
   tipLabel: {
-    fontWeight: '700',
+    fontFamily: ClashFont.semibold,
   },
   tipText: {
     fontSize: 13,
+    fontFamily: ClashFont.regular,
     lineHeight: 20,
   },
   buttonContainer: {
     paddingBottom: 30,
     paddingTop: 20,
+  },
+  copyButton: {
+    height: 56,
+    minHeight: 56,
+    maxHeight: 56,
+  },
+  copyButtonText: {
+    fontFamily: ClashFont.medium,
   },
 });

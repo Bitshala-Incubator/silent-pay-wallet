@@ -5,6 +5,7 @@ import { Image, Keyboard, Platform, StyleSheet, TouchableOpacity } from 'react-n
 import { ClashFont } from '../constants/fonts';
 import loc from '../loc';
 import { Theme } from './themes';
+import HeaderBackButton from './HeaderBackButton';
 
 const styles = StyleSheet.create({
   button: {
@@ -112,15 +113,28 @@ const navigationStyle = (
           </TouchableOpacity>
         );
       }
+
+      if (!headerLeft && !isFirstRouteInStack) {
+        headerLeft = () => (
+          <HeaderBackButton
+            color={theme.colors.headerChevronColor}
+            onPress={() => {
+              Keyboard.dismiss();
+              navigation.goBack();
+            }}
+          />
+        );
+      }
+
       const baseHeaderStyle = {
         headerShadowVisible: false,
         headerTitleAlign: 'center' as const,
         headerTitleStyle: {
           fontFamily: ClashFont.medium,
           fontSize: 17,
-          color: theme.colors.foregroundColor,
+          color: theme.colors.headerTitleColor,
         },
-        headerTintColor: theme.colors.foregroundColor,
+        headerTintColor: theme.colors.headerChevronColor,
         headerBackButtonDisplayMode: 'minimal',
       };
       const isLeftCloseButtonAndroid = closeButton === CloseButtonPosition.Left && Platform.OS === 'android';

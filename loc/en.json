@@ -392,6 +392,7 @@
         "title": "Payment Found",
         "found_it": "Found it!",
         "status": "Status",
+        "progress": "Progress",
         "confirming_label": "Confirming",
         "confirmed": "Confirmed",
         "attention_highlight": "Almost there!",
@@ -408,7 +409,7 @@
         "reason_different_address": "Payment sent to different address",
         "reason_incorrect_txid": "The TXID is incorrect",
         "reason_not_silent_payment": "Sender used a regular address instead of Silent Payment",
-        "tip_label": "Tip:",
+        "tip_label": "TIP:",
         "tip": "Double-check with the sender that they used your Silent Payment address.",
         "copy_my_address": "Copy My Address"
     },

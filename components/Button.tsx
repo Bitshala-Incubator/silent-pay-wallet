@@ -26,6 +26,7 @@ interface ButtonProps extends PressableProps {
     type: string;
     color: string;
   };
+  iconElement?: React.ReactNode;
   title?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -61,7 +62,8 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
     <ActivityIndicator size="small" color={fontColor} />
   ) : (
     <>
-      {props.icon && <Icon name={props.icon.name} type={props.icon.type} color={props.icon.color} />}
+      {props.iconElement}
+      {!props.iconElement && props.icon && <Icon name={props.icon.name} type={props.icon.type} color={props.icon.color} />}
       {props.title && <Text style={textStyle}>{props.title}</Text>}
     </>
   );
