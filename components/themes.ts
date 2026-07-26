@@ -162,6 +162,41 @@ export const ShroudDefaultTheme = {
     checkButtonDisabledBackground: '#eef0f4',
     headerTitleColor: '#1E293B',
     headerChevronColor: '#1E293B',
+
+    // Payment found icon tokens
+    successCheckGradientStart: '#DCFCE7',
+    successCheckGradientEnd: '#D0FAE5',
+    successCheckIconColor: '#00A63E',
+
+    // Payment found "Almost there" box tokens
+    attentionBoxBackground: '#EFF6FF',
+    attentionBoxBorder: '#DBEAFE',
+    attentionHighlightColor: '#8B5CF6',
+    attentionBodyText: '#475569',
+
+    // Payment found details card tokens
+    detailsCardBackground: '#F6F7F8',
+    detailsCardBorder: '#E5E7EB',
+    detailsRowLabel: '#64748B',
+    statusConfirmingColor: '#E17100',
+    confirmationsProgressFill: '#FE9A00',
+    progressTrackBackground: '#E5E7EB',
+
+    // No Payment Found search badge tokens
+    searchBadgeGradientStart: '#F3F4F6',
+    searchBadgeGradientEnd: '#E5E7EB',
+    searchBadgeIconColor: '#64748B',
+
+    // No Payment Found reasons box tokens
+    reasonsBoxBackground: '#FFF9EC',
+    reasonsBoxBorder: '#FEF3C6',
+    reasonsAccentColor: '#E17100',
+    reasonsTitleColor: '#1E293B',
+    reasonsBodyText: '#475569',
+
+    // No Payment Found tip box tokens
+    tipBoxBackground: '#EEF4FF',
+    tipBodyText: '#475569',
   },
 };
 
@@ -261,6 +296,41 @@ export const ShroudDarkTheme: Theme = {
     checkButtonDisabledBackground: '#171717',
     headerTitleColor: '#C4CFE1',
     headerChevronColor: '#C4CFE1',
+
+    // Payment found icon tokens
+    successCheckGradientStart: '#DCFCE7',
+    successCheckGradientEnd: '#D0FAE5',
+    successCheckIconColor: '#00C046',
+
+    // Payment found "Almost there" box tokens
+    attentionBoxBackground: '#121212',
+    attentionBoxBorder: '#21242A',
+    attentionHighlightColor: '#8B5CF6',
+    attentionBodyText: '#FFFFFF',
+
+    // Payment found details card tokens
+    detailsCardBackground: '#121212',
+    detailsCardBorder: '#21242A',
+    detailsRowLabel: '#FFFFFF',
+    statusConfirmingColor: '#FF8A15',
+    confirmationsProgressFill: '#FFAD32',
+    progressTrackBackground: '#D7DAE0',
+
+    // No Payment Found search badge tokens
+    searchBadgeGradientStart: '#F3F4F6',
+    searchBadgeGradientEnd: '#E5E7EB',
+    searchBadgeIconColor: '#64748B',
+
+    // No Payment Found reasons box tokens (box stays cream-colored regardless of theme)
+    reasonsBoxBackground: '#FFF9EC',
+    reasonsBoxBorder: '#524201',
+    reasonsAccentColor: '#FB7D00',
+    reasonsTitleColor: '#64748B',
+    reasonsBodyText: '#475569',
+
+    // No Payment Found tip box tokens
+    tipBoxBackground: '#121212',
+    tipBodyText: '#FFFFFF',
   },
 };
 
