@@ -22,3 +22,9 @@ export type {
 } from './types';
 export { IDLE_SCAN_STATE, isScannable } from './types';
 export { RustTransactionProcessor, createTransactionProcessor } from './RustTransactionProcessor';
+export {
+  planSplitOutputs,
+  canSplitPayment,
+  SPEND_INPUT_VBYTES,
+  OUTPUT_VBYTES,
+} from './splitPayment';

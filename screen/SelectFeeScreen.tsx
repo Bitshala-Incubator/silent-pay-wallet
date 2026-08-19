@@ -114,17 +114,23 @@ interface FeeCardProps {
 }
 
 const FeeCard: FC<FeeCardProps> = ({ label, fee, rate, eta, icon, selected, disabled, onPress, colors }) => {
-  const stylesHook = StyleSheet.create({
-    card: {
-      backgroundColor: selected ? colors.surfaceSubtle : colors.white,
-      borderColor: selected ? colors.feeCardSelectedBorder : colors.feeCardBorder,
-    },
-    iconCircle: { backgroundColor: selected ? colors.white : colors.surfaceSubtle },
-    label: { color: colors.black },
-    subtitlePrimary: { color: colors.textPrimary },
-    subtitleSecondary: { color: colors.textSecondary },
-    eta: { color: selected ? colors.brandPrimary : colors.amountMeta },
-  });
+  /* eslint-disable react-native/no-unused-styles */
+  const stylesHook = useMemo(
+    () =>
+      StyleSheet.create({
+        card: {
+          backgroundColor: selected ? colors.surfaceSubtle : colors.white,
+          borderColor: selected ? colors.feeCardSelectedBorder : colors.feeCardBorder,
+        },
+        iconCircle: { backgroundColor: selected ? colors.white : colors.surfaceSubtle },
+        label: { color: colors.black },
+        subtitlePrimary: { color: colors.textPrimary },
+        subtitleSecondary: { color: colors.textSecondary, fontFamily: ClashFont.regular },
+        eta: { color: selected ? colors.brandPrimary : colors.amountMeta },
+      }),
+    [selected, colors],
+  );
+  /* eslint-enable react-native/no-unused-styles */
 
   return (
     <TouchableOpacity
@@ -179,7 +185,7 @@ const SelectFeeScreen = () => {
     satVbyteText: { color: colors.textSecondary },
     customFeeInputColors: { color: colors.textPrimary },
     customEstimateText: { color: colors.textPrimary },
-    customEstimateRate: { color: colors.textSecondary },
+    customEstimateRate: { color: colors.textSecondary, fontFamily: ClashFont.regular },
     customEstimateEta: { color: colors.brandPrimary },
   });
 

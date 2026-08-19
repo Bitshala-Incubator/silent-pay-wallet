@@ -45,7 +45,10 @@ export const sanitizeAmountInput = (text: string, unit: BitcoinUnit): string => 
   }
   const cleaned = text.replace(/,/g, '.').replace(/[^0-9.]/g, '');
   const [intPart, ...rest] = cleaned.split('.');
-  return rest.length ? `${intPart}.${rest.join('')}` : intPart;
+  if (!rest.length) return intPart;
+  // BTC has 8 decimal places (1 sat); anything past that isn't a valid amount and, left
+  // unclamped, produces fractional sats that diverge between the preview and the signed tx.
+  return `${intPart}.${rest.join('').slice(0, 8)}`;
 };
 
 /**

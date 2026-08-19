@@ -7,7 +7,11 @@ import { TOptions } from 'bip21';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Keyboard, LayoutAnimation, ScrollView, StyleSheet, Text, TextInput, Pressable, View } from 'react-native';
 import { SilentPayment } from 'silent-payments';
+import SplitIcon from '../../components/icons/SplitIcon';
+import InfoIcon from '../../components/icons/InfoIcon';
+import { ClashFont } from '../../constants/fonts';
 import { btcToSatoshi, satoshiToBTC, satoshiToLocalCurrency } from '../../modules/currency';
+import { canSplitPayment } from '../../helpers/silent-payments';
 import triggerHapticFeedback, { HapticFeedbackTypes, triggerSelectionHapticFeedback } from '../../modules/hapticFeedback';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet';
@@ -24,7 +28,6 @@ import LabeledField from '../../components/LabeledField';
 import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
 import { Action } from '../../components/types';
-import { ClashFont } from '../../constants/fonts';
 import { isAmountEmpty, sanitizeAmountInput, displayAmountForUnit, feeSpeedTierForRate } from '../../helpers/send/format';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
@@ -80,6 +83,17 @@ const SendDetails = () => {
   const [feePrecalc, setFeePrecalc] = useState<IFee>({ current: null, slowFee: null, mediumFee: null, fastestFee: null });
   const [changeAddress, setChangeAddress] = useState<string | null>(null);
   const [dumb, setDumb] = useState(false);
+  const [isSplitEnabled, setIsSplitEnabled] = useState(false);
+  // Splitting change is opt-out: it's the privacy-preserving default, but it leaves the wallet with
+  // more (smaller) UTXOs to spend later, so the sender gets to decline.
+  const [isChangeSplitEnabled, setIsChangeSplitEnabled] = useState(true);
+  const [splitPreview, setSplitPreview] = useState<{ paymentAmounts: number[]; changeCount: number; fee: number; feeDelta: number } | null>(
+    null,
+  );
+  // The toggle's eligibility gate only knows the amount; the builder also needs a change budget it
+  // can pay the extra outputs from. When it declines, say so here instead of silently sending one
+  // output after showing the user a split card.
+  const [splitDeclined, setSplitDeclined] = useState(false);
   const [displayUnit, setDisplayUnit] = useState<BitcoinUnit>(BitcoinUnit.BTC);
   const { isEditable } = routeParams;
   // if utxo is limited we use it to calculate available balance
@@ -190,6 +204,97 @@ const SendDetails = () => {
     console.log('SendDetails: No precalc fees yet, using default networkTransactionFees.fastestFee:', defaultFee);
     return defaultFee;
   }, [customFee, selectedPresetFeeRate, feePrecalc, networkTransactionFees]);
+
+  const isSPAddress = SilentPayment.isPaymentCodeValid(recipient?.address ?? '');
+  const isSplitEligible = isSPAddress && !isMaxActive && amountSatsNum > 0 && canSplitPayment(amountSatsNum, Number(feeRate) || 1);
+  // Reset split when the recipient no longer qualifies (amount dropped, address changed to non-SP, fee rate rose, etc.)
+  useEffect(() => {
+    if (!isSplitEligible) setIsSplitEnabled(false);
+  }, [isSplitEligible]);
+
+  // Debounced dry run of the real builder: replaces three independent estimates
+  // (partitionPaymentAmounts preview, estimateSplitExtraFee, the canSplitPayment gate) with one
+  // call to the actual coinselect+split path, so the preview can never disagree with the signed
+  // tx. Both calls are side-effect-free (dryRun skips the SP-UTXO pending-input reservation).
+  useEffect(() => {
+    if (!(isSplitEnabled && isSplitEligible && wallet && amountSatsNum > 0 && recipient?.address)) {
+      setSplitPreview(null);
+      setSplitDeclined(false);
+      return;
+    }
+
+    // Drop the previous result up front, not just on completion: during the debounce window it
+    // is stale, and createPsbtTransaction() would still pin the signed tx to it. Changing only
+    // the fee rate keeps the amount (so the pin's sum check still passes) while shrinking the
+    // change — enough to push the plan below the change budget.
+    setSplitPreview(null);
+    setSplitDeclined(false);
+
+    let cancelled = false;
+    const handle = setTimeout(async () => {
+      try {
+        const change = await getChangeAddressAsync();
+        if (!change || cancelled) return;
+
+        const feeR = Number(feeRate) || 1;
+        const lutxo = (utxos || wallet.getUtxo()) as CreateTransactionUtxo[];
+        const targets: CreateTransactionTarget[] = [{ address: recipient.address, value: amountSatsNum }];
+        const sequence = isTransactionReplaceable ? HDSilentPaymentsWallet.defaultRBFSequence : HDSilentPaymentsWallet.finalRBFSequence;
+        const spWallet = wallet as HDSilentPaymentsWallet;
+
+        const baseline = spWallet.createTransaction(lutxo, targets, feeR, change, sequence, true, 0, { enabled: false, dryRun: true });
+        const split = spWallet.createTransaction(lutxo, targets, feeR, change, sequence, true, 0, {
+          enabled: true,
+          splitChange: isChangeSplitEnabled,
+          dryRun: true,
+        });
+        if (cancelled) return;
+
+        const changeAddresses = split.changeAddresses ?? [change];
+        const changeSet = new Set(changeAddresses);
+        const paymentAmounts = split.outputs.filter(o => o.address && !changeSet.has(o.address)).map(o => o.value);
+
+        if (paymentAmounts.length < 2) {
+          // Subsumes the eligibility gate: the builder declined to split this payment (below
+          // the floor, fee cap, no change budget), so don't show a preview it won't honor.
+          setSplitPreview(null);
+          setSplitDeclined(true);
+          return;
+        }
+
+        setSplitPreview({ paymentAmounts, changeCount: changeAddresses.length, fee: split.fee, feeDelta: split.fee - baseline.fee });
+      } catch (e) {
+        // coinselect throws "Not enough balance..." at the margins; treat as "no preview"
+        if (!cancelled) {
+          setSplitPreview(null);
+          setSplitDeclined(true);
+        }
+      }
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isSplitEnabled,
+    isChangeSplitEnabled,
+    isSplitEligible,
+    wallet,
+    amountSatsNum,
+    feeRate,
+    recipient?.address,
+    utxos,
+    isTransactionReplaceable,
+  ]);
+
+  // Ordinals ("Output 1"/"Output 2") don't match `shuffleOutputs`, which is correct and stays —
+  // display-order only, sorted by value; the on-chain output order is never touched.
+  const previewOutputs: Array<{ sats: number }> = (splitPreview?.paymentAmounts ?? [])
+    .slice()
+    .sort((a, b) => b - a)
+    .map(sats => ({ sats }));
 
   useEffect(() => {
     // decode route params
@@ -592,7 +697,7 @@ const SendDetails = () => {
     }
 
     // without forcing `HDSegwitBech32Wallet` i had a weird ts error, complaining about last argument (fp)
-    const { tx, outputs, psbt, fee } = (wallet as HDSilentPaymentsWallet)?.createTransaction(
+    const { tx, outputs, psbt, fee, changeAddresses } = (wallet as HDSilentPaymentsWallet)?.createTransaction(
       lutxo,
       targets,
       requestedSatPerByte,
@@ -600,6 +705,14 @@ const SendDetails = () => {
       isTransactionReplaceable ? HDSilentPaymentsWallet.defaultRBFSequence : HDSilentPaymentsWallet.finalRBFSequence,
       false,
       0,
+      {
+        enabled: isSplitEnabled,
+        splitChange: isChangeSplitEnabled,
+        // Pin the actual signed tx to what the dry-run preview showed the user — otherwise a
+        // different economicFloor draw at send time could flip the split count and silently
+        // re-randomize the amounts the user already approved.
+        precalculatedPaymentAmounts: splitPreview && splitPreview.paymentAmounts.length > 0 ? splitPreview.paymentAmounts : undefined,
+      },
     );
 
     if (tx && routeParams.launchedBy && psbt) {
@@ -617,7 +730,8 @@ const SendDetails = () => {
     };
     await saveToDisk();
 
-    let recipients = outputs.filter(({ address }) => address !== change);
+    const changeSet = new Set([...(changeAddresses ?? []), change]);
+    let recipients = outputs.filter(({ address }) => !!address && !changeSet.has(address));
 
     if (recipients.length === 0) {
       // special case. maybe the only destination in this transaction is our own change address..?
@@ -632,6 +746,8 @@ const SendDetails = () => {
       tx: tx.toHex(),
       recipients,
       satoshiPerByte: requestedSatPerByte,
+      splitOutputCount: isSplitEnabled && recipients.length > 1 ? recipients.length : undefined,
+      spRecipientAddress: isSplitEnabled && recipients.length > 1 ? addresses[0].address : undefined,
     });
     setIsLoading(false);
   };
@@ -814,6 +930,42 @@ const SendDetails = () => {
   }[feeSpeedTierForRate(Number(feeRate), networkTransactionFees.fastestFee, networkTransactionFees.mediumFee)];
 
   const stylesHook = StyleSheet.create({
+    splitCard: {
+      borderColor: isSplitEnabled ? colors.brandPrimary : colors.splitCardDisabledBorderColor,
+      backgroundColor: isSplitEnabled ? colors.splitCardEnabledBGColor : colors.splitCardDisabledBGColor,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      gap: 12,
+    },
+    splitIconCircle: {
+      backgroundColor: isSplitEnabled ? colors.splitIconEnabledBGColor : colors.searchIconBackground,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+    },
+    splitToggleTrack: {
+      backgroundColor: isSplitEnabled ? colors.brandPrimary : colors.splitToggleDisabledBGColor,
+    },
+    splitCardSubtitle: { color: colors.textSecondary },
+    splitInfoBox: {
+      backgroundColor: colors.bannerBackground,
+      borderColor: colors.splitInfoBoxBorderColor,
+    },
+    splitInfoText: { color: colors.splitInfoBoxTextColor },
+    splitCardTitle: { color: colors.textPrimary },
+    splitToggleThumb: { backgroundColor: isSplitEnabled ? colors.white : colors.searchIconBackground },
+    changeToggleTrack: { backgroundColor: isChangeSplitEnabled ? colors.brandPrimary : colors.splitToggleDisabledBGColor },
+    changeToggleThumb: { backgroundColor: isChangeSplitEnabled ? colors.white : colors.searchIconBackground },
+    splitOutputAmount: { color: colors.textPrimary },
+    splitOutputLabel: { color: colors.textSecondary },
+    splitFeeIncreaseRow: {
+      backgroundColor: colors.splitFeeIncreaseBGColor,
+      borderColor: colors.splitFeeIncreaseBorderColor,
+      borderWidth: 1,
+    },
+    splitFeeIncreaseLabel: { color: colors.splitFeeIncreaseTextColor },
+    splitFeeIncreaseValue: { color: colors.brandPrimary },
+
     root: {
       backgroundColor: colors.background,
     },
@@ -944,6 +1096,128 @@ const SendDetails = () => {
           </View>
           <ChevronRightIcon color={colors.chevron} />
         </Pressable>
+
+        {isSplitEligible && (
+          <View style={[styles.splitCard, stylesHook.splitCard]}>
+            {/* Header row */}
+            <View style={styles.splitCardHeader}>
+              <View style={[styles.splitIconCircle, stylesHook.splitIconCircle]}>
+                <SplitIcon size={19} />
+              </View>
+              <View style={styles.splitCardContent}>
+                <View style={styles.splitTitleRow}>
+                  <Text style={[styles.splitCardTitle, stylesHook.splitCardTitle]}>{loc.send.split_payment}</Text>
+                  <Pressable
+                    accessibilityRole="switch"
+                    accessibilityLabel={loc.send.split_payment}
+                    accessibilityState={{ checked: isSplitEnabled }}
+                    testID="splitPaymentToggle"
+                    onPress={() => setIsSplitEnabled(v => !v)}
+                    style={[styles.splitToggleTrack, stylesHook.splitToggleTrack]}
+                  >
+                    <View style={[styles.splitToggleThumb, stylesHook.splitToggleThumb, isSplitEnabled && styles.splitToggleThumbOn]} />
+                  </Pressable>
+                </View>
+                <Text style={[styles.splitCardSubtitle, stylesHook.splitCardSubtitle]}>{loc.send.split_payment_subtitle}</Text>
+              </View>
+            </View>
+
+            {/* Split Details — shown when enabled */}
+            {isSplitEnabled && (
+              <>
+                {/* Info box */}
+                <View style={[styles.splitInfoBox, stylesHook.splitInfoBox]}>
+                  <InfoIcon color={colors.brandPrimary} size={20} />
+                  <Text style={[styles.splitInfoText, stylesHook.splitInfoText]}>
+                    {loc.send.split_payment_info}
+                    <Text style={styles.splitInfoTextEmphasis}>{loc.send.split_payment_info_emphasis}</Text>
+                  </Text>
+                </View>
+
+                {splitDeclined && (
+                  <View style={[styles.splitInfoBox, stylesHook.splitInfoBox]}>
+                    <InfoIcon color={colors.brandPrimary} size={20} />
+                    <Text style={[styles.splitInfoText, stylesHook.splitInfoText]}>{loc.send.split_payment_unavailable}</Text>
+                  </View>
+                )}
+
+                {/* Output preview — from the dry-run above, not a separate estimate, so these
+                    numbers exactly match what gets signed. Outputs are display-sorted by value
+                    (never the on-chain order, which stays shuffled). */}
+                {previewOutputs.length > 0 && (
+                  <View style={styles.splitOutputsSection}>
+                    {previewOutputs.map((output, i) => (
+                      <React.Fragment key={i}>
+                        <View style={styles.splitOutputRow}>
+                          <Text style={[styles.splitOutputLabel, stylesHook.splitOutputLabel]}>
+                            {loc.formatString(loc.send.split_output_label, { number: i + 1 })}
+                          </Text>
+                          <Text style={[styles.splitOutputAmount, stylesHook.splitOutputAmount]}>
+                            {satoshiToBTC(output.sats)} {loc.units[BitcoinUnit.BTC]}
+                          </Text>
+                        </View>
+                        {i < previewOutputs.length - 1 && <View style={styles.splitOutputDivider} />}
+                      </React.Fragment>
+                    ))}
+                  </View>
+                )}
+
+                {/* Splitting the change is a second, separate choice — it only applies once the
+                    split builder is running, so it lives inside this card. */}
+                <View style={styles.splitChangeSection}>
+                  <View style={styles.splitChangeHeader}>
+                    <View style={styles.splitTitleRow}>
+                      <Text style={[styles.splitChangeTitle, stylesHook.splitCardTitle]}>{loc.send.split_change}</Text>
+                      <Pressable
+                        accessibilityRole="switch"
+                        accessibilityLabel={loc.send.split_change}
+                        accessibilityState={{ checked: isChangeSplitEnabled }}
+                        testID="splitChangeToggle"
+                        onPress={() => setIsChangeSplitEnabled(v => !v)}
+                        style={[styles.splitToggleTrack, stylesHook.changeToggleTrack]}
+                      >
+                        <View
+                          style={[styles.splitToggleThumb, stylesHook.changeToggleThumb, isChangeSplitEnabled && styles.splitToggleThumbOn]}
+                        />
+                      </Pressable>
+                    </View>
+                    <Text style={[styles.splitCardSubtitle, stylesHook.splitCardSubtitle]}>{loc.send.split_change_subtitle}</Text>
+                  </View>
+
+                  {isChangeSplitEnabled && (
+                    <View style={[styles.splitInfoBox, styles.splitChangeInfoBox, stylesHook.splitInfoBox]}>
+                      <View style={styles.splitChangeInfoRow}>
+                        <InfoIcon color={colors.brandPrimary} size={20} />
+                        <Text style={[styles.splitInfoText, stylesHook.splitInfoText]}>{loc.send.split_change_info}</Text>
+                      </View>
+                      {/* The count comes from the same dry run as the amounts above — the planner
+                          picks it from the change budget, so there is nothing here to set. */}
+                      {splitPreview && (
+                        <View style={styles.splitOutputRow}>
+                          <Text style={[styles.splitOutputLabel, stylesHook.splitOutputLabel]}>
+                            {splitPreview.changeCount === 1
+                              ? loc.send.split_change_output_single
+                              : loc.formatString(loc.send.split_change_outputs, { count: splitPreview.changeCount })}
+                          </Text>
+                          <Text style={[styles.splitOutputAmount, stylesHook.splitOutputAmount]}>{loc.send.split_change_auto}</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+
+                {previewOutputs.length > 0 && (
+                  <View style={[styles.splitFeeIncreaseRow, stylesHook.splitFeeIncreaseRow]}>
+                    <Text style={[styles.splitFeeIncreaseLabel, stylesHook.splitFeeIncreaseLabel]}>{loc.send.fee_increase}</Text>
+                    <Text style={[styles.splitFeeIncreaseValue, stylesHook.splitFeeIncreaseValue]}>
+                      {`+${satoshiToBTC(splitPreview?.feeDelta ?? 0)} ${loc.units[BitcoinUnit.BTC]}`}
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        )}
       </ScrollView>
 
       <DismissKeyboardInputAccessory />
@@ -971,6 +1245,134 @@ const SendDetails = () => {
 export default SendDetails;
 
 const styles = StyleSheet.create({
+  splitCard: {
+    marginBottom: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  splitCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  splitIconCircle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  splitCardContent: {
+    flex: 1,
+    gap: 4,
+  },
+  splitTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  splitCardTitle: {
+    fontFamily: ClashFont.medium,
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  splitToggleTrack: {
+    width: 46,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  splitToggleThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  splitToggleThumbOn: {
+    alignSelf: 'flex-end',
+  },
+  splitCardSubtitle: {
+    fontFamily: ClashFont.regular,
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  splitInfoBox: {
+    flexDirection: 'row',
+    borderRadius: 16,
+    borderWidth: 0.54,
+    paddingVertical: 19,
+    paddingHorizontal: 12,
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  splitInfoText: {
+    flex: 1,
+    fontFamily: ClashFont.regular,
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  splitInfoTextEmphasis: {
+    fontFamily: ClashFont.medium,
+  },
+  splitOutputsSection: {
+    gap: 8,
+  },
+  splitChangeSection: {
+    gap: 12,
+  },
+  splitChangeHeader: {
+    gap: 4,
+  },
+  splitChangeTitle: {
+    fontFamily: ClashFont.semibold,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  splitChangeInfoBox: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+  },
+  splitChangeInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  splitOutputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 1,
+  },
+  splitOutputLabel: {
+    fontFamily: ClashFont.regular,
+    fontSize: 12,
+    lineHeight: 26,
+  },
+  splitOutputAmount: {
+    fontFamily: ClashFont.medium,
+    fontSize: 12,
+    lineHeight: 26,
+  },
+  splitOutputDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(230, 228, 228, 0.6)',
+  },
+  splitFeeIncreaseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  splitFeeIncreaseLabel: {
+    fontFamily: ClashFont.regular,
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  splitFeeIncreaseValue: {
+    fontFamily: ClashFont.semibold,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   root: {
     flex: 1,
     justifyContent: 'space-between',
@@ -1049,7 +1451,7 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
   feeSummaryValueMeta: {
-    fontFamily: ClashFont.medium,
+    fontFamily: ClashFont.regular,
   },
   bottom: {
     paddingHorizontal: 24,

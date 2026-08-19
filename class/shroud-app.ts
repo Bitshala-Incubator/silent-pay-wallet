@@ -266,7 +266,7 @@ export class ShroudApp {
     if (credentials) {
       password = credentials.password;
     } else {
-      const buf = await randomBytes(64);
+      const buf = randomBytes(64);
       password = buf.toString('hex');
       await Keychain.setGenericPassword(service, password, { service });
     }

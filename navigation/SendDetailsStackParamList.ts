@@ -52,6 +52,8 @@ export type SendDetailsStackParamList = {
     tx: string;
     recipients: CreateTransactionTarget[];
     satoshiPerByte: number;
+    splitOutputCount?: number;
+    spRecipientAddress?: string;
   };
   PsbtWithHardwareWallet: {
     memo?: string;

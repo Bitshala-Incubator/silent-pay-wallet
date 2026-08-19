@@ -35,12 +35,26 @@ export type CreateTransactionTarget = {
   };
 };
 
+/**
+ * Split-payment params for HDSilentPaymentsWallet.createTransaction, collapsed into one object
+ * so a future parent-signature insertion is a type error at every call site instead of a
+ * silent positional shift.
+ */
+export type SplitOptions = {
+  enabled: boolean;
+  /** Split the change too, not just the payment. Defaults to true. */
+  splitChange?: boolean;
+  precalculatedPaymentAmounts?: number[];
+  dryRun?: boolean;
+};
+
 export type CreateTransactionResult = {
   tx?: bitcoin.Transaction;
   inputs: CoinSelectReturnInput[];
   outputs: CoinSelectOutput[];
   fee: number;
   psbt: bitcoin.Psbt;
+  changeAddresses?: string[];
 };
 
 type TransactionInput = {

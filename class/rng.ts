@@ -6,11 +6,11 @@
 // React Native: entropy via global crypto.getRandomValues (polyfilled by react-native-get-random-values)
 
 /**
- * Generate cryptographically secure random bytes using native api.
+ * Generate cryptographically secure random bytes using native api synchronously.
  * @param  {number}   size      The number of bytes of randomness
- * @return {Promise.<Buffer>}   The random bytes
+ * @return {Buffer}             The random bytes
  */
-export async function randomBytes(size: number): Promise<Buffer> {
+export function randomBytes(size: number): Buffer {
   const g: any = globalThis as any;
   const rnCrypto = g && g.crypto;
   if (!rnCrypto || typeof rnCrypto.getRandomValues !== 'function') {

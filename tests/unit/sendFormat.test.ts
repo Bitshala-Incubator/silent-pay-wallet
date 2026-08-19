@@ -48,6 +48,11 @@ describe('send/format', () => {
       expect(sanitizeAmountInput('1,000.5', BitcoinUnit.BTC)).toBe('1.0005');
       expect(sanitizeAmountInput('1.2.3.4', BitcoinUnit.BTC)).toBe('1.234');
     });
+    it('clamps BTC input to 8 decimal places (1 sat), the smallest unit', () => {
+      expect(sanitizeAmountInput('0.123456789', BitcoinUnit.BTC)).toBe('0.12345678');
+      expect(sanitizeAmountInput('1.234567891234', BitcoinUnit.BTC)).toBe('1.23456789');
+      expect(sanitizeAmountInput('0.00000001', BitcoinUnit.BTC)).toBe('0.00000001'); // exactly 8 unaffected
+    });
     it('keeps digits only in sats mode, dropping dots and separators', () => {
       expect(sanitizeAmountInput('3440', BitcoinUnit.SATS)).toBe('3440');
       expect(sanitizeAmountInput('3,440 sats', BitcoinUnit.SATS)).toBe('3440');

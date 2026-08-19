@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useReducer } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View, ScrollView } from 'react-native';
 import { Text } from '@rneui/themed';
 import BigNumber from 'bignumber.js';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -22,6 +22,8 @@ import { useStorage } from '../../hooks/context/useStorage';
 import { useSettings } from '../../hooks/context/useSettings';
 import AmountHero from '../../components/AmountHero';
 import DetailRow from '../../components/DetailRow';
+import CopyIcon from '../../components/icons/CopyIcon';
+import ShieldCheckIcon from '../../components/icons/ShieldCheckIcon';
 import SendIcon from '../../components/icons/SendIcon';
 import { ClashFont } from '../../constants/fonts';
 import { computeTotalSats } from '../../helpers/send/format';
@@ -63,7 +65,7 @@ const Confirm: React.FC = () => {
   const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const navigation = useExtendedNavigation<ConfirmNavigationProp>();
   const route = useRoute<ConfirmRouteProp>();
-  const { recipients, walletID, fee, tx } = route.params;
+  const { recipients, walletID, fee, tx, splitOutputCount, spRecipientAddress } = route.params;
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const { navigate, goBack } = navigation;
@@ -72,8 +74,27 @@ const Confirm: React.FC = () => {
   const { colors } = useTheme();
   const [copiedAddr, setCopiedAddr] = React.useState(false);
   const [copiedTxid, setCopiedTxid] = React.useState(false);
+  const [copiedSP, setCopiedSP] = React.useState(false);
+  const [copiedOutputs, setCopiedOutputs] = React.useState<Record<number, boolean>>({});
 
   const stylesHook = StyleSheet.create({
+    splitSectionTitle: { color: colors.brandPrimary },
+    splitOutputsCard: {
+      backgroundColor: colors.splitCardEnabledBGColor,
+      borderColor: 'transparent',
+    },
+    outputLabel: { color: colors.textPrimary },
+    outputAmount: { color: colors.textPrimary },
+    outputAddressCard: { backgroundColor: colors.background },
+    outputAddressLabel: { color: colors.amountMeta },
+    outputAddressText: { color: colors.textPrimary },
+    spAddressRow: {
+      borderColor: colors.inputBackgroundColor,
+      backgroundColor: colors.background,
+    },
+    spAddressLabel: { color: colors.amountMeta },
+    spAddressText: { color: colors.brandPrimary },
+
     root: { backgroundColor: colors.background },
     divider: { backgroundColor: colors.divider },
     summaryLabel: { color: colors.amountMeta },
@@ -85,6 +106,8 @@ const Confirm: React.FC = () => {
     sendNowButton: { backgroundColor: colors.brandPrimary },
     sendNowButtonDisabled: { backgroundColor: colors.ctaDisabled },
     sendNowText: { color: colors.white },
+    outputCopyBtn: { backgroundColor: colors.white },
+    lightDivider: { backgroundColor: colors.divider },
   });
 
   useEffect(() => {
@@ -155,7 +178,12 @@ const Confirm: React.FC = () => {
   };
 
   const recipient = recipients[0];
-  const amountSats = recipient?.value ?? 0;
+  const amountSats = spRecipientAddress ? recipients.reduce((acc, curr) => acc + (curr.value ?? 0), 0) : (recipient?.value ?? 0);
+  // Display order only. The on-chain order is deliberately shuffled (change must not be
+  // positionally identifiable), so sorting by value — the same rule SendDetails previews with —
+  // is what keeps "Output 1" the same row on both screens instead of contradicting itself.
+  const splitOutputs = useMemo(() => recipients.slice().sort((a, b) => (b.value ?? 0) - (a.value ?? 0)), [recipients]);
+  const displayAddress = spRecipientAddress ?? recipient?.address ?? '';
   const txid = useMemo(() => {
     try {
       return tx ? bitcoin.Transaction.fromHex(tx).getId() : '';
@@ -171,55 +199,130 @@ const Confirm: React.FC = () => {
     setTimeout(() => setFlag(false), 1000);
   };
 
+  const copyOutput = (index: number, text: string) => {
+    copy(text, v => setCopiedOutputs(prev => ({ ...prev, [index]: v })));
+  };
+
   return (
     <SafeArea style={[styles.root, stylesHook.root]}>
-      <View style={styles.content}>
-        <AmountHero amount={satoshiToBTC(amountSats)} fiat={`≈ ${satoshiToLocalCurrency(amountSats)}`} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          <AmountHero amount={satoshiToBTC(amountSats)} fiat={`≈ ${satoshiToLocalCurrency(amountSats)}`} />
 
-        <View style={[styles.divider, stylesHook.divider]} />
+          <View style={[styles.divider, stylesHook.divider]} />
 
-        <View style={styles.detailsGroup}>
-          <View>
-            <DetailRow
-              label={loc.send.onchain_address_derived}
-              value={recipient?.address ?? ''}
-              mono
-              copied={copiedAddr}
-              onCopy={() => copy(recipient?.address ?? '', setCopiedAddr)}
-              accessibilityLabel={loc.transactions.details_copy}
-            />
-            <View style={styles.lightDivider} />
+          <View style={styles.detailsGroup}>
+            <View style={styles.outputsWrapper}>
+              {spRecipientAddress ? (
+                <>
+                  <Text style={[styles.splitSectionTitle, stylesHook.splitSectionTitle]}>
+                    {loc.formatString(loc.send.split_into_outputs, {
+                      count: splitOutputCount ?? recipients.length,
+                    })}
+                  </Text>
 
-            <DetailRow
-              label={loc.send.transaction_id}
-              value={txid}
-              mono
-              copied={copiedTxid}
-              onCopy={() => copy(txid, setCopiedTxid)}
-              accessibilityLabel={loc.transactions.details_copy_txid}
-            />
-            <View style={styles.lightDivider} />
-          </View>
+                  <View style={[styles.splitOutputsCard, stylesHook.splitOutputsCard]}>
+                    {splitOutputs.map((r, i) => (
+                      <React.Fragment key={`output-${i}`}>
+                        <View style={styles.outputGroup}>
+                          <View style={styles.outputHeaderRow}>
+                            <Text style={[styles.outputLabel, stylesHook.outputLabel]}>
+                              {loc.formatString(loc.send.split_output_label, { number: i + 1 })}
+                            </Text>
+                            <Text style={[styles.outputAmount, stylesHook.outputAmount]}>
+                              {`${satoshiToBTC(r.value ?? 0)} ${loc.units[BitcoinUnit.BTC]}`}
+                            </Text>
+                          </View>
+                          <View style={[styles.outputAddressCard, stylesHook.outputAddressCard]}>
+                            <View style={styles.outputAddressHeader}>
+                              <Text style={[styles.outputAddressLabel, stylesHook.outputAddressLabel]}>
+                                {loc.send.onchain_address_derived}
+                              </Text>
+                              <Pressable
+                                accessibilityRole="button"
+                                onPress={() => copyOutput(i, r.address ?? '')}
+                                style={[styles.outputCopyBtn, stylesHook.outputCopyBtn]}
+                              >
+                                <CopyIcon size={16} color={copiedOutputs[i] ? colors.brandPrimary : colors.chevron} />
+                              </Pressable>
+                            </View>
+                            <Text style={[styles.outputAddressText, stylesHook.outputAddressText]} numberOfLines={2}>
+                              {r.address}
+                            </Text>
+                          </View>
+                        </View>
+                        {i < splitOutputs.length - 1 && <View style={[styles.lightDivider, stylesHook.lightDivider]} />}
+                      </React.Fragment>
+                    ))}
 
-          <View>
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, stylesHook.summaryLabel]}>{loc.send.network_fee}</Text>
-              <Text style={[styles.summaryValue, stylesHook.summaryValue]}>
-                {satoshiToBTC(feeSatoshi)} {loc.units[BitcoinUnit.BTC]}
-                <Text style={[styles.summaryFiat, stylesHook.summaryFiat]}> ({satoshiToLocalCurrency(feeSatoshi)})</Text>
-              </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={loc.send.recipients_sp_address}
+                      style={[styles.spAddressRow, stylesHook.spAddressRow]}
+                      onPress={() => copy(spRecipientAddress, setCopiedSP)}
+                    >
+                      <ShieldCheckIcon size={20} />
+                      <View style={styles.spAddressTextWrap}>
+                        <Text style={[styles.spAddressLabel, stylesHook.spAddressLabel]} numberOfLines={1}>
+                          {loc.send.recipients_sp_address}
+                        </Text>
+                        {/* This is the one address the user can actually verify — they typed it,
+                            and it never appears on-chain — so it must be shown before signing. */}
+                        <Text style={[styles.spAddressText, stylesHook.spAddressText]} numberOfLines={1}>
+                          {spRecipientAddress}
+                        </Text>
+                      </View>
+                      <CopyIcon size={18} color={copiedSP ? colors.brandPrimary : colors.settingsBtnIconColor} />
+                    </Pressable>
+                  </View>
+
+                  <View style={[styles.lightDivider, stylesHook.lightDivider]} />
+                </>
+              ) : (
+                <>
+                  <DetailRow
+                    label={loc.send.onchain_address_derived}
+                    value={displayAddress}
+                    mono
+                    copied={copiedAddr}
+                    onCopy={() => copy(displayAddress, setCopiedAddr)}
+                    accessibilityLabel={loc.transactions.details_copy}
+                  />
+                  <View style={[styles.lightDivider, stylesHook.lightDivider]} />
+                </>
+              )}
+
+              <DetailRow
+                label={loc.send.transaction_id}
+                value={txid}
+                mono
+                copied={copiedTxid}
+                onCopy={() => copy(txid, setCopiedTxid)}
+                accessibilityLabel={loc.transactions.details_copy_txid}
+              />
+              <View style={[styles.lightDivider, stylesHook.lightDivider]} />
             </View>
-            <View style={styles.lightDivider} />
 
-            <View style={[styles.totalRow, stylesHook.totalRow]}>
-              <Text style={[styles.totalLabel, stylesHook.totalLabel]}>{loc.send.total}</Text>
-              <Text style={[styles.totalValue, stylesHook.totalValue]}>
-                {satoshiToBTC(totalSats)} {loc.units[BitcoinUnit.BTC]}
-              </Text>
+            <View style={styles.summaryBlock}>
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, stylesHook.summaryLabel]}>{loc.send.network_fee}</Text>
+                <Text style={[styles.summaryValue, stylesHook.summaryValue]}>
+                  {satoshiToBTC(feeSatoshi)} {loc.units[BitcoinUnit.BTC]}
+                  <Text style={[styles.summaryFiat, stylesHook.summaryFiat]}> ({satoshiToLocalCurrency(feeSatoshi)})</Text>
+                </Text>
+              </View>
+              <View style={[styles.lightDivider, stylesHook.lightDivider]} />
+
+              <View style={[styles.totalRow, stylesHook.totalRow]}>
+                <Text style={[styles.totalLabel, stylesHook.totalLabel]}>{loc.send.total}</Text>
+                <Text style={[styles.totalValue, stylesHook.totalValue]}>
+                  {satoshiToBTC(totalSats)} {loc.units[BitcoinUnit.BTC]}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.bottom}>
         {state.isLoading ? (
@@ -248,14 +351,97 @@ const Confirm: React.FC = () => {
 export default Confirm;
 
 const styles = StyleSheet.create({
+  splitSectionTitle: {
+    fontFamily: ClashFont.medium,
+    fontSize: 16,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  splitOutputsCard: {
+    borderRadius: 12,
+    borderWidth: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  outputHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  outputLabel: {
+    fontFamily: ClashFont.medium,
+    fontSize: 14,
+    lineHeight: 26,
+  },
+  outputAmount: {
+    fontFamily: ClashFont.medium,
+    fontSize: 12,
+    lineHeight: 26,
+  },
+  outputAddressCard: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    gap: 10,
+  },
+  outputAddressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  outputAddressLabel: {
+    fontFamily: ClashFont.regular,
+    fontSize: 12,
+    lineHeight: 26,
+  },
+  outputAddressText: {
+    fontFamily: ClashFont.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  outputCopyBtn: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spAddressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  spAddressTextWrap: {
+    flex: 1,
+  },
+  spAddressLabel: {
+    fontFamily: ClashFont.medium,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  spAddressText: {
+    fontFamily: ClashFont.medium,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   root: {
     flex: 1,
     paddingTop: 19,
-    justifyContent: 'space-between',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   content: {
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 32,
     gap: 12,
   },
   divider: {
@@ -265,17 +451,24 @@ const styles = StyleSheet.create({
   lightDivider: {
     height: StyleSheet.hairlineWidth,
     width: '100%',
-    backgroundColor: 'rgba(230, 228, 228, 0.6)',
   },
   detailsGroup: {
-    marginTop: -10,
+    gap: 8,
+  },
+  outputsWrapper: {
+    gap: 6,
+  },
+  outputGroup: {
+    gap: 8,
+  },
+  summaryBlock: {
+    gap: 4,
   },
 
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
   },
   summaryLabel: {
     fontFamily: ClashFont.regular,

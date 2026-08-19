@@ -94,7 +94,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   async generate() {
-    const buf = await randomBytes(16);
+    const buf = randomBytes(16);
     this.secret = bip39.entropyToMnemonic(buf.toString('hex'));
   }
 
@@ -857,6 +857,21 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   /**
+   * BIP-352 requires the private key for the pubkey actually committed on-chain. For a p2tr
+   * key-path spend that's the BIP-86-tweaked output key, not the untweaked internal key
+   * `_getWifForAddress` returns — the silent-payments library does not apply TapTweak itself
+   * (it only negates for an odd y-value). Callers must tweak before handing WIFs to it.
+   */
+  protected _getTaprootTweakedWifForAddress(address: string): string {
+    const internalWif = this._getWifForAddress(address);
+    if (!internalWif) throw new Error(`Internal error: no WIF for address ${address}`);
+    const keyPair = ECPair.fromWIF(internalWif);
+    const tapInternalKey = keyPair.publicKey.subarray(1, 33);
+    const tweakHash = bitcoin.crypto.taggedHash('TapTweak', tapInternalKey);
+    return keyPair.tweak(tweakHash).toWIF();
+  }
+
+  /**
    * Finds WIF corresponding to address and returns it
    *
    * @param address {string} Address that belongs to this wallet
@@ -938,16 +953,55 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           if (this.type === 'HDlegacyP2PKH') utxoType = 'p2pkh';
       }
 
-      const spUtxos: SPUTXO[] = inputs.map(u => ({ ...u, utxoType, wif: u.wif! }));
+      const spUtxos: SPUTXO[] = inputs.map(u => ({
+        ...u,
+        utxoType,
+        wif: this.segwitType === 'p2tr' ? this._getTaprootTweakedWifForAddress(String(u.address)) : u.wif!,
+      }));
       const sp = new SilentPayment();
       outputs = sp.createTransaction(spUtxos, outputs) as CoinSelectOutput[];
     }
 
+    const { psbt, tx } = this._buildAndSignPsbt(inputs, outputs, [changeAddress], sequence, skipSigning, masterFingerprint);
+    return { tx, inputs, outputs, fee, psbt };
+  }
+
+  /**
+   * Builds and (unless skipSigning) signs a PSBT from already-coinselected inputs and
+   * already-resolved outputs (any sp1 targets must already be resolved to real addresses).
+   * Shared by the plain send path and the split-payment builders so a fix here — e.g. the
+   * derivation metadata / sequence normalisation below — reaches every caller, instead of
+   * needing to be re-applied to each build path separately.
+   *
+   * @param changeAddresses Every address in `outputs` that is wallet-owned change (not a user
+   *   target), so bip32Derivation/tapBip32Derivation get attached to it. An output with no
+   *   `.address` at all (the coinselect-assigned change slot) is treated as change and assigned
+   *   `changeAddresses[0]`.
+   */
+  protected _buildAndSignPsbt(
+    inputs: CoinSelectReturnInput[],
+    outputs: CoinSelectOutput[],
+    changeAddresses: string[],
+    sequence: number,
+    skipSigning: boolean,
+    masterFingerprint: number,
+  ): { psbt: Psbt; tx?: bitcoin.Transaction } {
     sequence = sequence || AbstractHDElectrumWallet.defaultRBFSequence;
     let psbt = new bitcoin.Psbt();
     let c = 0;
     const keypairs: Record<number, ECPairInterface> = {};
-    const values: Record<number, number> = {};
+    const changeSet = new Set(changeAddresses);
+
+    // this is not correct fingerprint, as we dont know real fingerprint - we got zpub with 84/0, but fingerpting
+    // should be from root. basically, fingerprint should be provided from outside  by user when importing zpub
+    let masterFingerprintBuffer: Buffer;
+    if (masterFingerprint) {
+      let masterFingerprintHex = Number(masterFingerprint).toString(16);
+      if (masterFingerprintHex.length < 8) masterFingerprintHex = '0' + masterFingerprintHex; // conversion without explicit zero might result in lost byte
+      masterFingerprintBuffer = Buffer.from(Buffer.from(masterFingerprintHex, 'hex')).reverse();
+    } else {
+      masterFingerprintBuffer = Buffer.from([0x00, 0x00, 0x00, 0x00]);
+    }
 
     inputs.forEach(input => {
       let keyPair;
@@ -955,25 +1009,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         // skiping signing related stuff
         keyPair = ECPair.fromWIF(this._getWifForAddress(String(input.address)));
         keypairs[c] = keyPair;
-      }
-      values[c] = input.value;
-      c++;
-      if (!skipSigning) {
-        // skiping signing related stuff
         if (!input.address || !this._getWifForAddress(input.address)) throw new Error('Internal error: no address or WIF to sign input');
       }
-
-      let masterFingerprintBuffer;
-      if (masterFingerprint) {
-        let masterFingerprintHex = Number(masterFingerprint).toString(16);
-        if (masterFingerprintHex.length < 8) masterFingerprintHex = '0' + masterFingerprintHex; // conversion without explicit zero might result in lost byte
-        const hexBuffer = Buffer.from(masterFingerprintHex, 'hex');
-        masterFingerprintBuffer = Buffer.from(hexBuffer).reverse();
-      } else {
-        masterFingerprintBuffer = Buffer.from([0x00, 0x00, 0x00, 0x00]);
-      }
-      // this is not correct fingerprint, as we dont know real fingerprint - we got zpub with 84/0, but fingerpting
-      // should be from root. basically, fingerprint should be provided from outside  by user when importing zpub
+      c++;
 
       psbt = this._addPsbtInput(psbt, input, sequence, masterFingerprintBuffer);
     });
@@ -984,24 +1022,13 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       // @ts-ignore
       if (!output.address && !output.script?.hex) {
         change = true;
-        output.address = changeAddress;
+        output.address = changeAddresses[0];
+      } else if (output.address && changeSet.has(output.address)) {
+        change = true;
       }
 
       const path = this._getDerivationPathByAddress(String(output.address));
       const pubkey = this._getPubkeyByAddress(String(output.address));
-      let masterFingerprintBuffer;
-
-      if (masterFingerprint) {
-        let masterFingerprintHex = Number(masterFingerprint).toString(16);
-        if (masterFingerprintHex.length < 8) masterFingerprintHex = '0' + masterFingerprintHex; // conversion without explicit zero might result in lost byte
-        const hexBuffer = Buffer.from(masterFingerprintHex, 'hex');
-        masterFingerprintBuffer = Buffer.from(hexBuffer).reverse();
-      } else {
-        masterFingerprintBuffer = Buffer.from([0x00, 0x00, 0x00, 0x00]);
-      }
-
-      // this is not correct fingerprint, as we dont know realfingerprint - we got zpub with 84/0, but fingerpting
-      // should be from root. basically, fingerprint should be provided from outside  by user when importing zpub
 
       psbt.addOutput({
         address: output.address,
@@ -1048,11 +1075,11 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       }
     }
 
-    let tx;
+    let tx: bitcoin.Transaction | undefined;
     if (!skipSigning) {
       tx = psbt.finalizeAllInputs().extractTransaction();
     }
-    return { tx, inputs, outputs, fee, psbt };
+    return { psbt, tx };
   }
 
   _addPsbtInput(psbt: Psbt, input: CoinSelectReturnInput, sequence: number, masterFingerprintBuffer: Buffer) {
