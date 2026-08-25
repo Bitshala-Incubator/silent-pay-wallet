@@ -28,7 +28,7 @@ const palette = {
   gray850: '#313030',
   gray900: '#202020',
   gray925: '#1C1C1E',
-  gray950: '#121212',
+  gray950: '#0D0D0D',
   maroon900: '#5A4E4E',
 
   violet50: '#F6F5FD',
@@ -107,31 +107,43 @@ const tokens = {
   statusPaused: same('#9792A6'),
   statusSuccess: same('#55B685'),
   statusError: same(palette.red600),
-  surfaceSubtle: same(palette.violet50), // banner / card background
-  accentSubtle: same(palette.violet100), // banner & card border, "check again" button bg, scanning icon ring
+  surfaceSubtle: pair(palette.violet50, palette.violet900), // banner / card background
+  accentSubtle: pair(palette.violet100, '#2D264F'), // banner & card border, "check again" button bg, scanning icon ring
+  progressCardBackground: pair(palette.violet50, '#1A1535'), // sync screen "Update Progress" / privacy card background
+  progressCardBorder: pair(palette.violet100, '#25253A'), // sync screen "Update Progress" / privacy card border
+  pausedIconColor: pair('#1A1A1A', '#F0F0F5'), // paused-state pause icon on the sync banner
   surfaceCaution: same('#FDFBF5'), // caution banner background (address-reuse warning)
   iconCaution: same('#F1AF63'), // caution banner icon (warm amber)
+  errorBannerText: pair('#B24334', '#C54A3A'), // "can't connect" sync status icon glyph
   segmentTrack: same('#F8F8FA'), // pill toggle track background
   segmentSelectedBorder: same('#CFCFCF'), // selected pill border
   qrCardBg: same('#F9FAFB'), // QR code card background
   copyHint: same(palette.gray450), // "tap to copy" icon + label
-  progressTrack: same('#EAECF0'),
+  progressTrack: pair('#EAECF0', '#1A1535'),
   buttonBorder: same('#EBEBEB'),
+  continueButtonBorder: pair('#EBEBEB', '#6B5CE7'), // continue button border ("paused" action button)
+  retryButtonBorder: pair('#EBEBEB', '#212121'), // retry button border ("can't connect" action button)
   textPrimary: pair('#1A1A1A', palette.white), // titles, primary copy
   textSecondary: same('#8E8E93'), // subtitles, privacy copy
   textMeta: same('#92929B'), // ETA / "%" meta text
+  syncEtaIconColor: same('#C7C7CC'), // ETA clock icon on sync screen
+  syncPercentColor: pair(palette.black, '#F0F0F5'), // sync screen percent-complete number
+  syncPercentSignColor: pair('#92929B', '#8888AA'), // sync screen "%" sign next to the number
   textMuted: same('#7B7A7E'), // card row labels
   chevron: same('#C7C7CC'), // disclosure chevron
   white: same(palette.white),
   black: same(palette.black), // large emphasis numerals
   // SyncStatusIcon per-status ring/fill tints (glyph color = brandPrimary / status* above)
   syncFillScanning: same('#DCD2F9'),
-  syncRingPaused: same('#EEEEF1'),
-  syncFillPaused: same('#E4E2E8'),
+  syncRingPaused: pair('#E6E4E499', '#FFFFFF14'), // alpha baked in: 0.6 opacity light, 0.08 opacity dark
+  syncFillPaused: pair('#F5F5F7', '#1A1A28'),
+  syncOuterPaused: pair(palette.white, '#0E0E16'), // paused-state icon backing circle
+  syncGlyphPaused: pair('#8E8E93', '#8888AA'), // paused-state pause glyph
   syncRingDone: same('#E2FAEA'),
   syncFillDone: same('#D2F9DC'),
-  syncRingError: same('#FDF1F2'),
-  syncFillError: same('#FBE9EB'),
+  syncRingError: pair('#FDF1F2', '#330C09'),
+  syncFillError: pair('#FBE9EB', '#3E0B0B'),
+  syncOuterError: pair(palette.white, '#0D0D0D'), // error-state icon backing circle
   // Legacy / existing tokens (keep for compatibility)
   receiveBtnBackground: pair('#EAE4FB', '#110732'),
   bannerBackground: pair(palette.violet50, palette.violet900),

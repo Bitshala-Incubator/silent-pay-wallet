@@ -29,40 +29,24 @@ interface SyncStatusIconProps {
 
 const SyncStatusIcon: React.FC<SyncStatusIconProps> = ({ status, size = 66 }) => {
   const { colors } = useTheme();
-  // ring = outer ring + inner disc stroke, fill = inner disc fill, glyph = the symbol
+  // outer = backing circle fill, ring = outer ring + inner disc stroke, fill = inner disc fill, glyph = the symbol
   const iconColors = {
-    scanning: { ring: colors.accentSubtle, fill: colors.syncFillScanning, glyph: colors.brandPrimary },
-    paused: { ring: colors.syncRingPaused, fill: colors.syncFillPaused, glyph: colors.statusPaused },
-    done: { ring: colors.syncRingDone, fill: colors.syncFillDone, glyph: colors.statusSuccess },
-    error: { ring: colors.syncRingError, fill: colors.syncFillError, glyph: colors.statusError },
+    scanning: { outer: colors.white, ring: colors.accentSubtle, fill: colors.syncFillScanning, glyph: colors.brandPrimary },
+    paused: { outer: colors.syncOuterPaused, ring: colors.syncRingPaused, fill: colors.syncFillPaused, glyph: colors.syncGlyphPaused },
+    done: { outer: colors.white, ring: colors.syncRingDone, fill: colors.syncFillDone, glyph: colors.statusSuccess },
+    error: { outer: colors.syncOuterError, ring: colors.syncRingError, fill: colors.syncFillError, glyph: colors.errorBannerText },
   };
   const c = iconColors[status];
   return (
     <Svg width={size} height={size} viewBox="0 0 66 66" fill="none">
       {status === 'paused' && (
         <>
-          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={colors.white} stroke={c.ring} strokeWidth="1.50691" />
-          <Rect
-            x="53.3979"
-            y="53.3978"
-            width="41.5345"
-            height="41.5345"
-            rx="20.7673"
-            transform="rotate(180 53.3979 53.3978)"
-            fill={c.fill}
-          />
-          <Rect
-            x="53.3979"
-            y="53.3978"
-            width="41.5345"
-            height="41.5345"
-            rx="20.7673"
-            transform="rotate(180 53.3979 53.3978)"
-            stroke={c.ring}
-            strokeWidth="1.50691"
-          />
+          <Circle cx="32.9998" cy="32.9998" r="32.9998" fill={c.outer} />
+          <Circle cx="32.9998" cy="32.9998" r="32.4998" stroke={c.ring} />
+          <Rect x="53.1099" y="53.1098" width="42" height="42" rx="21" transform="rotate(180 53.1099 53.1098)" fill={c.fill} />
+          <Rect x="52.6099" y="52.6098" width="41" height="41" rx="20.5" transform="rotate(180 52.6099 52.6098)" stroke={c.ring} />
           <Path
-            d="M34.0472 42.5472V22.7139H42.5472V42.5472H34.0472ZM22.7139 42.5472V22.7139H31.2139V42.5472H22.7139ZM36.8805 39.7139H39.7139V25.5472H36.8805V39.7139ZM25.5472 39.7139H28.3805V25.5472H25.5472V39.7139Z"
+            d="M33.5267 42.0264V22.1931H42.0267V42.0264H33.5267ZM22.1934 42.0264V22.1931H30.6934V42.0264H22.1934ZM36.36 39.1931H39.1934V25.0264H36.36V39.1931ZM25.0267 39.1931H27.86V25.0264H25.0267V39.1931Z"
             fill={c.glyph}
           />
         </>
@@ -70,7 +54,7 @@ const SyncStatusIcon: React.FC<SyncStatusIconProps> = ({ status, size = 66 }) =>
 
       {status === 'done' && (
         <>
-          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={colors.white} stroke={c.ring} strokeWidth="1.50691" />
+          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={c.outer} stroke={c.ring} strokeWidth="1.50691" />
           <Rect
             x="54.3393"
             y="54.3392"
@@ -99,7 +83,7 @@ const SyncStatusIcon: React.FC<SyncStatusIconProps> = ({ status, size = 66 }) =>
 
       {status === 'scanning' && (
         <>
-          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={colors.white} stroke={c.ring} strokeWidth="1.50691" />
+          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={c.outer} stroke={c.ring} strokeWidth="1.50691" />
           <Rect
             x="54.8503"
             y="54.8502"
@@ -138,28 +122,35 @@ const SyncStatusIcon: React.FC<SyncStatusIconProps> = ({ status, size = 66 }) =>
 
       {status === 'error' && (
         <>
-          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={colors.white} stroke={c.ring} strokeWidth="1.50691" />
+          <Circle cx="32.9998" cy="32.9998" r="32.2464" fill={c.outer} stroke={c.ring} strokeWidth="1.50691" />
           <Rect
-            x="54.3393"
-            y="54.3392"
-            width="42.4759"
-            height="42.4759"
-            rx="21.238"
-            transform="rotate(180 54.3393 54.3392)"
+            x="53.3979"
+            y="53.3978"
+            width="41.5345"
+            height="41.5345"
+            rx="20.7673"
+            transform="rotate(180 53.3979 53.3978)"
             fill={c.fill}
           />
           <Rect
-            x="54.3393"
-            y="54.3392"
-            width="42.4759"
-            height="42.4759"
-            rx="21.238"
-            transform="rotate(180 54.3393 54.3392)"
+            x="53.3979"
+            y="53.3978"
+            width="41.5345"
+            height="41.5345"
+            rx="20.7673"
+            transform="rotate(180 53.3979 53.3978)"
             stroke={c.ring}
             strokeWidth="1.50691"
           />
-          <Rect x="31.16" y="21.5" width="3.68" height="14.5" rx="1.84" fill={c.glyph} />
-          <Circle cx="33" cy="42.4" r="2.2" fill={c.glyph} />
+          <Path
+            d="M32.6308 41.4816C37.5191 41.4816 41.4818 37.5188 41.4818 32.6306C41.4818 27.7423 37.5191 23.7795 32.6308 23.7795C27.7425 23.7795 23.7798 27.7423 23.7798 32.6306C23.7798 37.5188 27.7425 41.4816 32.6308 41.4816Z"
+            stroke={c.glyph}
+            strokeWidth="1.66607"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path d="M32.6306 36.1709V32.6305" stroke={c.glyph} strokeWidth="1.66607" strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M32.6306 29.0901H32.6389" stroke={c.glyph} strokeWidth="1.66607" strokeLinecap="round" strokeLinejoin="round" />
         </>
       )}
     </Svg>

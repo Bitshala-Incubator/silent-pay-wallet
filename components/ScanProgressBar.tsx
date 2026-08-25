@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from '@rneui/themed';
 import ChevronRightIcon from './icons/ChevronRightIcon';
+import PauseIcon from './icons/PauseIcon';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -81,7 +82,7 @@ const ScanProgressBar: React.FC<Props> = ({ scanState, onResume }) => {
           accessibilityLabel={blockText as string}
         >
           <View style={styles.iconWrap}>
-            <Icon name="pause" type="material" size={18} color={colors.statusPaused} />
+            <PauseIcon size={20} color={colors.pausedIconColor} />
           </View>
           <Text style={[styles.bannerText, { color: colors.textPrimary }]} numberOfLines={1}>
             {blockText}
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
   },
   resumeText: {
     fontSize: 14,
-    fontFamily: ClashFont.regular,
+    fontFamily: ClashFont.medium,
   },
 });
 

@@ -73,6 +73,7 @@ export interface ScanStateInfo {
   startedAt: number | null;
   eta: number | null;
   etaComputedAt: number | null;
+  scanRate: number | null;
   error: string | null;
   lastScannedBlock: number;
 }
@@ -83,6 +84,7 @@ export const IDLE_SCAN_STATE: ScanStateInfo = {
   startedAt: null,
   eta: null,
   etaComputedAt: null,
+  scanRate: null,
   error: null,
   lastScannedBlock: 0,
 };
