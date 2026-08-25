@@ -105,10 +105,11 @@ const tokens = {
   // Tokens using same() are intentionally identical in dark.
   brandPrimary: pair(palette.violet600, palette.violet500),
   statusPaused: same('#9792A6'),
-  statusSuccess: same('#55B685'),
+  statusSuccess: pair('#55B685', '#66C799'),
   statusError: same(palette.red600),
   surfaceSubtle: pair(palette.violet50, palette.violet900), // banner / card background
   accentSubtle: pair(palette.violet100, '#2D264F'), // banner & card border, "check again" button bg, scanning icon ring
+  checkAgainButtonColor: pair(palette.violet600, palette.white), // "check again" button icon + text
   progressCardBackground: pair(palette.violet50, '#1A1535'), // sync screen "Update Progress" / privacy card background
   progressCardBorder: pair(palette.violet100, '#25253A'), // sync screen "Update Progress" / privacy card border
   pausedIconColor: pair('#1A1A1A', '#F0F0F5'), // paused-state pause icon on the sync banner
@@ -121,7 +122,7 @@ const tokens = {
   copyHint: same(palette.gray450), // "tap to copy" icon + label
   progressTrack: pair('#EAECF0', '#1A1535'),
   buttonBorder: same('#EBEBEB'),
-  continueButtonBorder: pair('#EBEBEB', '#6B5CE7'), // continue button border ("paused" action button)
+  continueButtonBorder: pair('#EBEBEB', '#6B5CE7'), // brand-strong border shared by the "pause" and "continue" sync action buttons
   retryButtonBorder: pair('#EBEBEB', '#212121'), // retry button border ("can't connect" action button)
   textPrimary: pair('#1A1A1A', palette.white), // titles, primary copy
   textSecondary: same('#8E8E93'), // subtitles, privacy copy
@@ -134,13 +135,15 @@ const tokens = {
   white: same(palette.white),
   black: same(palette.black), // large emphasis numerals
   // SyncStatusIcon per-status ring/fill tints (glyph color = brandPrimary / status* above)
-  syncFillScanning: same('#DCD2F9'),
+  syncOuterScanning: pair(palette.white, '#0D0D0D'), // scanning-state icon backing circle
+  syncFillScanning: pair('#DCD2F9', '#3A3166'),
   syncRingPaused: pair('#E6E4E499', '#FFFFFF14'), // alpha baked in: 0.6 opacity light, 0.08 opacity dark
   syncFillPaused: pair('#F5F5F7', '#1A1A28'),
   syncOuterPaused: pair(palette.white, '#0E0E16'), // paused-state icon backing circle
   syncGlyphPaused: pair('#8E8E93', '#8888AA'), // paused-state pause glyph
-  syncRingDone: same('#E2FAEA'),
-  syncFillDone: same('#D2F9DC'),
+  syncOuterDone: pair(palette.white, '#0D0D0D'), // done-state icon backing circle
+  syncRingDone: pair('#E2FAEA', '#16301F'),
+  syncFillDone: pair('#D2F9DC', '#1C3D28'),
   syncRingError: pair('#FDF1F2', '#330C09'),
   syncFillError: pair('#FBE9EB', '#3E0B0B'),
   syncOuterError: pair(palette.white, '#0D0D0D'), // error-state icon backing circle

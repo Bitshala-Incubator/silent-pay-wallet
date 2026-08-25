@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from '../../components/SafeArea';
 import SyncStatusIcon, { PauseIcon, PlayIcon } from '../../components/SyncStatusIcon';
 import RefreshIcon from '../../components/icons/RefreshIcon';
+import RetryIcon from '../../components/icons/RetryIcon';
 import ClockFilledIcon from '../../components/icons/ClockFilledIcon';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useScannableWallet } from '../../hooks/useScannableWallet';
@@ -135,7 +136,7 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
             style={[
               styles.actionButton,
               styles.actionButtonPauseGap,
-              { backgroundColor: colors.brandPrimary, borderColor: colors.buttonBorder },
+              { backgroundColor: colors.brandPrimary, borderColor: colors.continueButtonBorder },
             ]}
           >
             <PauseIcon color={colors.white} size={13} />
@@ -159,11 +160,12 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
             style={[
               styles.actionButton,
               styles.actionButtonOutlined,
+              styles.actionButtonRetryGap,
               { backgroundColor: colors.accentSubtle, borderColor: colors.brandPrimary },
             ]}
           >
-            <Icon name="refresh" type="material" size={20} color={colors.brandPrimary} />
-            <Text style={[styles.actionButtonText, { color: colors.brandPrimary }]}>{loc.sync.btn_check_again}</Text>
+            <RetryIcon size={20} color={colors.checkAgainButtonColor} />
+            <Text style={[styles.actionButtonText, { color: colors.checkAgainButtonColor }]}>{loc.sync.btn_check_again}</Text>
           </Pressable>
         );
       case 'error':
@@ -195,7 +197,11 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
         {effectiveStatus !== 'error' && (
           <View style={styles.percentRow}>
             <Text style={[styles.percentNum, { color: colors.syncPercentColor }]}>{Math.round(effectivePct)}</Text>
-            <Text style={[styles.percentSign, { color: colors.syncPercentSignColor }]}>%</Text>
+            <Text
+              style={[styles.percentSign, { color: effectiveStatus === 'done' ? colors.syncPercentColor : colors.syncPercentSignColor }]}
+            >
+              %
+            </Text>
           </View>
         )}
 
