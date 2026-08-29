@@ -5,6 +5,9 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import SafeArea from '../../components/SafeArea';
 import SyncStatusIcon, { PauseIcon, PlayIcon } from '../../components/SyncStatusIcon';
+import RefreshIcon from '../../components/icons/RefreshIcon';
+import RetryIcon from '../../components/icons/RetryIcon';
+import ClockFilledIcon from '../../components/icons/ClockFilledIcon';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useScannableWallet } from '../../hooks/useScannableWallet';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
@@ -133,7 +136,7 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
             style={[
               styles.actionButton,
               styles.actionButtonPauseGap,
-              { backgroundColor: colors.brandPrimary, borderColor: colors.buttonBorder },
+              { backgroundColor: colors.brandPrimary, borderColor: colors.continueButtonBorder },
             ]}
           >
             <PauseIcon color={colors.white} size={13} />
@@ -144,7 +147,7 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
         return (
           <Pressable
             onPress={handleResume}
-            style={[styles.actionButton, { backgroundColor: colors.brandPrimary, borderColor: colors.buttonBorder }]}
+            style={[styles.actionButton, { backgroundColor: colors.brandPrimary, borderColor: colors.continueButtonBorder }]}
           >
             <PlayIcon color={colors.white} size={32} />
             <Text style={[styles.actionButtonText, { color: colors.white }]}>{loc.sync.btn_continue}</Text>
@@ -157,20 +160,25 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
             style={[
               styles.actionButton,
               styles.actionButtonOutlined,
+              styles.actionButtonRetryGap,
               { backgroundColor: colors.accentSubtle, borderColor: colors.brandPrimary },
             ]}
           >
-            <Icon name="refresh" type="material" size={20} color={colors.brandPrimary} />
-            <Text style={[styles.actionButtonText, { color: colors.brandPrimary }]}>{loc.sync.btn_check_again}</Text>
+            <RetryIcon size={20} color={colors.checkAgainButtonColor} />
+            <Text style={[styles.actionButtonText, { color: colors.checkAgainButtonColor }]}>{loc.sync.btn_check_again}</Text>
           </Pressable>
         );
       case 'error':
         return (
           <Pressable
             onPress={handleRetry}
-            style={[styles.actionButton, { backgroundColor: colors.brandPrimary, borderColor: colors.buttonBorder }]}
+            style={[
+              styles.actionButton,
+              styles.actionButtonRetryGap,
+              { backgroundColor: colors.brandPrimary, borderColor: colors.retryButtonBorder },
+            ]}
           >
-            <Icon name="refresh" type="material" size={20} color={colors.white} />
+            <RefreshIcon size={24} color={colors.white} />
             <Text style={[styles.actionButtonText, { color: colors.white }]}>{loc.sync.btn_retry}</Text>
           </Pressable>
         );
@@ -188,14 +196,18 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
 
         {effectiveStatus !== 'error' && (
           <View style={styles.percentRow}>
-            <Text style={[styles.percentNum, { color: colors.black }]}>{Math.round(effectivePct)}</Text>
-            <Text style={[styles.percentSign, { color: colors.textMeta }]}>%</Text>
+            <Text style={[styles.percentNum, { color: colors.syncPercentColor }]}>{Math.round(effectivePct)}</Text>
+            <Text
+              style={[styles.percentSign, { color: effectiveStatus === 'done' ? colors.syncPercentColor : colors.syncPercentSignColor }]}
+            >
+              %
+            </Text>
           </View>
         )}
 
         {(effectiveStatus === 'scanning' || effectiveStatus === 'paused') && (
           <View style={styles.etaRow}>
-            <Icon name="schedule" type="material" size={18} color={colors.textMeta} />
+            <ClockFilledIcon size={18} color={colors.syncEtaIconColor} />
             <Text style={[styles.etaText, { color: colors.textMeta }]}>{formatEtaAbout(liveEta) ?? '--'}</Text>
           </View>
         )}
@@ -215,7 +227,7 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
         </Text>
 
         {(effectiveStatus === 'scanning' || effectiveStatus === 'paused') && (
-          <View style={[styles.progressCard, { backgroundColor: colors.surfaceSubtle, borderColor: colors.accentSubtle }]}>
+          <View style={[styles.progressCard, { backgroundColor: colors.progressCardBackground, borderColor: colors.progressCardBorder }]}>
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{loc.sync.update_progress}</Text>
             <View style={styles.cardRow}>
               <Text style={[styles.cardLabel, { color: colors.textMuted }]}>{loc.sync.block_label}</Text>
@@ -235,12 +247,18 @@ const SyncScreen: React.FC<SyncScreenProps> = () => {
                 </Text>
               )}
             </View>
+            <View style={styles.cardRow}>
+              <Text style={[styles.cardLabel, { color: colors.textMuted }]}>{loc.sync.scan_rate_label}</Text>
+              <Text style={[styles.cardValue, styles.cardValueSemibold, { color: colors.textPrimary }]} numberOfLines={1}>
+                {scanState.scanRate !== null ? loc.formatString(loc.sync.scan_rate_value, { rate: scanState.scanRate }) : '--'}
+              </Text>
+            </View>
           </View>
         )}
 
         {renderActionButton()}
 
-        <View style={[styles.privacyCard, { backgroundColor: colors.surfaceSubtle }]}>
+        <View style={[styles.privacyCard, { backgroundColor: colors.progressCardBackground }]}>
           <Icon name="info-outline" type="material" size={20} color={colors.brandPrimary} />
           <Text style={[styles.privacyText, { color: colors.textSecondary }]}>{loc.sync.privacy_info}</Text>
         </View>
@@ -281,8 +299,8 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
   },
   percentSign: {
-    fontSize: 20,
-    marginTop: 20,
+    fontSize: 44,
+    lineHeight: 48,
     marginLeft: 2,
     fontFamily: ClashFont.medium,
   },
@@ -293,7 +311,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   etaText: {
-    fontSize: 13,
+    fontSize: 15,
     fontFamily: ClashFont.regular,
   },
   barTrack: {
@@ -308,7 +326,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: 'center',
     marginBottom: 16,
     fontFamily: ClashFont.regular,
@@ -322,8 +340,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   cardTitle: {
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 14,
+    lineHeight: 20,
     marginBottom: 4,
     fontFamily: ClashFont.medium,
   },
@@ -343,7 +361,7 @@ const styles = StyleSheet.create({
     fontFamily: ClashFont.regular,
   },
   cardValueSemibold: {
-    fontFamily: ClashFont.semibold,
+    fontFamily: ClashFont.medium,
   },
   blockHeightRow: {
     flexDirection: 'row',
@@ -366,6 +384,9 @@ const styles = StyleSheet.create({
   actionButtonPauseGap: {
     gap: 10,
   },
+  actionButtonRetryGap: {
+    gap: 2,
+  },
   actionButtonText: {
     fontSize: 16,
     fontFamily: ClashFont.medium,
@@ -380,8 +401,8 @@ const styles = StyleSheet.create({
   },
   privacyText: {
     flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     fontFamily: ClashFont.regular,
   },
 });

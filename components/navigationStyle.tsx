@@ -128,6 +128,9 @@ const navigationStyle = (
           color: theme.colors.foregroundColor,
         },
         headerTintColor: theme.colors.foregroundColor,
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+        },
       };
       const isLeftCloseButtonAndroid = closeButton === CloseButtonPosition.Left && Platform.OS === 'android';
 

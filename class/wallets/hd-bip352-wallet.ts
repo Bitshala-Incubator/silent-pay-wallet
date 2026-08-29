@@ -106,8 +106,8 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannabl
   private _scanResumeResolver: (() => void) | null = null;
   private _scanResumePromise: Promise<void> | null = null;
   private _lastProgressEmitTime: number = 0;
-  // rolling window of {wall-clock time, cumulative percentComplete} samples, used for ETA
-  private _scanSamples: { t: number; percent: number }[] = [];
+  // rolling window of {wall-clock time, cumulative percentComplete, block height} samples, used for ETA and scan rate
+  private _scanSamples: { t: number; percent: number; block: number }[] = [];
   private _scanStartTime: number = 0;
   private _onScanStateChangeCallback: ((state: ScanStateInfo) => void) | null = null;
 
@@ -575,7 +575,14 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannabl
         return 0;
       }
 
-      this._emitScanState('scanning', { startedAt: this._scanStartTime, progress: null, eta: null, etaComputedAt: null, error: null });
+      this._emitScanState('scanning', {
+        startedAt: this._scanStartTime,
+        progress: null,
+        eta: null,
+        etaComputedAt: null,
+        scanRate: null,
+        error: null,
+      });
 
       let totalUTXOsAdded = 0;
 
@@ -583,16 +590,17 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannabl
         await this._waitIfPaused();
         if (this.activeScanPromise === null || this.cancelScanCallbackScan) return;
 
-        this._scanSamples.push({ t: Date.now(), percent: progress.percentComplete });
+        this._scanSamples.push({ t: Date.now(), percent: progress.percentComplete, block: progress.currentBlock });
         if (this._scanSamples.length > SCAN_ETA_ROLLING_WINDOW) {
           this._scanSamples.shift();
         }
 
-        // Estimate ETA from the recent throughput (percent/ms) over the rolling window,
-        // not a raw batch count: time spanned vs. percent gained between the oldest and
-        // newest samples gives the current scan rate, which we extrapolate to 100%.
+        // Estimate ETA and scan rate from the recent throughput over the rolling window, not a raw
+        // batch count: time spanned vs. percent/blocks gained between the oldest and newest samples
+        // gives the current scan rate, which we extrapolate to 100% for the ETA.
         let eta: number | null = null;
         let etaComputedAt: number | null = null;
+        let scanRate: number | null = null;
         if (this._scanSamples.length >= 2) {
           const oldest = this._scanSamples[0];
           const newest = this._scanSamples[this._scanSamples.length - 1];
@@ -604,6 +612,10 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannabl
             eta = Math.round(msPerPercent * remainingPercent);
             etaComputedAt = newest.t;
           }
+          const blocksGained = newest.block - oldest.block;
+          if (elapsedMs > 0 && blocksGained > 0) {
+            scanRate = Math.round(blocksGained / (elapsedMs / 1000));
+          }
         }
 
         const now = Date.now();
@@ -613,7 +625,7 @@ export class HDSilentPaymentsWallet extends HDTaprootWallet implements IScannabl
 
         if (isComplete || statusChanged || throttleElapsed) {
           this._lastProgressEmitTime = now;
-          this._emitScanState('scanning', { progress, eta, etaComputedAt });
+          this._emitScanState('scanning', { progress, eta, etaComputedAt, scanRate });
         }
 
         if (onProgress) {
