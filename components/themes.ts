@@ -131,6 +131,9 @@ const tokens = {
   statusPaused: pair('#9792A6', palette.slate400),
   statusSuccess: pair('#55B685', palette.green400),
   statusError: pair(palette.red550, palette.red500),
+  errorAccent: same(palette.red500), // vivid red badge fill (recovery-phrase verify), distinct from statusError's softer border tone
+  verifyCorrectFill: pair('#EBF5ED', palette.green900), // correct-answer pill fill (recovery-phrase verify)
+  verifyIncorrectFill: pair('#FCD3CA', palette.maroon900), // incorrect-answer pill fill (recovery-phrase verify)
   surfaceSubtle: pair(palette.violet50, palette.violet920), // banner / card background
   accentSubtle: pair(palette.violet100, palette.slate880), // banner & card border, "check again" button bg, scanning icon ring
   accentSubtleDisabled: pair(palette.violet150Alpha, palette.violet850), // disabled bg for accentSubtle/brandPrimary "soft" buttons

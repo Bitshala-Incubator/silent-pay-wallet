@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useTheme } from '../../components/themes';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 import { HDSilentPaymentsWallet } from '../../class/wallets/hd-bip352-wallet';
+import { ClashFont } from '../../constants/fonts';
 import loc from '../../loc';
 import presentAlert from '../../components/Alert';
 import { useStorage } from '../../hooks/context/useStorage';
@@ -12,6 +13,7 @@ import triggerHapticFeedback, { HapticFeedbackTypes } from '../../modules/haptic
 import { getDefaultIndexer } from '../../modules/SilentPaymentIndexer';
 import { BIP352_ACTIVATION_HEIGHT } from '../../modules/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Button from '../../components/Button';
 
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList, 'Onboarding'>;
 
@@ -67,27 +69,29 @@ const OnboardingScreen: React.FC = () => {
   const renderCoverScreen = useCallback(() => {
     return (
       <SafeAreaView style={[styles.welcomeContainer, { backgroundColor: colors.background }]}>
-        <View style={styles.welcomeContent}>
-          <View style={styles.logoContainer}>
-            <Image source={require('../../img/icon.png')} style={styles.bitcoinLogo} resizeMode="contain" />
-          </View>
+        <View style={styles.content}>
+          <Image source={require('../../img/icon.png')} style={styles.logo} resizeMode="contain" />
+          <Text style={[styles.title, { color: colors.primary }]}>{loc.onboarding.shroud}</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{loc.onboarding.subtitle}</Text>
+        </View>
 
-          <Text style={[styles.welcomeTitle, { color: colors.primary }]}>{loc.onboarding.shroud}</Text>
-          <Text style={[styles.welcomeSubtitle, { color: colors.labelText }]}>{loc.onboarding.subtitle}</Text>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.createButton} onPress={handleContinue} testID="CreateWallet">
-              <Text style={styles.createButtonText}>{loc.onboarding.create_wallet}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.restoreButton} onPress={importWallet} testID="ImportWallet">
-              <Text style={styles.restoreButtonText}>{loc.onboarding.import_wallet}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.footerContainer}>
-            <Text style={[styles.footerText, { color: colors.labelText }]}> {loc.onboarding.footer}</Text>
-          </View>
+        <View style={styles.buttonContainer}>
+          <Button
+            title={loc.onboarding.create_wallet}
+            onPress={handleContinue}
+            testID="CreateWallet"
+            borderRadius={16}
+            style={styles.button}
+          />
+          <Button
+            title={loc.onboarding.import_wallet}
+            onPress={importWallet}
+            testID="ImportWallet"
+            borderRadius={16}
+            backgroundColor="transparent"
+            buttonTextColor={colors.primary}
+            style={[styles.button, styles.secondaryButton, { borderColor: colors.accentSubtle }]}
+          />
         </View>
       </SafeAreaView>
     );
@@ -99,17 +103,12 @@ const OnboardingScreen: React.FC = () => {
 export default OnboardingScreen;
 
 const styles = StyleSheet.create({
-  welcomeContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
-  welcomeContent: { alignItems: 'center', maxWidth: 320, width: '100%' },
-  logoContainer: { marginBottom: 40 },
-  bitcoinLogo: { width: 80, height: 80, borderRadius: 40 },
-  welcomeTitle: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 },
-  welcomeSubtitle: { fontSize: 16, textAlign: 'center', marginBottom: 60, lineHeight: 22 },
-  buttonContainer: { width: '100%', marginBottom: 40 },
-  createButton: { backgroundColor: '#754CE8', paddingVertical: 16, paddingHorizontal: 32, borderRadius: 8, marginBottom: 16 },
-  createButtonText: { color: 'white', fontSize: 16, fontWeight: '600', textAlign: 'center' },
-  restoreButton: { paddingVertical: 16, paddingHorizontal: 32, borderRadius: 8, marginBottom: 16 },
-  restoreButtonText: { color: '#754CE8', fontSize: 16, fontWeight: '600', textAlign: 'center' },
-  footerContainer: { marginTop: 20 },
-  footerText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  welcomeContainer: { flex: 1 },
+  content: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 },
+  logo: { width: 88, height: 88, marginBottom: 24 },
+  title: { fontFamily: ClashFont.semibold, fontSize: 37, textAlign: 'center', textTransform: 'uppercase', marginBottom: 16 },
+  subtitle: { fontFamily: ClashFont.regular, fontSize: 15, textAlign: 'center', lineHeight: 22 },
+  buttonContainer: { paddingHorizontal: 24, paddingBottom: 24, gap: 12 },
+  button: { height: 56, maxHeight: 56 },
+  secondaryButton: { borderWidth: 1 },
 });

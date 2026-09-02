@@ -55,8 +55,7 @@ const AddWalletStack = () => {
         component={PleaseBackupComponent}
         options={navigationStyle({
           gestureEnabled: false,
-          headerBackVisible: false,
-          title: loc.pleasebackup.null,
+          headerShown: false,
         })(theme)}
       />
       <Stack.Screen
