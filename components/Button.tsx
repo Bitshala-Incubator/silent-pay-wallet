@@ -21,11 +21,13 @@ interface ButtonProps extends PressableProps {
   buttonTextColor?: string;
   disabled?: boolean;
   testID?: string;
-  icon?: {
-    name: string;
-    type: string;
-    color: string;
-  };
+  icon?:
+    | {
+        name: string;
+        type: string;
+        color: string;
+      }
+    | React.ReactElement;
   title?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -56,12 +58,13 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
   };
 
   const textStyle = [styles.text, { color: fontColor }, props.textStyle];
+  const icon = props.icon;
 
   const buttonView = props.showActivityIndicator ? (
     <ActivityIndicator size="small" color={fontColor} />
   ) : (
     <>
-      {props.icon && <Icon name={props.icon.name} type={props.icon.type} color={props.icon.color} />}
+      {icon && ('name' in icon ? <Icon name={icon.name} type={icon.type} color={icon.color} /> : icon)}
       {props.title && <Text style={textStyle}>{props.title}</Text>}
     </>
   );
