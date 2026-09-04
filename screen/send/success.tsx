@@ -1,16 +1,20 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
+import ActionButton from '../../components/ActionButton';
 import AmountHero from '../../components/AmountHero';
 import CheckmarkIcon from '../../components/icons/CheckmarkIcon';
 import { ClashFont } from '../../constants/fonts';
 import { useTheme } from '../../components/themes';
 import loc from '../../loc';
+import ContactChip from '../../components/ContactChip';
+import SaveContactRow from '../../components/SaveContactRow';
 import { SendDetailsStackParamList } from '../../navigation/SendDetailsStackParamList.ts';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation.ts';
 import { btcToSatoshi, satoshiToLocalCurrency } from '../../modules/currency';
+import { useContacts } from '../../hooks/context/useContacts';
 
 type RouteProps = RouteProp<SendDetailsStackParamList, 'Success'>;
 
@@ -19,11 +23,15 @@ const Success = () => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProps>();
-  const { amount } = route.params || {};
+  const { amount, recipientAddress } = route.params || {};
+  const { getContact } = useContacts();
 
   const amountStr = amount != null ? String(amount) : '0';
   const amountSats = amount != null ? btcToSatoshi(amount) : 0;
   const fiat = `≈ ${satoshiToLocalCurrency(amountSats)}`;
+
+  // Whoever was paid, named: a known payee straight away, an unsaved one once the row takes a name.
+  const contact = recipientAddress === undefined ? undefined : getContact(recipientAddress);
 
   const onDonePressed = () => {
     // @ts-ignore getParent() typing doesn't expose pop()
@@ -35,8 +43,6 @@ const Success = () => {
     sheet: { backgroundColor: colors.background, paddingBottom: 32 + insets.bottom },
     checkCircle: { backgroundColor: colors.surfaceSubtle },
     sentText: { color: colors.textEmphasis },
-    doneButton: { backgroundColor: colors.brandStrong },
-    doneButtonText: { color: colors.white },
   });
 
   return (
@@ -50,14 +56,22 @@ const Success = () => {
 
         <AmountHero amount={amountStr} fiat={fiat} />
 
-        <Pressable
-          accessibilityRole="button"
-          testID="successDoneButton"
+        {contact && (
+          <ContactChip name={contact.name} colorIndex={contact.colorIndex} style={styles.contactChip} testID="SuccessContactChip" />
+        )}
+
+        {/* The payment is already sent, so leaving for the contact editor would strand the user
+            here forever. The row takes the name on the sheet and settles into the chip above. */}
+        <SaveContactRow address={recipientAddress} variant="pill" />
+
+        <ActionButton
+          title={loc.send.success_done}
           onPress={onDonePressed}
-          style={[styles.doneButton, stylesHook.doneButton]}
-        >
-          <Text style={[styles.doneButtonText, stylesHook.doneButtonText]}>{loc.send.success_done}</Text>
-        </Pressable>
+          backgroundColor={colors.brandStrong}
+          color={colors.white}
+          style={[styles.sheetButton, styles.doneButton]}
+          testID="successDoneButton"
+        />
       </View>
     </View>
   );
@@ -128,19 +142,16 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'center',
   },
-  doneButton: {
+  // The sheet centres its children, so the buttons have to ask for the full width.
+  sheetButton: {
     width: '100%',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
   },
-  doneButtonText: {
-    fontFamily: ClashFont.medium,
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
+  // The chip hugs its name, so it centres rather than sitting under the sheet's left edge.
+  contactChip: {
+    alignSelf: 'center',
+  },
+  doneButton: {
+    marginTop: 4,
   },
 });
 

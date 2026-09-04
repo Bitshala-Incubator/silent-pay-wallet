@@ -11,5 +11,16 @@
         <item name="colorPrimary">@color/button_background_color</item>
         <item name="colorPrimaryVariant">@color/button_alternative_text_color</item>
         <item name="colorOnPrimary">@color/button_text_color</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>
+    </style>
+
+    <style name="AppTheme.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppTheme.BottomSheet</item>
+    </style>
+
+    <style name="AppTheme.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearance">@null</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="backgroundTint">@null</item>
     </style>
 </resources>

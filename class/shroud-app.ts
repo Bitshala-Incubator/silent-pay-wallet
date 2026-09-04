@@ -12,6 +12,7 @@ import presentAlert from '../components/Alert';
 import { randomBytes } from './rng';
 import { ExtendedTransaction, Transaction, TWallet } from './wallets/types';
 import { HDSilentPaymentsWallet } from './wallets/hd-bip352-wallet.ts';
+import { readContacts, TContacts } from './contacts';
 
 let usedBucketNum: boolean | number = false;
 let savingInProgress = 0; // its both a flag and a counter of attempts to write to disk
@@ -31,6 +32,7 @@ type TRealmTransaction = {
 type TBucketStorage = {
   wallets: string[]; // array of serialized wallets, not actual wallet objects
   tx_metadata: TTXMetadata;
+  contacts: TContacts;
 };
 
 const isReactNative = typeof navigator !== 'undefined' && navigator?.product === 'ReactNative';
@@ -46,10 +48,12 @@ export class ShroudApp {
   public cachedPassword?: false | string;
   public tx_metadata: TTXMetadata;
   public wallets: TWallet[];
+  public contacts: TContacts;
 
   constructor() {
     this.wallets = [];
     this.tx_metadata = {};
+    this.contacts = {};
     this.cachedPassword = false;
   }
 
@@ -171,6 +175,7 @@ export class ShroudApp {
       await this.saveToDisk();
       this.wallets = [];
       this.tx_metadata = {};
+      this.contacts = {};
       return this.loadFromDisk();
     } else {
       throw new Error('Incorrect password. Please, try again.');
@@ -200,10 +205,12 @@ export class ShroudApp {
     usedBucketNum = false; // resetting currently used bucket so we wont overwrite it
     this.wallets = [];
     this.tx_metadata = {};
+    this.contacts = {};
 
     const data: TBucketStorage = {
       wallets: [],
       tx_metadata: {},
+      contacts: {},
     };
 
     let buckets = await this.getItem('data');
@@ -340,6 +347,7 @@ export class ShroudApp {
       const data: TBucketStorage = JSON.parse(dataRaw);
       if (!data.wallets) return false;
       this.tx_metadata = data.tx_metadata;
+      this.contacts = readContacts(data.contacts);
       const wallets = data.wallets;
       for (const key of wallets) {
         let parsedWallet: { type?: string } | undefined;
@@ -542,6 +550,7 @@ export class ShroudApp {
       let data: TBucketStorage | string[] /* either a bucket, or an array of encrypted buckets */ = {
         wallets: walletsToSave,
         tx_metadata: this.tx_metadata,
+        contacts: this.contacts,
       };
 
       if (this.cachedPassword) {

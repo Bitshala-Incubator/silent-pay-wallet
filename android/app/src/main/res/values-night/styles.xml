@@ -6,5 +6,6 @@
         <item name="colorPrimary">@color/button_background_color_dark</item>
         <item name="colorPrimaryVariant">@color/button_alternative_text_color_dark</item>
         <item name="colorOnPrimary">@color/button_text_color_dark</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>
     </style>
 </resources>

@@ -52,6 +52,11 @@ export type SendDetailsStackParamList = {
     tx: string;
     recipients: CreateTransactionTarget[];
     satoshiPerByte: number;
+    // The address as entered/picked by the user, before wallet.createTransaction() may have
+    // replaced it with a derived one-time silent-payment output address. Forwarded verbatim
+    // to Success so "Save as a Contact" can validate the actual sp1... address, not the
+    // one-time on-chain output.
+    recipientAddress?: string;
   };
   PsbtWithHardwareWallet: {
     memo?: string;
@@ -76,6 +81,7 @@ export type SendDetailsStackParamList = {
     amount: number;
     amountUnit?: BitcoinUnit;
     txid?: string;
+    recipientAddress?: string;
   };
   CoinControl: {
     walletID: string;

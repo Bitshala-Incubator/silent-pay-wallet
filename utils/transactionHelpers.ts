@@ -1,8 +1,10 @@
 import { Transaction } from '../class/wallets/types';
 
-export const shortenAddress = (address: string): string => {
-  return address.substr(0, 4) + '...' + address.substr(address.length - 4, 4);
-};
+/**
+ * Abbreviated address for list rows. Contacts pass a longer lead: silent payment addresses share
+ * a long common bech32m prefix, so a 4-character preview makes most of them indistinguishable.
+ */
+export const shortenAddress = (address: string, lead = 4, tail = 4): string => `${address.slice(0, lead)}...${address.slice(-tail)}`;
 
 export const isIncomingTransaction = (value?: number): boolean => (value ?? 0) >= 0;
 

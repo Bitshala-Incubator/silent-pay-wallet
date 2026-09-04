@@ -61,7 +61,7 @@ const Confirm: React.FC = () => {
   const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const navigation = useExtendedNavigation<ConfirmNavigationProp>();
   const route = useRoute<ConfirmRouteProp>();
-  const { recipients, walletID, fee, tx } = route.params;
+  const { recipients, walletID, fee, tx, recipientAddress } = route.params;
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const { navigate, goBack } = navigation;
@@ -125,6 +125,7 @@ const Confirm: React.FC = () => {
         fee: Number(fee),
         amount,
         txid,
+        recipientAddress,
       });
 
       dispatch({ type: ActionType.SET_LOADING, payload: false });

@@ -7,7 +7,7 @@ import { useTheme } from './themes';
 
 interface LabeledFieldProps {
   label: string;
-  children: React.ReactNode; // the input element
+  children: React.ReactNode; // the input element, normally a FieldTextInput
   trailing?: React.ReactNode; // e.g. a scan button
   testID?: string;
   /** Tinted variant for the Address field: light purple background + border. */
@@ -57,6 +57,8 @@ const styles = StyleSheet.create({
   inputWrap: {
     flex: 1,
     width: '100%',
+    // stacks anything rendered above the input (e.g. the send screen's contact chip)
+    gap: 10,
   },
 });
 

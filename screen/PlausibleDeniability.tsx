@@ -5,6 +5,7 @@ import presentAlert from '../components/Alert';
 import Button from '../components/Button';
 import loc from '../loc';
 import { useStorage } from '../hooks/context/useStorage';
+import { useContacts } from '../hooks/context/useContacts';
 import PromptPasswordConfirmationModal, {
   PromptPasswordConfirmationModalHandle,
   MODAL_TYPES,
@@ -48,6 +49,7 @@ function reducer(state: State, action: Action): State {
 // Component
 const PlausibleDeniability: React.FC = () => {
   const { cachedPassword, isPasswordInUse, createFakeStorage, resetWallets } = useStorage();
+  const { resetContacts } = useContacts();
   const [state, dispatch] = useReducer(reducer, initialState);
   const navigation = useExtendedNavigation();
   const promptRef = useRef<PromptPasswordConfirmationModalHandle>(null);
@@ -70,6 +72,7 @@ const PlausibleDeniability: React.FC = () => {
     try {
       await createFakeStorage(password);
       resetWallets();
+      resetContacts();
       triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
 
       // Set the modal type to SUCCESS to show the success animation instead of the alert

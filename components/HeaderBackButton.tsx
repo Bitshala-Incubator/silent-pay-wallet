@@ -6,15 +6,23 @@ import loc from '../loc';
 interface HeaderBackButtonProps {
   onPress: () => void;
   color: string;
+  /** Override where the chevron dismisses rather than navigates back, e.g. a bottom sheet. */
+  accessibilityLabel?: string;
+  testID?: string;
 }
 
-const HeaderBackButton: React.FC<HeaderBackButtonProps> = ({ onPress, color }) => (
+const HeaderBackButton: React.FC<HeaderBackButtonProps> = ({
+  onPress,
+  color,
+  accessibilityLabel = loc._.back,
+  testID = 'NavigationBackButton',
+}) => (
   <TouchableOpacity
     accessibilityRole="button"
-    accessibilityLabel={loc._.back}
+    accessibilityLabel={accessibilityLabel}
     style={styles.button}
     onPress={onPress}
-    testID="NavigationBackButton"
+    testID={testID}
   >
     <View style={styles.flip}>
       <ChevronRightIcon color={color} size={20} />

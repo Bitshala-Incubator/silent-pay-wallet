@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SizeClassProvider } from './components/Context/SizeClassProvider';
 import { SettingsProvider } from './components/Context/SettingsProvider';
 import { getEffectiveTheme } from './components/themes';
+import { ContactsProvider } from './components/Context/ContactsProvider';
 import MasterView from './navigation/MasterView';
 import { markNavigationReady, navigationRef } from './NavigationService';
 import { useLogger } from '@react-navigation/devtools';
@@ -45,7 +46,9 @@ const App = () => {
       <SafeAreaProvider>
         <StorageProvider>
           <SettingsProvider>
-            <ThemedNavigationContainer />
+            <ContactsProvider>
+              <ThemedNavigationContainer />
+            </ContactsProvider>
           </SettingsProvider>
         </StorageProvider>
       </SafeAreaProvider>

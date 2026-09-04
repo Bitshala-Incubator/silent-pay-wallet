@@ -18,6 +18,7 @@ const palette = {
   gray75: '#F0F0F5',
   gray100: '#EEF0F4',
   gray150: '#EEEEEE',
+  gray175: '#E5E7EB',
   gray200: '#E6E4E4',
   gray200Alpha: '#E6E4E499',
   gray250: '#E5E5EA',
@@ -49,7 +50,7 @@ const palette = {
   violet25: '#FDFCFE',
   violet50: '#F6F5FD',
   violet100: '#E6E2FA',
-  violet150: '#DCD2F9',
+  violet150: '#D7C8F7',
   violet150Alpha: '#DCD2F999',
   violet175: '#D7C8F7',
   violet200: '#D0C0FAFF',
@@ -60,7 +61,7 @@ const palette = {
   violet850: '#473F71',
   violet900: '#1D1A2B',
   violet920: '#1A1535',
-  violet500Alpha: '#8763EB8F',
+  violet500Alpha: '#6B5CE78F',
   indigo500: '#5856D6',
 
   blue500: '#0A84FF',
@@ -215,8 +216,19 @@ const tokens = {
   // text/brand. Brand-tinted *text*: "Use Max" pill, amount hints, Confirm total. Distinct from
   // brandStrong, which fills surfaces — this one has to stay readable *on* the background.
   textBrand: pair(palette.violet600, palette.violet175),
+  sheetBackIcon: pair(palette.gray700, palette.slate400), // bottom-sheet header back chevron
+  dashedBorder: pair('#E7E7E7', palette.whiteAlpha08), // "Save as Contact" affordance border (border/default)
+  // "to <contact>" chip. Unfilled, so only its border and label need tokens.
+  contactChipBorder: pair('#EAECF0', palette.whiteAlpha08),
+  contactChipText: pair('#344054', palette.gray375),
+  // "Saved as <name>" receipt shown in place of the save affordance for a beat after an inline save.
+  contactSavedSurface: pair('#EDFBF1', palette.green900),
+  contactSavedAccent: pair('#0F7A38', palette.green400), // its border, check and label — one green, three uses
   copyButtonBorder: pair(palette.gray200, palette.gray800), // Confirm copy-button border
-  transactionCardBorder: pair(palette.gray200, palette.gray850),
+  transactionCardBorder: pair(palette.gray200, palette.slate880),
+  searchFieldBorder: pair(palette.gray175, palette.slate885), // SearchField border (border/input)
+  searchFieldIcon: pair(palette.gray450, palette.slate400), // SearchField magnifier stroke
+  searchFieldPlaceholder: pair('rgba(16, 24, 40, 0.5)', palette.slate400), // SearchField hint (light: primary copy at 50%; dark: text/muted)
   txIconHaloBorder: pair(palette.violet100, palette.violet850),
   incomingIconBackground: pair('#E7E6F5', '#322361'),
   outgoingIconBackground: pair(palette.gray50, '#161616'),
@@ -247,6 +259,17 @@ const tokens = {
   settingsContactIconColor: same('#6366F1'),
   settingsNetworkIconColor: same('#00A63E'),
   settingsCurrencyIconColor: same('#F7931A'),
+
+  emptyStateTitle: pair('#0A0A0A', palette.gray75),
+  tabDivider: pair('#EAECF0', '#FFFFFF14'), // hairline rule under the whole tab strip (border/default)
+  tabInactiveText: pair('#667085', palette.slate400), // unselected tab label
+
+  // --- Contact detail tokens ---
+  // Destructive button (spec 8e): unfilled — bg/primary carries it and the red is border + label
+  // only. Light still tints; see the note on aligning it to #FFFFFF / #B24334.
+  removeSurface: pair('#FBE1DF', palette.slate950), // Remove Contact button background
+  removeBorder: pair('#FFC9C9', palette.red500), // Remove Contact button border
+  removeText: pair('#E7000B', palette.red500), // Remove Contact button label + trash glyph
 } satisfies Record<string, ColorToken>;
 
 type Scheme = 'light' | 'dark';

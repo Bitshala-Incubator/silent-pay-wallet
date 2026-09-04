@@ -103,6 +103,21 @@ export async function helperImportWallet(mnemonic, { birthDate } = {}) {
   }
 }
 
+// Fills in and saves the ContactEdit form. `via` is the testID of whichever button opens it —
+// the home tab's "+ Add", the empty state's CTA and the list header's "+" all land on the same
+// screen, so the caller only has to say which door it walked through.
+export async function helperAddContact(name, address, { via = 'HomeAddContactButton' } = {}) {
+  await element(by.id(via)).tap();
+  await waitFor(element(by.id('ContactNameInput')))
+    .toBeVisible()
+    .withTimeout(15_000);
+  await element(by.id('ContactNameInput')).replaceText(name);
+  // replaceText rather than typeText: a silent payment address is ~117 characters, and synthesizing
+  // that many key events is both slow and a reliable source of dropped characters.
+  await element(by.id('ContactAddressInput')).replaceText(address);
+  await element(by.id('ContactSaveButton')).tap();
+}
+
 // Dismisses the "Have you saved your wallet's backup phrase?" Alert that fires
 // the first time a fresh wallet navigates to an export-gated screen (e.g.
 // Receive). Test-side equivalent of a user clicking "Yes, I have." Silently

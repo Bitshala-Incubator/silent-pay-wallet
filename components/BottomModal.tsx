@@ -1,6 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef, ReactElement, ComponentType } from 'react';
 import { SheetSize, SizeChangeEvent, TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet';
-import { Keyboard, Image, StyleSheet, View, Pressable, Platform, GestureResponderEvent, Text } from 'react-native';
+import { Keyboard, Image, StyleSheet, View, Pressable, Platform, GestureResponderEvent, Text, StyleProp, ViewStyle } from 'react-native';
 import SaveFileButton from './SaveFileButton';
 import { useTheme } from './themes';
 import { Icon } from '@rneui/base';
@@ -21,6 +21,8 @@ interface BottomModalProps extends TrueSheetProps {
   header?: ReactElement | ComponentType<any> | null;
   headerTitle?: string;
   headerSubtitle?: string;
+  /** Overrides the default children padding, for sheets that draw their own header. */
+  contentStyle?: StyleProp<ViewStyle>;
 }
 
 type BottomModalShareContent = {
@@ -50,6 +52,7 @@ const BottomModal = forwardRef<BottomModalHandle, BottomModalProps>(
       header,
       headerTitle,
       headerSubtitle,
+      contentStyle,
       children,
       ...props
     },
@@ -193,7 +196,7 @@ const BottomModal = forwardRef<BottomModalHandle, BottomModalProps>(
         FooterComponent={FooterComponent as ReactElement}
         {...props}
       >
-        <View style={styles.childrenContainer}>{children}</View>
+        <View style={[styles.childrenContainer, contentStyle]}>{children}</View>
         {renderHeader()}
       </TrueSheet>
     );

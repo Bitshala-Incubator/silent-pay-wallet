@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, Keyboard, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Keyboard, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getPreferredCurrency, initCurrencyDaemon, setPreferredCurrency } from '../../modules/currency';
 import presentAlert from '../../components/Alert';
+import SearchField from '../../components/SearchField';
 import SettingsRow from '../../components/SettingsRow';
-import SearchIcon from '../../components/icons/SearchIcon';
 import CheckmarkIcon from '../../components/icons/CheckmarkIcon';
 import { useTheme } from '../../components/themes';
 import loc from '../../loc';
@@ -150,17 +150,7 @@ const Currency: React.FC = () => {
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <View style={[styles.searchBar, { backgroundColor: colors.background, borderColor: colors.settingsCardBorder }]}>
-        <SearchIcon size={20} background="transparent" stroke={colors.alternativeTextColor} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.settingsRowTitle }]}
-          placeholder={loc.settings.search_currency}
-          placeholderTextColor={colors.placeholderTextColor}
-          value={search}
-          onChangeText={setSearch}
-          autoCorrect={false}
-        />
-      </View>
+      <SearchField value={search} onChangeText={setSearch} placeholder={loc.settings.search_currency} style={styles.searchField} />
       <View style={[styles.listCard, { backgroundColor: colors.settingsCardBackground, marginBottom: insets.bottom }]}>
         <FlatList
           keyboardShouldPersistTaps="always"
@@ -187,26 +177,13 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 18,
+  searchField: {
+    marginHorizontal: 24,
     marginTop: 16,
-    paddingLeft: 4,
-    paddingRight: 16,
-    height: 49,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 4,
-    fontSize: 16,
-    fontFamily: ClashFont.regular,
   },
   listCard: {
     flex: 1,
-    marginHorizontal: 18,
+    marginHorizontal: 24,
     marginTop: 16,
     borderRadius: 16,
     overflow: 'hidden',

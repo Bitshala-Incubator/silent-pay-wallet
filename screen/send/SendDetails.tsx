@@ -5,7 +5,7 @@ import assert from 'assert';
 import BigNumber from 'bignumber.js';
 import { TOptions } from 'bip21';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, LayoutAnimation, ScrollView, StyleSheet, Text, TextInput, Pressable, View } from 'react-native';
+import { Keyboard, LayoutAnimation, ScrollView, StyleSheet, Text, Pressable, View } from 'react-native';
 import { SilentPayment } from 'silent-payments';
 import { btcToSatoshi, satoshiToBTC, satoshiToLocalCurrency } from '../../modules/currency';
 import triggerHapticFeedback, { HapticFeedbackTypes, triggerSelectionHapticFeedback } from '../../modules/hapticFeedback';
@@ -20,13 +20,20 @@ import { DismissKeyboardInputAccessory } from '../../components/DismissKeyboardI
 import HeaderMenuButton from '../../components/HeaderMenuButton';
 import ChevronRightIcon from '../../components/icons/ChevronRightIcon';
 import ScanQRIcon from '../../components/icons/ScanQRIcon';
+import ContactIcon from '../../components/icons/ContactIcon';
+import ContactChip from '../../components/ContactChip';
+import ContactPickerSheet from '../../components/ContactPickerSheet';
+import SaveContactRow from '../../components/SaveContactRow';
+import { BottomModalHandle } from '../../components/BottomModal';
+import FieldTextInput, { FieldAddressInput } from '../../components/FieldTextInput';
 import LabeledField from '../../components/LabeledField';
 import SafeArea from '../../components/SafeArea';
-import { caretProps, shadowSm, useTheme } from '../../components/themes';
+import { shadowSm, useTheme } from '../../components/themes';
 import { Action } from '../../components/types';
 import { ClashFont } from '../../constants/fonts';
 import { isAmountEmpty, sanitizeAmountInput, displayAmountForUnit, feeSpeedTierForRate } from '../../helpers/send/format';
 import { useStorage } from '../../hooks/context/useStorage';
+import { useContacts } from '../../hooks/context/useContacts';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { useKeyboard } from '../../hooks/useKeyboard';
 import loc, { formatBalance } from '../../loc';
@@ -67,9 +74,11 @@ const SendDetails = () => {
   const isTransactionReplaceable = route.params?.isTransactionReplaceable;
   const routeParams = route.params;
   const { colors } = useTheme();
+  const { contactList, getContact } = useContacts();
 
   // state
   const [isLoading, setIsLoading] = useState(false);
+  const contactSheetRef = useRef<BottomModalHandle>(null);
   const [wallet, setWallet] = useState<TWallet | null>(null);
   const { isVisible } = useKeyboard();
   const [addresses, setAddresses] = useState<IPaymentDestinations[]>([{ address: '', key: String(Math.random()), unit: amountUnit }]);
@@ -551,6 +560,19 @@ const SendDetails = () => {
     });
   }, [navigation]);
 
+  // A saved payee is named by the chip above the address; an unsaved one gets the save affordance.
+  const contact = getContact(recipient?.address ?? '');
+
+  const onContactsPressed = useCallback(() => contactSheetRef.current?.present(), []);
+
+  const onContactPicked = useCallback(
+    (address: string) => {
+      contactSheetRef.current?.dismiss();
+      onChangeAddress(address);
+    },
+    [onChangeAddress],
+  );
+
   const createPsbtTransaction = async () => {
     if (!wallet) return;
 
@@ -627,6 +649,10 @@ const SendDetails = () => {
       tx: tx.toHex(),
       recipients,
       satoshiPerByte: requestedSatPerByte,
+      // `recipients` (above) is post-createTransaction: for a silent-payment target its
+      // address has already been replaced by the derived one-time on-chain output. Capture
+      // the address as the user actually entered/picked it, before that substitution.
+      recipientAddress: addresses.length === 1 ? addresses[0].address : undefined,
     });
     setIsLoading(false);
   };
@@ -812,7 +838,6 @@ const SendDetails = () => {
     root: {
       backgroundColor: colors.background,
     },
-    fieldInput: { color: colors.textPrimary },
     scanBtn: { backgroundColor: colors.background },
     feeSummary: { borderColor: colors.accentSubtle, backgroundColor: colors.surfaceSubtle },
     feeSummaryDisabled: { borderColor: colors.borderDefault, backgroundColor: colors.surfaceBrandSubtle },
@@ -840,7 +865,12 @@ const SendDetails = () => {
 
   return (
     <SafeArea style={[styles.root, stylesHook.root]}>
-      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        testID="SendDetailsScrollView"
+        style={styles.body}
+        contentContainerStyle={styles.bodyContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <AmountHero
           editable
           amount={displayAmount}
@@ -857,43 +887,52 @@ const SendDetails = () => {
 
         <View style={styles.fieldsGroup}>
           <View style={styles.fieldsPair}>
-            <LabeledField
-              label={loc.send.label_address}
-              tinted={!!recipient?.address}
-              trailing={
-                !recipient?.address ? (
-                  <Pressable accessibilityRole="button" onPress={navigateToQRCodeScanner} style={[styles.scanBtn, stylesHook.scanBtn]}>
-                    <ScanQRIcon color={colors.brandStrong} size={20} />
-                  </Pressable>
-                ) : undefined
-              }
-            >
-              <TextInput
-                style={[styles.fieldInput, stylesHook.fieldInput, styles.addressFieldInput]}
-                placeholder={loc.send.paste_or_scan}
-                placeholderTextColor={colors.textSecondary}
-                value={recipient?.address}
-                onChangeText={onChangeAddress}
-                editable={isEditable}
-                autoCapitalize="none"
-                autoCorrect={false}
-                multiline
-                {...caretProps(colors)}
-                underlineColorAndroid="transparent"
-                testID="AddressInput"
-              />
-            </LabeledField>
+            <View style={styles.addressGroup}>
+              <LabeledField
+                label={loc.send.label_address}
+                tinted={!!recipient?.address}
+                trailing={
+                  !recipient?.address ? (
+                    <View style={styles.addressActions}>
+                      <Pressable accessibilityRole="button" onPress={navigateToQRCodeScanner} style={[styles.scanBtn, stylesHook.scanBtn]}>
+                        <ScanQRIcon color={colors.brandStrong} size={20} />
+                      </Pressable>
+                      {/* Nothing to pick from means the button can only open an empty sheet. */}
+                      {contactList.length > 0 && (
+                        <Pressable
+                          accessibilityRole="button"
+                          onPress={onContactsPressed}
+                          style={[styles.contactBtn, stylesHook.scanBtn]}
+                          testID="SendDetailsContactsButton"
+                          accessibilityLabel={loc.contacts.header}
+                        >
+                          <ContactIcon color={colors.brandStrong} size={24} />
+                        </Pressable>
+                      )}
+                    </View>
+                  ) : undefined
+                }
+              >
+                {contact && <ContactChip name={contact.name} colorIndex={contact.colorIndex} testID="SendDetailsContactChip" />}
+                <FieldAddressInput
+                  placeholder={loc.send.paste_or_scan}
+                  value={recipient?.address}
+                  onChangeText={onChangeAddress}
+                  editable={isEditable}
+                  testID="AddressInput"
+                />
+              </LabeledField>
+
+              {/* The chip above already names a saved payee, so nothing stands in once this retires. */}
+              <SaveContactRow address={recipient?.address} />
+            </View>
 
             <LabeledField label={loc.send.label_note}>
-              <TextInput
-                style={[styles.fieldInput, stylesHook.fieldInput]}
+              <FieldTextInput
                 placeholder={loc.send.note_visible_to_you}
-                placeholderTextColor={colors.textSecondary}
                 value={transactionMemo}
                 onChangeText={setTransactionMemo}
                 editable={!isLoading}
-                {...caretProps(colors)}
-                underlineColorAndroid="transparent"
                 testID="NoteInput"
               />
             </LabeledField>
@@ -954,6 +993,8 @@ const SendDetails = () => {
           textStyle={styles.nextButtonText}
         />
       </View>
+
+      <ContactPickerSheet ref={contactSheetRef} onPick={onContactPicked} />
     </SafeArea>
   );
 };
@@ -965,6 +1006,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
+  addressActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  contactBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addressGroup: { gap: 8 },
   select: {
     marginBottom: 24,
     marginHorizontal: 24,
@@ -983,20 +1033,6 @@ const styles = StyleSheet.create({
   },
   fieldsPair: {
     gap: 12,
-  },
-  fieldInput: {
-    flex: 1,
-    width: '100%',
-    fontFamily: ClashFont.regular,
-    fontSize: 14,
-    lineHeight: 20,
-    padding: 0,
-  },
-  addressFieldInput: {
-    // grows with wrapped text up to ~5 lines (comfortably fits a full silent-payment
-    // address with no scrolling); caps further growth for pathological pastes instead
-    // of letting the screen layout balloon
-    maxHeight: 100,
   },
   scanBtn: {
     width: 32,
